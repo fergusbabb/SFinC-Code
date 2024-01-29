@@ -4,7 +4,6 @@ from matplotlib import pyplot as plt
 
 lam = 1
 gam = 1
-
 def vectorPrime(state, N):
     global lam
     global gam
@@ -22,11 +21,10 @@ unitCircleX = np.cos(theta)
 unitCircleY = np.sin(theta)
 
 plt.plot(unitCircleX, unitCircleY, color="r")
+plt.plot([0, np.sqrt(2)/2], [0, np.sqrt(2)/2], "r--")
 
-N = np.linspace(0, 8, 201)
+N = np.linspace(0, 8, 401)
 
-##x0 = -0.9
-##y0 = 0.1
 for x0 in np.arange(-0.99, 1, 0.1):
     for y0 in [0.01]:#np.arange(0, 1, 0.1):
         if x0**2 + y0**2 > 1:
@@ -41,4 +39,3 @@ for x0 in np.arange(-0.99, 1, 0.1):
 
 plt.axis("equal")
 plt.show()
-##plt.plot()
