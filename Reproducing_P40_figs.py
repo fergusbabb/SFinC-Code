@@ -38,7 +38,7 @@ ax.plot(a, b, 'r', linewidth=1, label='Bounding Circle')
 ax.plot([-1,1], [0,0], 'r', linewidth=1)
 
 
-gam = 1
+gam_0 = 1
 lam_0 = 3
 pathnum = 50
 
@@ -63,6 +63,7 @@ def ODEs(coords, t):
     x, y = coords[0], coords[1]
 
     lam = lambda_slide.get()
+    gam = gamma_slide.get()
 
     # Return the derivatives [x', y']
     dx_dN = -3*x + lam*(np.sqrt(3/2))*y**2 + (3/2)*x*(2*x**2+gam*(1-x**2-y**2))
@@ -80,19 +81,25 @@ def update_plot(event):
     fig.canvas.draw()
 
 
-lambda_slide_label = tk.Label(window, text = "$lambda$ value", width = 15, 
+lambda_slide_label = tk.Label(window, text = 'r$\lambda$ value', width = 15, 
                        height = 2).pack(anchor = 'center', pady=0.1)
-lambda_slide = tk.Scale(window,from_ = 0, to = 5, orient = 'horizontal',
+lambda_slide = tk.Scale(window, from_ = 0, to = 5, orient = 'horizontal',
                        width = 20, length = 250, resolution=0.01)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
 lambda_slide.set(lam_0)
 lambda_slide.pack(anchor = 'center', pady=0.1)
 
-
+gamma_slide_label = tk.Label(window, text = 'r$\gamma$ value', width = 15, 
+                       height = 2).pack(anchor = 'center', pady=0.1)
+gamma_slide = tk.Scale(window, from_ = 0, to = 5, orient = 'horizontal',
+                       width = 20, length = 250, resolution=0.01)
+gamma_slide.bind("<ButtonRelease-1>", update_plot)
+gamma_slide.set(gam_0)
+gamma_slide.pack(anchor = 'center', pady=0.1)
 
 
 n = np.linspace(0, 8, 1000) 
-xinit = np.linspace(-0.99,0.99,pathnum)
+xinit = np.linspace(-0.99, 0.99, pathnum)
 
 main_tracks = []
 for i in range(pathnum):
