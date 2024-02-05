@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
 
-lam = 3
+lam = np.sqrt(2)
 gam = 1
 
 fig, ax = plt.subplots(2, 2)
@@ -48,7 +48,7 @@ ax[0, 0].plot(unitCircleX, unitCircleY, color="r")
 ax[0, 0].plot(omegaDEcircleX, omegaDEcircleY, "r--", linewidth=0.75)
 ax[0, 0].plot([0, x/np.sqrt(omegaDE)], [0, y/np.sqrt(omegaDE)], "r--", linewidth=0.75)
 
-N = np.linspace(0, 8, 401)
+N = np.linspace(0, 10, 401)
 
 for x0 in np.linspace(-0.99, 0.99, 10):
     for y0 in [0.01]:#np.arange(0.01, 1, 0.1):
@@ -60,12 +60,24 @@ for x0 in np.linspace(-0.99, 0.99, 10):
         pathx = pathTranspose[0]
         pathy = pathTranspose[1]
 
-        ax[0, 0].plot(pathx, pathy, linewidth=0.25)
+        ax[0, 0].plot(pathx, pathy, linewidth=0.75)
 
         ax[1, 0].plot(N, pathx)
         ax[1, 1].plot(N, pathy)
 
-        ax[0, 1].plot(N, 1 - 3*pathx**2 + 1.5*gam*(1 - pathx**2 - pathy**2))
+        ax[0, 1].plot([0, N[-1]], [0, 0], "k--", linewidth=0.75)
+        ax[0, 1].plot(N, -3*pathx**2 - 1.5*gam*(1 - pathx**2 - pathy**2) + 1)
 
 ax[0, 0].axis("equal")
+ax[0, 0].set_xlabel("x")
+ax[0, 0].set_ylabel("y")
+
+ax[0, 1].set_xlabel("N")
+ax[0, 1].set_ylabel("$\dot H / H^2 + 1$")
+
+ax[1, 0].set_xlabel("N")
+ax[1, 0].set_ylabel("x")
+
+ax[1, 1].set_xlabel("N")
+ax[1, 1].set_ylabel("y")
 plt.show()
