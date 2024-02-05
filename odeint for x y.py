@@ -2,10 +2,12 @@ import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
 
-lam = 1
+lam = 3
 gam = 1
 
-plt.annotate("$\lambda = $" + str(lam) + "\n$\gamma = $" + str(gam), xy = (-1, 1))
+fig, ax = plt.subplots(2, 2)
+
+ax[0, 0].annotate("$\lambda = $" + str(lam) + "\n$\gamma = $" + str(gam), xy = (-1, 0.8))
 
 def vectorPrime(state, N):
     global lam
@@ -42,14 +44,14 @@ unitCircleY = np.sin(theta)
 omegaDEcircleX = np.sqrt(omegaDE) * unitCircleX
 omegaDEcircleY = np.sqrt(omegaDE) * unitCircleY
 
-plt.plot(unitCircleX, unitCircleY, color="r")
-plt.plot(omegaDEcircleX, omegaDEcircleY, "r--", linewidth=0.75)
-plt.plot([0, x/np.sqrt(omegaDE)], [0, y/np.sqrt(omegaDE)], "r--", linewidth=0.75)
+ax[0, 0].plot(unitCircleX, unitCircleY, color="r")
+ax[0, 0].plot(omegaDEcircleX, omegaDEcircleY, "r--", linewidth=0.75)
+ax[0, 0].plot([0, x/np.sqrt(omegaDE)], [0, y/np.sqrt(omegaDE)], "r--", linewidth=0.75)
 
 N = np.linspace(0, 8, 401)
 
-for x0 in np.arange(-0.99, 1, 0.2):
-    for y0 in np.arange(0.01, 1, 0.1):
+for x0 in np.linspace(-0.99, 0.99, 10):
+    for y0 in [0.01]:#np.arange(0.01, 1, 0.1):
         if x0**2 + y0**2 > 1:
             continue
         path = integrate.odeint(vectorPrime, [x0, y0], N)
@@ -58,7 +60,12 @@ for x0 in np.arange(-0.99, 1, 0.2):
         pathx = pathTranspose[0]
         pathy = pathTranspose[1]
 
-        plt.plot(pathx, pathy, color="k", linewidth=0.25)
+        ax[0, 0].plot(pathx, pathy, linewidth=0.25)
 
-plt.axis("equal")
+        ax[1, 0].plot(N, pathx)
+        ax[1, 1].plot(N, pathy)
+
+        ax[0, 1].plot(N, 1 - 3*pathx**2 + 1.5*gam*(1 - pathx**2 - pathy**2))
+
+ax[0, 0].axis("equal")
 plt.show()
