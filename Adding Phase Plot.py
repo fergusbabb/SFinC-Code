@@ -39,6 +39,12 @@ axis_dims2 = [.15,.20,.7,.7]
 ax2 = fig2.add_axes(axis_dims2)
 #ax2.set_aspect('equal')
 
+#Acceleration vs N plot figure
+fig3 = Figure(figsize=(5, 3))
+axis_dims3 = [.15,.20,.7,.7]
+ax3 = fig3.add_axes(axis_dims3)
+#ax3.set_aspect('equal')
+
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
 ax.plot(np.cos(theta), np.sin(theta),
@@ -47,7 +53,7 @@ ax.plot([-1,1], [0,0], 'r', linewidth=1)
 
 
 #Initial values
-gam_0 = 1 
+gam_0 = 1
 lam_0 = 3
 pathnum = 10
 
@@ -85,7 +91,9 @@ ax2.plot([2,2],[0,2],'k', linestyle = ':')
 canvas2 = FigureCanvasTkAgg(fig2, window)
 canvas2.draw()
 
-
+#As before for acceleration vs N plot
+canvas3 = FigureCanvasTkAgg(fig3, window)
+canvas3.draw()
 
 
 
@@ -105,7 +113,7 @@ def ODEs(coords, t, lam, gam):
     return [dx_dN, dy_dN]
 
 #________________________Define Acceleration Expression______________________
-def acceleration(x, y):
+def acceleration(x, y, gam):
     return -3*x**2 - 1.5*gam*(1 - x**2 - y**2) + 1
 
 #_______________________________Update track plots___________________________
@@ -121,13 +129,22 @@ def update_plot(event):
     #Plot all paths with updated values
     for i in range(pathnum):
         initial_conditions = [xinit[i], 0.01]  #Initial values for x and y
-    
+
+        
         #Solve the system of ODEs using odeint
         solution = odeint(ODEs, initial_conditions, n, args = (lam, gam))
-        main_tracks[i].set_data(solution[:,0], solution[:,1])
+
+        solution_x = solution[:, 0]
+        solution_y = solution[:, 1]
+
+        solution_acceleration = acceleration(solution_x, solution_y, gam)
+
+        main_tracks[i].set_data(solution_x, solution_y)
+        acceleration_plot_tracks[i].set_ydata(solution_acceleration)
 
     #Show plots
     fig.canvas.draw()
+    fig3.canvas.draw()
 
 
 #_________________________Cursor interactivity_______________________
@@ -173,10 +190,11 @@ gamma_slide.set(gam_0)
 
 canvas.get_tk_widget().grid( row=1, column=1, rowspan=3, columnspan=2, ipadx=10, ipady=10)
 canvas2.get_tk_widget().grid(row=1, column=4, rowspan=3, columnspan=2, ipadx=10, ipady=10)
+canvas3.get_tk_widget().grid(row=4, column=1, rowspan=3, columnspan=2, ipadx=10, ipady=10)
 lambda_slide_label.grid(     row=1, column=3, rowspan=1, columnspan=1                    )
-lambda_slide.grid(           row=1, column=3, rowspan=1, columnspan=1         )
+lambda_slide.grid(           row=1, column=3, rowspan=1, columnspan=1                    )
 gamma_slide_label.grid(      row=2, column=3, rowspan=1, columnspan=1                    )
-gamma_slide.grid(            row=2, column=3, rowspan=1, columnspan=1       )
+gamma_slide.grid(            row=2, column=3, rowspan=1, columnspan=1                    )
 
 
 
@@ -184,11 +202,12 @@ gamma_slide.grid(            row=2, column=3, rowspan=1, columnspan=1       )
 #___________________________________Initial Plot____________________________________
 
 #Define log a linspace for ode
-n = np.linspace(0, 30, 1000)
+n = np.linspace(0, 10, 1000)
 xinit = np.linspace(-0.99, 0.99, pathnum)
 
 #Initial plot
 main_tracks = []
+acceleration_plot_tracks = []
 for i in range(pathnum):
     initial_conditions = [xinit[i], 0.01]  #Initial values for x and y
     
@@ -201,10 +220,13 @@ for i in range(pathnum):
     solution_x = solution[:, 0]
     solution_y = solution[:, 1]
 
-    solution_acceleration = acceleration(solution_x, solution_y)
-    
+    solution_acceleration = acceleration(solution_x, solution_y, gam)
+
+    acceleration_plot_i = ax3.plot(n, solution_acceleration, 'r', linewidth=.5)[0]
+    acceleration_plot_tracks.append(acceleration_plot_i)
+    acceleration_plot_i.set_visible(True)
+
     track_i = ax.plot(solution_x, solution_y, 'k', linewidth=.5)[0]
-    
     main_tracks.append(track_i)
     track_i.set_visible(True)
 
