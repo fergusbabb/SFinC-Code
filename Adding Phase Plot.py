@@ -15,8 +15,8 @@ ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 
 #Personal plotting preferences
-'''plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-                     "font.serif": ["Computer Modern Serif"]})'''
+plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+                     "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=12, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
@@ -51,8 +51,6 @@ axis_dims4 = [.15,.20,.7,.7]
 ax4 = fig4.add_axes(axis_dims4)
 #ax4.set_aspect('equal')
 
-
-
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
 ax.plot(np.cos(theta), np.sin(theta),
@@ -83,12 +81,12 @@ ax.set_ylabel('$y$', rotation = 0, y=1.02)
 ax2.set(xlim=[0,12],ylim=[0,2])
 ax2.set_xlabel('$\lambda^2$', x=1.02)
 ax2.set_ylabel('$\gamma$', rotation = 0, y=1.02)
-ax2.plot([0,6],[12,2],'k', linestyle = '-')
+ax2.plot([0,6], [12,2],'k', linestyle = '-')
 ax2.plot([0,12],[0,0],'k')
-ax2.plot([0,0],[0,2],'k')
-ax2.plot([6,6],[0,2],'k')
-ax2.plot([0,6],[0,2],'k')
-ax2.plot([2,2],[0,2],'k', linestyle = ':')
+ax2.plot([0,0], [0,2],'k')
+ax2.plot([6,6], [0,2],'k')
+ax2.plot([0,6], [0,2],'k')
+ax2.plot([2,2], [0,2],'k', linestyle = ':')
 
 
 canvas = FigureCanvasTkAgg(fig, window) 
@@ -132,7 +130,7 @@ def update_plot(event):
     #Before update_plot is called lam and gam sliders are updated
     #Sliders will always have current lambda/ gamma values
     lam = lambda_slide.get()
-    gam = gamma_slide.get()
+    gam =  gamma_slide.get()
 
     #Update cursor star point
     clickpoint.set_data(lam**2, gam)
