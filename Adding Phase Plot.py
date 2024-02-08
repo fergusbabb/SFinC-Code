@@ -25,7 +25,7 @@ plt.rcParams['ytick.labelsize'] = 10
 #Standard tkinter window set up
 window = tk.Tk()
 window.title('Autonomous Systems')
-window.geometry('1600x1200')
+window.geometry('1600x1000')
 
 #Tracks plot figure
 fig = Figure(figsize=(5, 3))
@@ -44,6 +44,14 @@ fig3 = Figure(figsize=(5, 3))
 axis_dims3 = [.15,.20,.7,.7]
 ax3 = fig3.add_axes(axis_dims3)
 #ax3.set_aspect('equal')
+
+#Acceleration vs x/y plot figure
+fig4 = Figure(figsize=(5, 3))
+axis_dims4 = [.15,.20,.7,.7]
+ax4 = fig4.add_axes(axis_dims4)
+#ax4.set_aspect('equal')
+
+
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
@@ -71,10 +79,6 @@ ax.set_ylabel('$y$', rotation = 0, y=1.02)
 #plot_label = tk.Label(window, text = "Master Plot", width = 10, 
 #                       height = 2).pack(anchor='n')
 
-canvas = FigureCanvasTkAgg(fig, window) 
-#Canvas is where figure is placed to window
-canvas.draw() #Show canvas (ie show figure)
-
 #Interactive plot, plot lines as in P40
 ax2.set(xlim=[0,12],ylim=[0,2])
 ax2.set_xlabel('$\lambda^2$', x=1.02)
@@ -87,6 +91,10 @@ ax2.plot([0,6],[0,2],'k')
 ax2.plot([2,2],[0,2],'k', linestyle = ':')
 
 
+canvas = FigureCanvasTkAgg(fig, window) 
+#Canvas is where figure is placed to window
+canvas.draw() #Show canvas (ie show figure)
+
 #As before for interactive phase plot
 canvas2 = FigureCanvasTkAgg(fig2, window)
 canvas2.draw()
@@ -95,6 +103,9 @@ canvas2.draw()
 canvas3 = FigureCanvasTkAgg(fig3, window)
 canvas3.draw()
 
+#As before for x/y vs N plot
+canvas4 = FigureCanvasTkAgg(fig4, window)
+canvas4.draw()
 
 
 #_____________________________Define ODE for 1 fluid_____________________
@@ -141,15 +152,17 @@ def update_plot(event):
 
         main_tracks[i].set_data(solution_x, solution_y)
         acceleration_plot_tracks[i].set_ydata(solution_acceleration)
+        x_tracks[i].set_ydata(solution_x)
+        y_tracks[i].set_ydata(solution_y)
 
     #Show plots
     fig.canvas.draw()
     fig3.canvas.draw()
-
+    fig4.canvas.draw()
 
 #_________________________Cursor interactivity_______________________
 #Initial cursor point
-clickpoint, = ax2.plot(lam_0**2,gam_0,'r*')
+clickpoint, = ax2.plot(lam_0**2, gam_0, 'r*')
 
 #Define function for interaction with plot
 def regions_plot(event):
@@ -159,7 +172,7 @@ def regions_plot(event):
     #Update lambda, gamma values from interaction
     lambda_slide.set(np.sqrt(ix))
     gamma_slide.set(iy)
-    clickpoint.set_data(ix,iy)
+    clickpoint.set_data(ix, iy)
 
     #Update plot for new values
     update_plot(event)
@@ -189,8 +202,9 @@ gamma_slide.set(gam_0)
 
 
 canvas.get_tk_widget().grid( row=1, column=1, rowspan=3, columnspan=2, ipadx=10, ipady=10)
-canvas2.get_tk_widget().grid(row=1, column=4, rowspan=3, columnspan=2, ipadx=10, ipady=10)
-canvas3.get_tk_widget().grid(row=4, column=1, rowspan=3, columnspan=2, ipadx=10, ipady=10)
+canvas2.get_tk_widget().grid(row=4, column=1, rowspan=3, columnspan=2, ipadx=10, ipady=10)
+canvas3.get_tk_widget().grid(row=1, column=4, rowspan=3, columnspan=2, ipadx=10, ipady=10)
+canvas4.get_tk_widget().grid(row=4, column=4, rowspan=3, columnspan=2, ipadx=10, ipady=10)
 lambda_slide_label.grid(     row=1, column=3, rowspan=1, columnspan=1                    )
 lambda_slide.grid(           row=1, column=3, rowspan=1, columnspan=1                    )
 gamma_slide_label.grid(      row=2, column=3, rowspan=1, columnspan=1                    )
@@ -208,6 +222,8 @@ xinit = np.linspace(-0.99, 0.99, pathnum)
 #Initial plot
 main_tracks = []
 acceleration_plot_tracks = []
+x_tracks = []
+y_tracks = []
 for i in range(pathnum):
     initial_conditions = [xinit[i], 0.01]  #Initial values for x and y
     
@@ -220,8 +236,16 @@ for i in range(pathnum):
     solution_x = solution[:, 0]
     solution_y = solution[:, 1]
 
-    solution_acceleration = acceleration(solution_x, solution_y, gam)
+    x_plot_i = ax4.plot(n, solution_x, 'm', linewidth=.5)[0]
+    x_tracks.append(x_plot_i)
+    x_plot_i.set_visible(True)
 
+    y_plot_i = ax4.plot(n, solution_y, 'c', linewidth=.5)[0]
+    y_tracks.append(y_plot_i)
+    y_plot_i.set_visible(True)
+
+    solution_acceleration = acceleration(solution_x, solution_y, gam)
+    
     acceleration_plot_i = ax3.plot(n, solution_acceleration, 'r', linewidth=.5)[0]
     acceleration_plot_tracks.append(acceleration_plot_i)
     acceleration_plot_i.set_visible(True)
