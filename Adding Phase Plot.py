@@ -89,6 +89,7 @@ ax2.plot([0,0],[0,2],'k')
 ax2.plot([6,6],[0,2],'k')
 ax2.plot([0,6],[0,2],'k')
 ax2.plot([2,2],[0,2],'k', linestyle = ':')
+ax2.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
 
 
 canvas = FigureCanvasTkAgg(fig, window) 
@@ -123,10 +124,25 @@ def ODEs(coords, t, lam, gam):
 
     return [dx_dN, dy_dN]
 
-#________________________Define Acceleration Expression______________________
+#____________________________Acceleration Region___________________________
 def acceleration(x, y, gam):
+    ## Defines the acceleration expression for a given point (x, y)
     return -3*x**2 - 1.5*gam*(1 - x**2 - y**2) + 1
 
+def acceleration_y_boundary(x, gam):
+    ## Defines the line where the acceleration expression = 0 at y for a given x
+    ysquared = (2/gam - 1) * x**2 - 2/(3*gam) + 1
+    ysquared = np.where(ysquared>0, ysquared, 0)
+    return np.sqrt(ysquared)
+
+def compute_fill(gam):
+    ## Calculates where the acceleration region is valid and draws it on the plot
+    x = np.linspace(-1, 1, 401)
+    boundary = acceleration_y_boundary(x, gam)
+    xWhere = np.where(boundary < np.sqrt(1-x**2), True, False)
+    return ax.fill_between(x, boundary, np.sqrt(1-x**2), where = xWhere)
+    
+    
 #_______________________________Update track plots___________________________
 def update_plot(event):
     #Before update_plot is called lam and gam sliders are updated
@@ -155,8 +171,14 @@ def update_plot(event):
         x_tracks[i].set_ydata(solution_x)
         y_tracks[i].set_ydata(solution_y)
 
+    global fill
+    fill.remove()
+    fill = compute_fill(gam)# = plt.fill_between(x, acceleration_y_boundary(x), np.sqrt(1-x**2), where = xWhere)
+    fill.set_color([0.1, 0.4, 0.7, 0.5])
+
     #Show plots
     fig.canvas.draw()
+    fig2.canvas.draw()
     fig3.canvas.draw()
     fig4.canvas.draw()
 
@@ -176,7 +198,6 @@ def regions_plot(event):
 
     #Update plot for new values
     update_plot(event)
-    fig2.canvas.draw()
 
 
 #____________________________Defining Widgets_____________________________________
@@ -224,6 +245,10 @@ main_tracks = []
 acceleration_plot_tracks = []
 x_tracks = []
 y_tracks = []
+
+fill = compute_fill(gam_0)
+fill.set_color([0.1, 0.4, 0.7, 0.5])
+
 for i in range(pathnum):
     initial_conditions = [xinit[i], 0.01]  #Initial values for x and y
     
