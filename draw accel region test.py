@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-gam = 0.5
+gam = 4/3
 
 def acceleration(x, y):
     return -3*x**2 - 1.5*gam*(1 - x**2 - y**2) + 1
@@ -18,8 +18,11 @@ unitCircleX = np.cos(theta)
 unitCircleY = np.sin(theta)
 
 xWhere = np.where(acceleration_y_boundary(x) < np.sqrt(1-x**2), True, False)
-plt.plot(unitCircleX, unitCircleY, color="r")
-plt.fill_between(x, acceleration_y_boundary(x), np.sqrt(1-x**2), where = xWhere)
+fill = plt.fill_between(x, acceleration_y_boundary(x), np.sqrt(1-x**2), where = xWhere)
+fill.set_hatch("///")
+fill.set_alpha(0.75)
+circle = plt.plot(unitCircleX, unitCircleY, color="r")
+fill.remove()
 
 plt.axis("equal")
 plt.show()
