@@ -25,16 +25,16 @@ plt.rcParams['ytick.labelsize'] = 10
 #Standard tkinter window set up
 window = tk.Tk()
 window.title('Autonomous Systems')
-window.geometry('900x1200')
+window.geometry('1600x1200')
 
 #Tracks plot figure
-fig = Figure(figsize=(6, 3))
+fig = Figure(figsize=(5, 3))
 axis_dims = [.15,.20,.7,.7]
 ax = fig.add_axes(axis_dims)
 ax.set_aspect('equal')
 
 #Interactivity phase plot figure
-fig2 = Figure(figsize=(6, 3))
+fig2 = Figure(figsize=(5, 3))
 axis_dims2 = [.15,.20,.7,.7]
 ax2 = fig2.add_axes(axis_dims2)
 #ax2.set_aspect('equal')
@@ -62,13 +62,12 @@ pathnum = 10
 ax.set_xlabel('$x$', x=1.02)
 ax.set_ylabel('$y$', rotation = 0, y=1.02)
 
-plot_label = tk.Label(window, text = "Master Plot", width = 10, 
-                       height = 2).pack(anchor='n')
+#plot_label = tk.Label(window, text = "Master Plot", width = 10, 
+#                       height = 2).pack(anchor='n')
 
 canvas = FigureCanvasTkAgg(fig, window) 
 #Canvas is where figure is placed to window
 canvas.draw() #Show canvas (ie show figure)
-canvas.get_tk_widget().pack(anchor = 'center', pady=0.2)
 
 #Interactive plot, plot lines as in P40
 ax2.set(xlim=[0,12],ylim=[0,2])
@@ -85,7 +84,7 @@ ax2.plot([2,2],[0,2],'k', linestyle = ':')
 #As before for interactive phase plot
 canvas2 = FigureCanvasTkAgg(fig2, window)
 canvas2.draw()
-canvas2.get_tk_widget().pack(anchor = 'center', pady=0.2)
+
 
 
 
@@ -152,21 +151,30 @@ cid = fig2.canvas.mpl_connect('button_press_event', regions_plot)
 
 #Lambda Slider
 lambda_slide_label = tk.Label(window, text = 'r$\lambda$ value', width = 15, 
-                       height = 2).pack(anchor = 'center', pady=0.1)
+                       height = 2)
 lambda_slide = tk.Scale(window, from_ = 0, to = np.sqrt(12), orient = 'horizontal',
                        width = 20, length = 250, resolution=0.01)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
 lambda_slide.set(lam_0)
-lambda_slide.pack(anchor = 'center', pady=0.1)
+
 
 #Gamma slider
 gamma_slide_label = tk.Label(window, text = 'r$\gamma$ value', width = 15, 
-                       height = 2).pack(anchor = 'center', pady=0.1)
+                       height = 2)
 gamma_slide = tk.Scale(window, from_ = 0, to = 2, orient = 'horizontal',
                        width = 20, length = 250, resolution=0.01)
 gamma_slide.bind("<ButtonRelease-1>", update_plot)
 gamma_slide.set(gam_0)
-gamma_slide.pack(anchor = 'center', pady=0.1)
+
+
+canvas.get_tk_widget().grid( row=1, column=1, rowspan=3, columnspan=2, ipadx=10, ipady=10)
+canvas2.get_tk_widget().grid(row=1, column=4, rowspan=3, columnspan=2, ipadx=10, ipady=10)
+lambda_slide_label.grid(     row=1, column=3, rowspan=1, columnspan=1                    )
+lambda_slide.grid(           row=1, column=3, rowspan=1, columnspan=1         )
+gamma_slide_label.grid(      row=2, column=3, rowspan=1, columnspan=1                    )
+gamma_slide.grid(            row=2, column=3, rowspan=1, columnspan=1       )
+
+
 
 
 #___________________________________Initial Plot____________________________________
