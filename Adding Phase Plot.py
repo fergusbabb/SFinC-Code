@@ -105,6 +105,10 @@ def ODEs(coords, t, lam, gam):
 
     return [dx_dN, dy_dN]
 
+#________________________Define Acceleration Expression______________________
+def acceleration(x, y):
+    return -3*x**2 - 1.5*gam*(1 - x**2 - y**2) + 1
+
 #_______________________________Update track plots___________________________
 def update_plot(event):
     #Before update_plot is called lam and gam sliders are updated
@@ -185,7 +189,13 @@ for i in range(pathnum):
 
     # Solve the system of ODEs using odeint
     solution = odeint(ODEs, initial_conditions, n, args = (lam, gam))
-    track_i = ax.plot(solution[:,0], solution[:,1], 'k', linewidth=.5)[0]
+
+    solution_x = solution[:, 0]
+    solution_y = solution[:, 1]
+
+    solution_acceleration = acceleration(solution_x, solution_y)
+    
+    track_i = ax.plot(solution_x, solution_y, 'k', linewidth=.5)[0]
     
     main_tracks.append(track_i)
     track_i.set_visible(True)
