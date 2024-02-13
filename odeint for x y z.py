@@ -6,7 +6,10 @@ lam = 1
 
 fig, ax = plt.subplots(2, 2)
 
-ax[0, 0].annotate("$\lambda = $" + str(lam), xy = (-1, 0.8))
+ax[0, 0].set_axis_off()
+ax[0, 0] = fig.add_subplot(2, 2, 1, projection="3d")
+
+##ax[0, 0].annotate("$\lambda = $" + str(lam), xy = (-1, 0.8))
 
 def vectorPrime(state, N):
     global lam
@@ -31,9 +34,12 @@ theta = np.linspace(0, np.pi, 51)
 unitCircleX = np.cos(theta)
 unitCircleY = np.sin(theta)
 
+ax[0, 0].plot(unitCircleX, unitCircleY, [0 for x in unitCircleX], color="r")
+ax[0, 0].plot(unitCircleX, [0 for x in unitCircleX], unitCircleY, color="r")
+ax[0, 0].plot([0 for x in unitCircleX[:26]], unitCircleX[:26], unitCircleY[:26], color="r")
 
+ax[0, 0].plot([-1, 1], [0, 0], [0, 0], "r")
 
-ax[0, 0].plot(unitCircleX, unitCircleY, color="r")
 
 N = np.linspace(0, 8, 401)
 a = np.exp(N)
@@ -53,7 +59,7 @@ pathx = pathTranspose[0]
 pathy = pathTranspose[1]
 pathz = pathTranspose[2]
 
-ax[0, 0].plot(pathx, pathy, linewidth=0.75)
+ax[0, 0].plot(pathx, pathy, pathz, linewidth=0.75)
 
 ax[1, 0].plot(N, pathx**2 + pathy**2)
 
@@ -64,9 +70,14 @@ ax[1, 1].plot(N, pathx**2 + pathy**2,                "b", label = "$\Omega_\phi 
 ax[0, 1].plot(N, accelerationExpression(pathx, pathy, pathz))
 ##        ax[0, 1].plot(N, -3*pathx**2 - 1.5*gam*(1 - pathx**2 - pathy**2) + 1)
 
-ax[0, 0].axis("equal")
+##ax[0, 0].axis("equal")
 ax[0, 0].set_xlabel("x")
 ax[0, 0].set_ylabel("y")
+ax[0, 0].set_zlabel("z")
+ax[0, 0].set_box_aspect([2, 1, 1])
+ax[0, 0].set_xticks([-1, -0.5, 0, 0.5, 1])
+ax[0, 0].set_yticks([0, 0.5, 1])
+ax[0, 0].set_zticks([0, 0.5, 1])
 
 ax[0, 1].set_xlabel("N")
 ax[0, 1].set_ylabel("Acceleration")
