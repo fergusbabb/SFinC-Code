@@ -32,7 +32,7 @@ window.geometry('1600x1000')
 fig = Figure(figsize=(5, 3))
 axis_dims = [.15,.20,.7,.7]
 ax = fig.add_axes(axis_dims, projection='3d')
-ax.set_aspect('equal')
+ax.set_box_aspect([1, 1, 1])
 
 '''
 #Interactivity phase plot figure
@@ -116,21 +116,34 @@ canvas4.draw()'''
 
 #_____________________________Define ODE for 1 fluid_____________________
 s = np.sqrt(6)
-def ODEs(coords, t, lam):
+def ODEs(state, N, lam):
     # coords[0] corresponds to the variable x
     # coords[1] corresponds to the variable y
     # coords[2] corresponds to the variable y
-    x, y, z = coords[0], coords[1], coords[2]
+##    x, y, z = coords[0], coords[1], coords[2]
+##
+##    a = 1/2
+##    A = a * (3*x**2 - 3*y**2 + z**2)
+##    
+##    #Return the derivatives [x', y', z']
+##    dx_dN = -3*a  +  3 * lam * y**2  / (x * s)  +  A
+##    dy_dN = -3*a  -      lam * s * x / 2        +  A
+##    dz_dN = -  a  +  A 
+##
+##    return [dx_dN, dy_dN, dz_dN]
 
-    a = 1/2
-    A = a * (3*x**2 - 3*y**2 + z**2)
-    
-    #Return the derivatives [x', y', z']
-    dx_dN = -3*a  +  3 * lam * y**2  / (x * s)  +  A
-    dy_dN = -3*a  -      lam * s * x / 2        +  A
-    dz_dN = -  a  +  A 
+    x = state[0]
+    y = state[1]
+    z = state[2]
 
-    return [dx_dN, dy_dN, dz_dN]
+    HdotSection = 1 + x**2 - y**2 - (1/3)*z**2
+
+    xprime = (-3*x) + (lam * np.sqrt(1.5) * y**2)  + (1.5*x * HdotSection)
+    yprime =         (-lam * np.sqrt(1.5) * x * y) + (1.5*y * HdotSection)
+    zprime = (-2*z)                                + (1.5*z * HdotSection)
+
+    return [xprime, yprime, zprime]
+
 
 #____________________________Acceleration Region___________________________
 '''
@@ -162,7 +175,7 @@ def update_plot(event):
     #Update cursor star point
     #clickpoint.set_data(lam**2, gam)
 
-y_0 =
+
     #Plot all paths with updated values
     for i in range(pathnum):
         z_0 = 0.9999
@@ -269,8 +282,9 @@ y_tracks = []
 for i in range(pathnum):
     z_0 = 0.9999
     y_0 = 0.0001
+    x_0 = 0.0001
 
-    initial_conditions = [xinit[i], y_0, z_0]  
+    initial_conditions = [x_0, y_0, z_0]  
     #Initial values for x y and z
     
     lam = lambda_slide.get()

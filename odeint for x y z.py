@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
 
-lam = 1
+lam = 2 * np.sqrt(2/3)# - 0.2
 
 fig, ax = plt.subplots(2, 2)
 
@@ -28,7 +28,7 @@ def vectorPrime(state, N):
 
 def accelerationExpression(x, y, z):
     HdotSection = 1 + x**2 - y**2 - (1/3)*z**2
-    return -3/2 * HdotSection + 1    
+    return -(3/2) * HdotSection + 1    
 
 theta = np.linspace(0, np.pi, 51)
 unitCircleX = np.cos(theta)
@@ -40,12 +40,12 @@ ax[0, 0].plot([0 for x in unitCircleX[:26]], unitCircleX[:26], unitCircleY[:26],
 
 ax[0, 0].plot([-1, 1], [0, 0], [0, 0], "r")
 
-
-N = np.linspace(0, 8, 401)
+N = np.linspace(0, 10, 401)
 a = np.exp(N)
 
+ax[0, 1].plot([0, N[-1]], [0, 0], "k--")
 
-z0 = 0.98
+z0 = 0.9
 
 y0 = 0.1
 x0 = 0.1
@@ -68,7 +68,12 @@ ax[1, 1].plot(N, 1 - pathx**2 - pathy**2 - pathz**2, "g", label = "$\Omega_m = 1
 ax[1, 1].plot(N, pathx**2 + pathy**2,                "b", label = "$\Omega_\phi = x^2 + y^2$")
 
 ax[0, 1].plot(N, accelerationExpression(pathx, pathy, pathz))
-##        ax[0, 1].plot(N, -3*pathx**2 - 1.5*gam*(1 - pathx**2 - pathy**2) + 1)
+
+
+##xFixed = 2 * np.sqrt(6) / lam
+##yFixed = 2 / (np.sqrt(3) * lam)
+##
+##ax[0, 0].scatter(xFixed, yFixed, 0)
 
 ##ax[0, 0].axis("equal")
 ax[0, 0].set_xlabel("x")
