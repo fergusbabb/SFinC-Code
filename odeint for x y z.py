@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
 
-lam = 2 * np.sqrt(2/3)# - 0.2
+lam = 9/3#2 * np.sqrt(2/3)# - 0.2
 
 fig, ax = plt.subplots(2, 2)
 
@@ -18,7 +18,7 @@ def vectorPrime(state, N):
     y = state[1]
     z = state[2]
 
-    HdotSection = 1 + x**2 - y**2 - (1/3)*z**2
+    HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
 
     xprime = (-3*x) + (lam * np.sqrt(1.5) * y**2)  + (1.5*x * HdotSection)
     yprime =         (-lam * np.sqrt(1.5) * x * y) + (1.5*y * HdotSection)
@@ -27,8 +27,14 @@ def vectorPrime(state, N):
     return [xprime, yprime, zprime]
 
 def accelerationExpression(x, y, z):
-    HdotSection = 1 + x**2 - y**2 - (1/3)*z**2
-    return -(3/2) * HdotSection + 1    
+    HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
+    return (1/2) * (-3*x**2 + 3*y**2 - z**2 - 1)
+
+##    Omega_m = 1 - x**2 - y**2 - z**2
+##    return -(3/2) * Omega_m - 2*z**2 - 3*x**2 + 1
+
+def gamma_phi(x, y):
+    return (2*x**2) / (x**2 + y**2)
 
 theta = np.linspace(0, np.pi, 51)
 unitCircleX = np.cos(theta)
@@ -40,17 +46,40 @@ ax[0, 0].plot([0 for x in unitCircleX[:26]], unitCircleX[:26], unitCircleY[:26],
 
 ax[0, 0].plot([-1, 1], [0, 0], [0, 0], "r")
 
-N = np.linspace(0, 10, 401)
+N = np.linspace(0, 30, 401)
 a = np.exp(N)
 
 ax[0, 1].plot([0, N[-1]], [0, 0], "k--")
 
-z0 = 0.9
+ax[1, 0].plot([0, N[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
+ax[1, 0].plot([0, N[-1]], [1, 1], "k--", linewidth = 0.5)
 
-y0 = 0.1
-x0 = 0.1
+
+y0 = 2 / (lam * np.sqrt(3))#0.2
+x0 = -2 * np.sqrt(2/3) / lam #np.sqrt(2) * y0
+z0 = np.sqrt(1 - (4/lam**2)) - 0.00000005
+
+##x0 = 0.1
+##y0 = 0.1
+##z0 = 0.9
 
 print(x0**2 + y0**2 + z0**2)
+
+fixedPoints = np.array([
+    [0, 0, 0],
+    [0, 0, 1],
+    [1, 0, 0],
+    [-1, 0, 0]
+    ])
+
+if lam**2 < 6:
+    fixedPoints = np.append(fixedPoints, [[lam/np.sqrt(6), np.sqrt(1 - (lam**2)/6), 0]], axis=0)
+
+if lam**2 > 3:
+    fixedPoints = np.append(fixedPoints, [[np.sqrt(3/2)/lam, np.sqrt(3/2)/lam, 0]], axis=0)
+
+if lam**2 > 8/3:
+    fixedPoints = np.append(fixedPoints, [[2 * np.sqrt(2/3) / lam, 2 / (lam * np.sqrt(3)), np.sqrt(1 - (4/lam**2))]], axis=0)
 
 path = integrate.odeint(vectorPrime, [x0, y0, z0], N)
 pathTranspose = path.transpose()
@@ -61,7 +90,7 @@ pathz = pathTranspose[2]
 
 ax[0, 0].plot(pathx, pathy, pathz, linewidth=0.75)
 
-ax[1, 0].plot(N, pathx**2 + pathy**2)
+ax[1, 0].plot(N, gamma_phi(pathx, pathy))
 
 ax[1, 1].plot(N, pathz**2,                           "r", label = "$\Omega_r = z^2$")
 ax[1, 1].plot(N, 1 - pathx**2 - pathy**2 - pathz**2, "g", label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
@@ -69,6 +98,9 @@ ax[1, 1].plot(N, pathx**2 + pathy**2,                "b", label = "$\Omega_\phi 
 
 ax[0, 1].plot(N, accelerationExpression(pathx, pathy, pathz))
 
+fixedPoints = fixedPoints.transpose()
+
+ax[0, 0].scatter(fixedPoints[0], fixedPoints[1], fixedPoints[2], depthshade=False)
 
 ##xFixed = 2 * np.sqrt(6) / lam
 ##yFixed = 2 / (np.sqrt(3) * lam)
@@ -88,7 +120,7 @@ ax[0, 1].set_xlabel("N")
 ax[0, 1].set_ylabel("Acceleration")
 
 ax[1, 0].set_xlabel("N")
-ax[1, 0].set_ylabel("$x^2 + y^2 = \Omega_\phi$")
+ax[1, 0].set_ylabel("$\gamma_\phi$")
 
 ax[1, 1].set_xlabel("N")
 ax[1, 1].set_ylabel("Density Parameters")
