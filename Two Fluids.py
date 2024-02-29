@@ -65,7 +65,7 @@ canvas = FigureCanvasTkAgg(fig, window)
 canvas.draw() #Show canvas (ie show figure)
 
 
-#_____________________________Define ODE for 1 fluid_____________________
+#_____________________________Define ODE for 2 fluids_____________________
 s = np.sqrt(6)
 def ODEs(state, N, lam):
     # coords[0] corresponds to the variable x
@@ -76,7 +76,7 @@ def ODEs(state, N, lam):
     y = state[1]
     z = state[2]
 
-    HdotSection = 1 + x**2 - y**2 - (1/3)*z**2
+    HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
 
     xprime = (-3*x) + (lam * np.sqrt(1.5) * y**2)  + (1.5*x * HdotSection)
     yprime =         (-lam * np.sqrt(1.5) * x * y) + (1.5*y * HdotSection)
