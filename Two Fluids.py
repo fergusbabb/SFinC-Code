@@ -14,8 +14,6 @@ from scipy.integrate import odeint
 import ctypes 
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
-
-
 #Personal plotting preferences
 plt.rcParams.update({"text.usetex": True, "font.family": "serif",
                      "font.serif": ["Computer Modern Serif"]})
