@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
 
-lam = 2# np.sqrt(12/3)+0.1#2 * np.sqrt(2/3)# - 0.2
+lam = 1# np.sqrt(12/3)+0.1#2 * np.sqrt(2/3)# - 0.2
 
 fig, ax = plt.subplots(2, 2)
 
@@ -42,24 +42,24 @@ ax[0, 0].plot([0 for x in unitCircleX[:26]], unitCircleX[:26], unitCircleY[:26],
 
 ax[0, 0].plot([-1, 1], [0, 0], [0, 0], "r")
 
-N = np.linspace(0, 30, 401)
-reverseN = -N
+N = np.linspace(0, 20, 401)
+reverseN = np.linspace(0, -8, 101)
 a = np.exp(N)
 
-ax[0, 1].plot([0, N[-1]], [0, 0], "k--")
+ax[0, 1].plot([reverseN[-1], N[-1]], [0, 0], "k--")
 
-ax[1, 0].plot([0, N[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
-ax[1, 0].plot([0, N[-1]], [1, 1], "k--", linewidth = 0.5)
+ax[1, 0].plot([reverseN[-1], N[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
+ax[1, 0].plot([reverseN[-1], N[-1]], [1, 1], "k--", linewidth = 0.5)
 
 
 ## Initial conditions
 
-if False:#lam > 2:
+if lam > 2:
     y0 = 2 / (lam * np.sqrt(3))#0.2
     x0 = 2 * np.sqrt(2/3) / lam #np.sqrt(2) * y0
-    z0 = np.sqrt(1 - (4/lam**2)) - 0.00000005
+    z0 = np.sqrt(1 - (4/lam**2)) - 0.005
 else:
-    x0 = 0#-0.01#0.05
+    x0 = -0.01#0.05
     y0 = 0.01
     z0 = 0.9
 
