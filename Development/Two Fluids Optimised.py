@@ -1,18 +1,79 @@
+#_______________________________Imports________________________________________
 import numpy as np
-from scipy import integrate
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, 
+NavigationToolbar2Tk)
+from mpl_toolkits.mplot3d import Axes3D
 
-lam = 1# np.sqrt(12/3)+0.1#2 * np.sqrt(2/3)# - 0.2
+#Tkinter for widgets and interactivity. Scipy for ode solving
+import tkinter as tk
+from scipy.integrate import odeint
 
-fig, ax = plt.subplots(2, 2)
+#This import stops automatically sets up the window so its reasonable
+import ctypes 
+ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
-ax[0, 0].set_axis_off()
-ax[0, 0] = fig.add_subplot(2, 2, 1, projection="3d")
+#Personal plotting preferences
+plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+                     "font.serif": ["Computer Modern Serif"]})
+plt.rc('axes', labelsize=12, titlesize=15)
+plt.rcParams['xtick.labelsize'] = 10
+plt.rcParams['ytick.labelsize'] = 10
+
+#_________________________Set up main window___________________________________
+#Standard tkinter window set up
+window = tk.Tk()
+window.title('Autonomous Systems')
+window.geometry('1600x1000')
+
+#Tracks plot figure
+fig = Figure(figsize=(16, 10)) #1600x1000 pixels
+track_axis_dims = [.05,.65,.3,.3]
+track_ax = fig.add_axes(track_axis_dims, projection='3d')
+track_ax.set_box_aspect([2, 1, 1])
+
+dens_axis_dims = [.05,.15,.3,.3]
+dens_ax = fig.add_axes(dens_axis_dims)
+
+accel_axis_dims = [.45,.65,.3,.3]
+accel_ax = fig.add_axes(accel_axis_dims)
+
+gamma_axis_dims = [.45,.15,.3,.3]
+gamma_ax = fig.add_axes(gamma_axis_dims)
+
+#Bounding Circle
+theta = np.linspace(0, np.pi, 150)
+track_ax.plot(np.cos(theta), np.sin(theta),
+         'r', linewidth=1, label='Bounding Circle')
+track_ax.plot(np.cos(theta), np.zeros(150), np.sin(theta),
+         'r', linewidth=1, label='Bounding Circle')
+track_ax.plot([-1,1], [0,0], 'r.', linewidth=1)
+
+#Initial values
+lam_0 = 1
+pathnum = 1
 
 
-def vectorPrime(state, N):
-    global lam
-    
+#_________________________Initialise plots___________________________________
+#Tkinter works as:
+#1) Main Window 
+#2) Set up canvases inside window 
+#3) Set up Figures attached to canvases 
+#4) Add axes to figures as usual
+
+track_ax.set_xlabel('$x$')
+track_ax.set_ylabel('$y$')
+track_ax.set_zlabel('$z$')
+
+
+#_____________________________Define ODE for 2 fluids_____________________
+s = np.sqrt(6)
+def ODEs(state, N, lam):
+    # coords[0] corresponds to the variable x
+    # coords[1] corresponds to the variable y
+    # coords[2] corresponds to the variable y
+
     x = state[0]
     y = state[1]
     z = state[2]
@@ -25,116 +86,144 @@ def vectorPrime(state, N):
 
     return [xprime, yprime, zprime]
 
-def accelerationExpression(x, y, z):
-    HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
-    return (1/2) * (-3*x**2 + 3*y**2 - z**2 - 1)
-
-def gamma_phi(x, y):
-    return (2*x**2) / (x**2 + y**2)
-
-theta = np.linspace(0, np.pi, 51)
-unitCircleX = np.cos(theta)
-unitCircleY = np.sin(theta)
-
-ax[0, 0].plot(unitCircleX, unitCircleY, [0 for x in unitCircleX], color="r")
-ax[0, 0].plot(unitCircleX, [0 for x in unitCircleX], unitCircleY, color="r")
-ax[0, 0].plot([0 for x in unitCircleX[:26]], unitCircleX[:26], unitCircleY[:26], color="r")
-
-ax[0, 0].plot([-1, 1], [0, 0], [0, 0], "r")
-
-N = np.linspace(0, 20, 401)
-reverseN = np.linspace(0, -8, 101)
-a = np.exp(N)
-
-ax[0, 1].plot([reverseN[-1], N[-1]], [0, 0], "k--")
-
-ax[1, 0].plot([reverseN[-1], N[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
-ax[1, 0].plot([reverseN[-1], N[-1]], [1, 1], "k--", linewidth = 0.5)
-
-
-## Initial conditions
-
-if lam > 2:
-    y0 = 2 / (lam * np.sqrt(3))#0.2
-    x0 = 2 * np.sqrt(2/3) / lam #np.sqrt(2) * y0
-    z0 = np.sqrt(1 - (4/lam**2)) - 0.005
-else:
-    x0 = -0.01#0.05
-    y0 = 0.01
-    z0 = 0.9
-
-print(x0**2 + y0**2 + z0**2)
-
-fixedPoints = np.array([
+#___________________________Function for fixed points________________________
+def fixedPoints_func(lam):
+    fixedPoints = np.array([
     [0, 0, 0],
     [0, 0, 1],
     [1, 0, 0],
     [-1, 0, 0]
     ])
 
-if lam**2 < 6:
-    fixedPoints = np.append(fixedPoints, [[lam/np.sqrt(6), np.sqrt(1 - (lam**2)/6), 0]], axis=0)
+    if lam**2 < 6:
+        fixedPoints = np.append(fixedPoints, [[lam/np.sqrt(6), np.sqrt(1 - (lam**2)/6), 0]], axis=0)
 
-if lam**2 > 3:
-    fixedPoints = np.append(fixedPoints, [[np.sqrt(3/2)/lam, np.sqrt(3/2)/lam, 0]], axis=0)
+    if lam**2 > 3:
+        fixedPoints = np.append(fixedPoints, [[np.sqrt(3/2)/lam, np.sqrt(3/2)/lam, 0]], axis=0)
 
-if lam**2 > 8/3:
-    fixedPoints = np.append(fixedPoints, [[2 * np.sqrt(2/3) / lam, 2 / (lam * np.sqrt(3)), np.sqrt(1 - (4/lam**2))]], axis=0)
-
-path = integrate.odeint(vectorPrime, [x0, y0, z0], N)
-pathTranspose = path.transpose()
-
-pathx = pathTranspose[0]
-pathy = pathTranspose[1]
-pathz = pathTranspose[2]
-
-ax[0, 0].plot(pathx, pathy, pathz, linewidth=0.75)
-
-ax[1, 0].plot(N, gamma_phi(pathx, pathy))
-
-ax[1, 1].plot(N, pathz**2,                           "r", label = "$\Omega_r = z^2$")
-ax[1, 1].plot(N, 1 - pathx**2 - pathy**2 - pathz**2, "g", label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
-ax[1, 1].plot(N, pathx**2 + pathy**2,                "b", label = "$\Omega_\phi = x^2 + y^2$")
-
-ax[0, 1].plot(N, accelerationExpression(pathx, pathy, pathz))
+    if lam**2 > 8/3:
+        fixedPoints = np.append(fixedPoints, [[2 * np.sqrt(2/3) / lam, 2 / (lam * np.sqrt(3)), np.sqrt(1 - (4/lam**2))]], axis=0)
+    
+    return fixedPoints
 
 
-reversePath = integrate.odeint(vectorPrime, [x0, y0, z0], reverseN)
-reversePathTranspose = reversePath.transpose()
+#_______________________________Acceleration Expression______________________
+def accelerationExpression(x, y, z):
+    HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
+    return (1/2) * (-3*x**2 + 3*y**2 - z**2 - 1)
 
-reversePathx = reversePathTranspose[0]
-reversePathy = reversePathTranspose[1]
-reversePathz = reversePathTranspose[2]
 
-ax[0, 0].plot(reversePathx, reversePathy, reversePathz, linewidth=0.75)
+#_______________________________Update track plots___________________________
 
-ax[1, 0].plot(reverseN, gamma_phi(reversePathx, reversePathy))
+def update_plot(event):
+    #Before update_plot is called lam and gam sliders are updated
+    #Sliders will always have current lambda/ gamma values
+    lam = lambda_slide.get()
+    fixedPoints = fixedPoints_func(lam).transpose()
 
-ax[1, 1].plot(reverseN, reversePathz**2,                           "r")
-ax[1, 1].plot(reverseN, 1 - reversePathx**2 - reversePathy**2 - reversePathz**2, "g")
-ax[1, 1].plot(reverseN, reversePathx**2 + reversePathy**2,                "b")
+    fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
+    fixedPoints_plot.set_3d_properties(fixedPoints[2,:]) #Plot all paths with updated values
+    
+    for i in range(pathnum):
+        z_0 = 0.9999
+        y_0 = 0.0001
+        x_0 = 0.001
+        initial_conditions = [x_0, y_0, z_0]  
+        #Initial values for x y and z
 
-ax[0, 1].plot(reverseN, accelerationExpression(reversePathx, reversePathy, reversePathz))
+        
+        # Solve the system of ODEs using odeint
+        solution = odeint(ODEs, initial_conditions, n, args = (lam,))
 
-fixedPoints = fixedPoints.transpose()
+        solution_x = solution[:, 0]
+        solution_y = solution[:, 1]
+        solution_z = solution[:, 2]
 
-ax[0, 0].scatter(fixedPoints[0], fixedPoints[1], fixedPoints[2], depthshade=False)
+        main_tracks[i].set_data(solution_x, solution_y)
+        main_tracks[i].set_3d_properties(solution_z)
 
-ax[0, 0].set_xlabel("x")
-ax[0, 0].set_ylabel("y")
-ax[0, 0].set_zlabel("z")
-ax[0, 0].set_box_aspect([2, 1, 1])
-ax[0, 0].set_xticks([-1, -0.5, 0, 0.5, 1])
-ax[0, 0].set_yticks([0, 0.5, 1])
-ax[0, 0].set_zticks([0, 0.5, 1])
+        accel_plot.set_ydata(accelerationExpression(solution_x,solution_y,solution_z))
 
-ax[0, 1].set_xlabel("N")
-ax[0, 1].set_ylabel("Acceleration")
+        Radn_dens_plot.set_ydata(solution_z**2)
+        Mass_dens_plot.set_ydata(
+            1 - solution_x**2 - solution_y**2 - solution_z**2)
+        Phi_dens_plot.set_ydata(solution_x**2 + solution_y**2)
 
-ax[1, 0].set_xlabel("N")
-ax[1, 0].set_ylabel("$\gamma_\phi$")
+    #Show plots
+    fig.canvas.draw()
 
-ax[1, 1].set_xlabel("N")
-ax[1, 1].set_ylabel("Density Parameters")
-ax[1, 1].legend()
-plt.show()
+
+#____________________________Defining Widgets_____________________________________
+#When cursor clicks on region plot update to clicked value
+#cid = fig2.canvas.mpl_connect('button_press_event', regions_plot)
+
+canvas = FigureCanvasTkAgg(fig, window) 
+#Canvas is where figure is placed to window
+canvas.draw() #Show canvas (ie show figure)
+
+#Lambda Slider
+lambda_slide_label = tk.Label(window, text = '$\lambda$ value', width = 15, 
+                       height = 2)
+lambda_slide = tk.Scale(window, from_ = 0, to = np.sqrt(12), orient = 'horizontal',
+                       width = 20, length = 250, resolution=0.01)
+lambda_slide.bind("<ButtonRelease-1>", update_plot)
+lambda_slide.set(lam_0)
+
+canvas.get_tk_widget().place(relheight=1,relwidth=1)
+lambda_slide_label.place(relx=0.05, rely=0.4, relheight=0.025, relwidth=0.3)
+lambda_slide.place(relx=0.05, rely=0.425, relheight=0.05, relwidth=0.3)
+
+
+
+
+#___________________________________Initial Plot____________________________________
+
+#Define log a linspace for ode
+n = np.linspace(0, 10, 1000)
+xinit = np.linspace(-0.99, 0.99, pathnum)
+
+#Initial plot
+main_tracks = []
+fixedPoints_plot, = track_ax.plot([], [], [], 'rx')
+
+for i in range(pathnum):
+    z_0 = 0.9999
+    y_0 = 0.0001
+    x_0 = 0.0001
+
+    initial_conditions = [x_0, y_0, z_0]  
+    #Initial values for x y and z
+    
+    lam = lambda_slide.get()
+    fixedPoints = fixedPoints_func(lam).transpose()
+    fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
+    fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
+
+    # Solve the system of ODEs using odeint
+    solution = odeint(ODEs, initial_conditions, n, args = (lam,))
+
+    solution_x = solution[:, 0]
+    solution_y = solution[:, 1]
+    solution_z = solution[:, 2]
+
+    Radn_dens_plot, = dens_ax.plot(n, solution_z**2, 'r',
+            label = "$\Omega_r = z^2$")
+    Mass_dens_plot, = dens_ax.plot(n,
+         1 - solution_x**2 - solution_y**2 - solution_z**2, 'g',
+            label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
+    Phi_dens_plot, = dens_ax.plot(n, solution_x**2 + solution_y**2, 'b',
+            label = "$\Omega_{\phi} = x^2 + y^2$")
+
+
+    track_ax.plot(x_0,y_0,z_0, 'cx')
+    track_i = track_ax.plot(solution_x, solution_y, solution_z, 'm', linewidth=2)[0]
+    accel_plot, = accel_ax.plot(n, accelerationExpression(solution_x,solution_y,solution_z))
+
+    main_tracks.append(track_i)
+    track_i.set_visible(True)
+
+
+dens_ax.legend()
+
+window.mainloop()
+#End
