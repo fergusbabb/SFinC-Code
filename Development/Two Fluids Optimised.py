@@ -15,31 +15,35 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
+plt.style.use('classic')
 plt.rcParams.update({"text.usetex": True, "font.family": "serif",
                      "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=12, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
 
+
 #_________________________Set up main window___________________________________
 #Standard tkinter window set up
 window = tk.Tk()
 window.title('Autonomous Systems')
-window.geometry('1600x1000')
+window.geometry('1600x900')
+
 
 #Tracks plot figure
-fig = Figure(figsize=(16, 10)) #1600x1000 pixels
-track_axis_dims = [.05,.65,.3,.3]
+fig = Figure(figsize=(16, 9)) #1600x900 pixels
+fig.set_facecolor('white')
+track_axis_dims = [.0,.5,.4,.5]
 track_ax = fig.add_axes(track_axis_dims, projection='3d')
 track_ax.set_box_aspect([2, 1, 1])
 
-dens_axis_dims = [.05,.15,.3,.3]
+dens_axis_dims = [.55,.075,.4,.3]
 dens_ax = fig.add_axes(dens_axis_dims)
 
-accel_axis_dims = [.45,.65,.3,.3]
+accel_axis_dims = [.55,.375,.4,.3]
 accel_ax = fig.add_axes(accel_axis_dims)
 
-gamma_axis_dims = [.45,.15,.3,.3]
+gamma_axis_dims = [.55,.675,.4,.3]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Bounding Circle
@@ -112,6 +116,10 @@ def accelerationExpression(x, y, z):
     HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
     return (1/2) * (-3*x**2 + 3*y**2 - z**2 - 1)
 
+#_______________________________Effective Eos Parameter______________________
+def gamma_phi(x, y):
+    return (2*x**2) / (x**2 + y**2)
+
 
 #_______________________________Update track plots___________________________
 
@@ -133,8 +141,7 @@ def update_plot(event):
 
         
         # Solve the system of ODEs using odeint
-        solution = odeint(ODEs, initial_conditions, n, args = (lam,))
-
+        solution = odeint(ODEs, initial_conditions, N, args = (lam,))
         solution_x = solution[:, 0]
         solution_y = solution[:, 1]
         solution_z = solution[:, 2]
@@ -149,6 +156,8 @@ def update_plot(event):
             1 - solution_x**2 - solution_y**2 - solution_z**2)
         Phi_dens_plot.set_ydata(solution_x**2 + solution_y**2)
 
+        effective_eos.set_ydata(gamma_phi(solution_x,solution_y))
+
     #Show plots
     fig.canvas.draw()
 
@@ -162,24 +171,25 @@ canvas = FigureCanvasTkAgg(fig, window)
 canvas.draw() #Show canvas (ie show figure)
 
 #Lambda Slider
-lambda_slide_label = tk.Label(window, text = '$\lambda$ value', width = 15, 
+lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
                        height = 2)
-lambda_slide = tk.Scale(window, from_ = 0, to = np.sqrt(12), orient = 'horizontal',
+lambda_slide = tk.Scale(window, from_ = np.sqrt(6), to = 0,
                        width = 20, length = 250, resolution=0.01)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
 lambda_slide.set(lam_0)
 
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
-lambda_slide_label.place(relx=0.05, rely=0.4, relheight=0.025, relwidth=0.3)
-lambda_slide.place(relx=0.05, rely=0.425, relheight=0.05, relwidth=0.3)
-
+lambda_slide_label.place(relx=0.4, rely=0.025, relheight=0.025, relwidth=0.05)
+lambda_slide.place(relx=0.4, rely=0.05, relheight=0.4, relwidth=0.05)
+lambda_slide.configure(bg = 'white', borderwidth=0)
+lambda_slide_label.configure(bg = 'white', borderwidth=0)
 
 
 
 #___________________________________Initial Plot____________________________________
 
 #Define log a linspace for ode
-n = np.linspace(0, 10, 1000)
+N = np.linspace(0, 15, 512)
 xinit = np.linspace(-0.99, 0.99, pathnum)
 
 #Initial plot
@@ -200,29 +210,46 @@ for i in range(pathnum):
     fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
 
     # Solve the system of ODEs using odeint
-    solution = odeint(ODEs, initial_conditions, n, args = (lam,))
-
+    solution = odeint(ODEs, initial_conditions, N, args = (lam,))
     solution_x = solution[:, 0]
     solution_y = solution[:, 1]
     solution_z = solution[:, 2]
 
-    Radn_dens_plot, = dens_ax.plot(n, solution_z**2, 'r',
+    
+    Radn_dens_plot, = dens_ax.plot(N, solution_z**2, 'r',
             label = "$\Omega_r = z^2$")
-    Mass_dens_plot, = dens_ax.plot(n,
+    Mass_dens_plot, = dens_ax.plot(N,
          1 - solution_x**2 - solution_y**2 - solution_z**2, 'g',
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
-    Phi_dens_plot, = dens_ax.plot(n, solution_x**2 + solution_y**2, 'b',
+    Phi_dens_plot, = dens_ax.plot(N, solution_x**2 + solution_y**2, 'b',
             label = "$\Omega_{\phi} = x^2 + y^2$")
 
 
     track_ax.plot(x_0,y_0,z_0, 'cx')
     track_i = track_ax.plot(solution_x, solution_y, solution_z, 'm', linewidth=2)[0]
-    accel_plot, = accel_ax.plot(n, accelerationExpression(solution_x,solution_y,solution_z))
+    accel_plot, = accel_ax.plot(N, accelerationExpression(solution_x,solution_y,solution_z))
+    effective_eos, = gamma_ax.plot(N, gamma_phi(solution_x, solution_y), 'k')
 
     main_tracks.append(track_i)
     track_i.set_visible(True)
 
 
+track_ax.set(xlabel='x', ylabel='y', zlabel='z',
+             xticks = [-1, -0.5, 0, 0.5, 1],
+             yticks = [0, 0.5, 1],
+             zticks = [0, 0.5, 1])
+track_ax.set_box_aspect([2, 1, 1])
+
+
+accel_ax.set_ylabel("Acceleration")
+
+accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
+
+gamma_ax.set_ylabel("$\gamma_\phi$")
+gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
+
+dens_ax.set_ylabel("Density Parameters")
+dens_ax.set_xlabel("$N$")
 dens_ax.legend()
 
 window.mainloop()
