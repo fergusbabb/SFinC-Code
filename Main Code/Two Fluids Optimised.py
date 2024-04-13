@@ -39,14 +39,17 @@ track_ax = fig.add_axes(track_axis_dims, projection='3d')
 track_ax.set_box_aspect([2, 1, 1])
 track_ax.view_init(elev=24, azim=66)
 
-dens_axis_dims = [.55,.075,.4,.3]
+dens_axis_dims = [.55,.125,.4,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
 
-accel_axis_dims = [.55,.375,.4,.3]
+accel_axis_dims = [.55,.4,.4,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
 
-gamma_axis_dims = [.55,.675,.4,.3]
+gamma_axis_dims = [.55,.675,.4,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
+
+d_lum_ax_dims = [.05,.125,.35,.35] 
+d_lum_ax = fig.add_axes(d_lum_ax_dims)
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
@@ -121,7 +124,6 @@ def fixedPoints_func(lam):
     
     return fixedPoints
 
-
 #_______________________________Acceleration Expression______________________
 def accelerationExpression(x, y, z):
     HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
@@ -131,9 +133,22 @@ def accelerationExpression(x, y, z):
 def gamma_phi(x, y):
     return (2*x**2) / (x**2 + y**2)
 
+#_______________________________Integrand Form_______________________________
+def integrand(N, x, y, z, N0, x0, y0, z0):
+    gamma  = gamma_phi(x, y)
+    O_m0   = 1 - x0**2 - y0**2 - z0**2
+    O_r0   = z0**2
+    O_phi0 = 1 - O_m0 - O_r0
+    oneplusz = np.exp(N0 - N)
+
+    radn_part = O_r0 * oneplusz**4
+    matt_part = O_m0 * oneplusz**3
+    phi_part  = O_phi0 * oneplusz**(3*gamma)
+    integrand = -oneplusz/np.sqrt(radn_part + matt_part + phi_part)
+    return integrand
+
 
 #_______________________________Update track plots___________________________
-
 def update_plot(event):
     #Before update_plot is called lam and gam sliders are updated
     #Sliders will always have current lambda/ gamma values
@@ -171,8 +186,11 @@ def update_plot(event):
 
         effective_eos.set_ydata(gamma_phi(solution_x,solution_y))
 
+        integrand_plot.set_ydata(integrand(N,
+            solution_x, solution_y, solution_z, N0, x_0, y_0, z_0))
     #Show plots
     fig.canvas.draw()
+
 
 
 #____________________________Defining Widgets________________________________
@@ -200,10 +218,10 @@ lambda_slide.configure(bg = 'white', borderwidth=0)
 lambda_slide_label.configure(bg = 'white', borderwidth=0)
 
 
-
 #___________________________________Initial Plot_____________________________
 #Define log a linspace for ode
-N = np.linspace(0, 15, 512)
+N0 = 0
+N = np.linspace(N0, 15, 512)
 xinit = np.linspace(-0.99, 0.99, pathnum)
 
 #Initial plot
@@ -249,6 +267,9 @@ for i in range(pathnum):
 
     main_tracks.append(track_i)
     track_i.set_visible(True)
+
+    integrand_plot, = d_lum_ax.plot(N0-N,
+        integrand(N, solution_x, solution_y, solution_z, N0, x_0, y_0, z_0))
 
 
 track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
