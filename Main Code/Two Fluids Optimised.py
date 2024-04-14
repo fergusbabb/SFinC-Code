@@ -8,7 +8,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 #Tkinter for widgets and interactivity. Scipy for ode solving
 import tkinter as tk
-from scipy.integrate import odeint
+from scipy.integrate import (odeint, quad)
+
 
 #This import stops automatically sets up the window so its reasonable
 import ctypes 
@@ -134,6 +135,7 @@ def gamma_phi(x, y):
     return (2*x**2) / (x**2 + y**2)
 
 #_______________________________Integrand Form_______________________________
+
 def integrand(N, x, y, z, N0, x0, y0, z0):
     gamma  = gamma_phi(x, y)
     O_m0   = 1 - x0**2 - y0**2 - z0**2
@@ -185,9 +187,12 @@ def update_plot(event):
         Phi_dens_plot.set_ydata(solution_x**2 + solution_y**2)
 
         effective_eos.set_ydata(gamma_phi(solution_x,solution_y))
+        
+        integrand_plot.set_ydata(integrand(N, solution_x, solution_y, solution_z, N0, x_0, y_0, z_0))
+        #integrand_plotx.set_ydata(solution_x)
+        #integrand_ploty.set_ydata(solution_y)
+        #integrand_plotz.set_ydata(solution_z)
 
-        integrand_plot.set_ydata(integrand(N,
-            solution_x, solution_y, solution_z, N0, x_0, y_0, z_0))
     #Show plots
     fig.canvas.draw()
 
@@ -206,9 +211,11 @@ canvas.draw() #Show canvas (ie show figure)
 lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
                        height = 2)
 lambda_slide = tk.Scale(window, from_ = np.sqrt(6), to = 0,
-                       width = 20, length = 250, resolution=0.01)
-lambda_slide.bind("<ButtonRelease-1>", update_plot)
+                       width = 20, length = 250, resolution=0.1)
+
 lambda_slide.set(lam_0)
+lambda_slide.bind("<ButtonRelease-1>", update_plot)
+
 
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
 lambda_slide_label.place(relx=0.45, rely=0.025,
@@ -222,6 +229,11 @@ lambda_slide_label.configure(bg = 'white', borderwidth=0)
 #Define log a linspace for ode
 N0 = 0
 N = np.linspace(N0, 15, 512)
+a = np.exp(N)
+zplus1 = 1/a
+
+d_lum_ax.plot()
+
 xinit = np.linspace(-0.99, 0.99, pathnum)
 
 #Initial plot
@@ -268,8 +280,11 @@ for i in range(pathnum):
     main_tracks.append(track_i)
     track_i.set_visible(True)
 
-    integrand_plot, = d_lum_ax.plot(N0-N,
-        integrand(N, solution_x, solution_y, solution_z, N0, x_0, y_0, z_0))
+
+    integrand_plot, = d_lum_ax.plot(N0-N, integrand(N, solution_x, solution_y, solution_z, N0, x_0, y_0, z_0))
+    #integrand_plotx, = d_lum_ax.plot(N,solution_x)
+    #integrand_ploty, = d_lum_ax.plot(N,solution_y)
+    #integrand_plotz, = d_lum_ax.plot(N,solution_z)
 
 
 track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
@@ -280,7 +295,6 @@ track_ax.set_box_aspect([2, 1, 1])
 
 
 accel_ax.set_ylabel("Acceleration")
-
 accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
 
 gamma_ax.set_ylabel("$\gamma_\phi$")
