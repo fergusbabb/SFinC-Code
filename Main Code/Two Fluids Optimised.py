@@ -16,9 +16,10 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
+
 plt.style.use('classic')
-plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-                     "font.serif": ["Computer Modern Serif"]})
+#plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+#                     "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=12, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
@@ -40,13 +41,13 @@ track_ax = fig.add_axes(track_axis_dims, projection='3d')
 track_ax.set_box_aspect([2, 1, 1])
 track_ax.view_init(elev=24, azim=66)
 
-dens_axis_dims = [.55,.125,.4,.275]
+dens_axis_dims = [.55,.1,.4,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
 
 accel_axis_dims = [.55,.4,.4,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
 
-gamma_axis_dims = [.55,.675,.4,.275]
+gamma_axis_dims = [.55,.7,.4,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 d_lum_ax_dims = [.05,.125,.35,.35] 
@@ -136,12 +137,13 @@ def gamma_phi(x, y):
 
 #_______________________________Integrand Form_______________________________
 
-def integrand(N, x, y, z, N0, x0, y0, z0):
+def integrand(N, x, y, z, Ni, xi, yi, zi):
     gamma  = gamma_phi(x, y)
-    O_m0   = 1 - x0**2 - y0**2 - z0**2
-    O_r0   = z0**2
+    #This is wrong! Needs to be with todays values, not initial values!
+    O_m0   = 1 - xi**2 - yi**2 - zi**2
+    O_r0   = zi**2
     O_phi0 = 1 - O_m0 - O_r0
-    oneplusz = np.exp(N0 - N)
+    oneplusz = np.exp(Ni - N)
 
     radn_part = O_r0 * oneplusz**4
     matt_part = O_m0 * oneplusz**3
@@ -162,10 +164,10 @@ def update_plot(event):
     #Plot all paths with updated values
     
     for i in range(pathnum):
-        z_0 = 0.9999
-        y_0 = 0.0001
-        x_0 = 0.001
-        initial_conditions = [x_0, y_0, z_0]  
+        z_i = 0.9999
+        y_i = 0.0001
+        x_i = 0.001
+        initial_conditions = [x_i, y_i, z_i]  
         #Initial values for x y and z
 
         
@@ -188,7 +190,7 @@ def update_plot(event):
 
         effective_eos.set_ydata(gamma_phi(solution_x,solution_y))
         
-        integrand_plot.set_ydata(integrand(N, solution_x, solution_y, solution_z, N0, x_0, y_0, z_0))
+        integrand_plot.set_ydata(integrand(N, solution_x, solution_y, solution_z, Ni, x_i, y_i, z_i))
         #integrand_plotx.set_ydata(solution_x)
         #integrand_ploty.set_ydata(solution_y)
         #integrand_plotz.set_ydata(solution_z)
@@ -211,7 +213,7 @@ canvas.draw() #Show canvas (ie show figure)
 lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
                        height = 2)
 lambda_slide = tk.Scale(window, from_ = np.sqrt(6), to = 0,
-                       width = 20, length = 250, resolution=0.1)
+                       width = 20, length = 250, resolution=0.001)
 
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
@@ -227,8 +229,8 @@ lambda_slide_label.configure(bg = 'white', borderwidth=0)
 
 #___________________________________Initial Plot_____________________________
 #Define log a linspace for ode
-N0 = 0
-N = np.linspace(N0, 15, 512)
+Ni = -10
+N = np.linspace(Ni, 20, 512)
 a = np.exp(N)
 zplus1 = 1/a
 
@@ -241,11 +243,10 @@ main_tracks = []
 fixedPoints_plot, = track_ax.plot([], [], [], 'o')
 
 for i in range(pathnum):
-    z_0 = 0.9999
-    y_0 = 0.0001
-    x_0 = 0.0001
-
-    initial_conditions = [x_0, y_0, z_0]  
+    z_i = 0.9999
+    y_i = 0.0001
+    x_i = 0.001
+    initial_conditions = [x_i, y_i, z_i]  
     #Initial values for x y and z
     
     lam = lambda_slide.get()
@@ -269,7 +270,7 @@ for i in range(pathnum):
             label = "$\Omega_\phi = x^2 + y^2$")
 
 
-    track_ax.plot(x_0,y_0,z_0, 'cx')
+    track_ax.plot(x_i,y_i,z_i, 'cx')
     track_i = track_ax.plot(
                     solution_x, solution_y, solution_z, 'm', linewidth=2)[0]
     accel_plot, = accel_ax.plot(N,
@@ -281,7 +282,7 @@ for i in range(pathnum):
     track_i.set_visible(True)
 
 
-    integrand_plot, = d_lum_ax.plot(N0-N, integrand(N, solution_x, solution_y, solution_z, N0, x_0, y_0, z_0))
+    integrand_plot, = d_lum_ax.plot(N, integrand(N, solution_x, solution_y, solution_z, Ni, x_i, y_i, z_i))
     #integrand_plotx, = d_lum_ax.plot(N,solution_x)
     #integrand_ploty, = d_lum_ax.plot(N,solution_y)
     #integrand_plotz, = d_lum_ax.plot(N,solution_z)
