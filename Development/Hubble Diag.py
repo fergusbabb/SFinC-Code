@@ -16,9 +16,15 @@ def vectorPrime(state, N, lam):
 
     return [xprime, yprime, zprime]
 
-def d_L_Integrand(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
-    index = np.abs(zaxis-z).argmin()
+def d_L_IntegrandConst(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
+##    index = np.abs(zaxis-z).argmin()
 ##    print(index)
+    return 1/np.sqrt((1 - Omega_Lambda)*(1+z)**3 +
+                     #Omega_r0*(1+z)**4 + 
+                     (Omega_Lambda))#*(1+z)**(3 * path_gamma_phi[index]))
+
+def d_L_IntegrandScalar(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
+    index = np.abs(zaxis-z).argmin()
     return 1/np.sqrt(Omega_m0*(1+z)**3 +
                      Omega_r0*(1+z)**4 + 
                      Omega_phi_0*(1+z)**(3 * path_gamma_phi[index]))
@@ -41,13 +47,13 @@ state_0 = [np.sqrt(xSquared),
            np.sqrt(ySquared),
            np.sqrt(Omega_r0)]
 
-N = np.linspace(0, -1, 31)
+N = np.linspace(0, -1.4, 31)
 
 z = np.exp(-N) - 1
 c = 3e5     # Given in km/s
 V = z * c   # ""
 h = 0.738
-H_0 = 100*h # km/s/Mpc
+H_0 = 100*h # km/(s Mpc)
 
 path = integrate.odeint(vectorPrime, state_0, N, args=(lam,))
 pathTranspose = path.transpose()
@@ -67,8 +73,17 @@ pathz = pathTranspose[2]
 
 path_gamma_phi = (2 * pathx**2) / (pathx**2 + pathy**2)
 
-##for Omega_phi_0 in [0, 0.3, 0.7, 1]:
-d_L = (c/H_0) * (1 + z) * integrate.odeint(d_L_Integrand, 0, z, args=(z, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi)).transpose()[0]
+for Omega_Lambda in [0, 0.3, 0.7, 1]:
+    d_L = (c/H_0) * (1 + z) * integrate.odeint(d_L_IntegrandConst, 0, z, args=(z, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi)).transpose()[0] # Given in Mpc?
+##    plt.plot(z, H_0 * d_L, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
+    plt.plot(d_L, V, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
 
-plt.plot(d_L, V)
+d_L = (c/H_0) * (1 + z) * integrate.odeint(d_L_IntegrandScalar, 0, z, args=(z, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi)).transpose()[0]
+plt.plot(d_L, H_0 * d_L, "--", label = "$H_0d$")
+
+plt.plot(d_L, V, label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0))
+
+plt.ylabel("V (km/s)")
+plt.xlabel("$d_L$ (Mpc)")
+plt.legend()
 plt.show()
