@@ -222,7 +222,16 @@ def update_plot(event):
         d_L_IntegrandScalar, 0, z, args=(
             z, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
+<<<<<<< HEAD
         integral_plot.set_ydata(d_L)
+=======
+        
+        integral_plot.set_xdata(d_L)
+        #integrand_plot.set_ydata(integrand(N, pathx, pathy, pathz, Ni, x_i, y_i, z_i))
+        #integrand_plotx.set_ydata(pathx)
+        #integrand_ploty.set_ydata(pathy)
+        #integrand_plotz.set_ydata(pathz)
+>>>>>>> 72620286fbc3def6ef430f58bd6526077e3501d6
 
     #Show plots
     fig.canvas.draw()
