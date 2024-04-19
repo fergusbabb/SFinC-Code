@@ -70,8 +70,12 @@ pathnum = 1
 
 lam_0 = 0.38583349
 Ni = -20
+NiForward = 10
 N = np.linspace(0, Ni, 512)
+NForward = np.linspace(0, NiForward, 256)
+
 z = np.exp(-N) - 1
+zForward = np.exp(-NForward) - 1
 c = 3e5     # Given in km/s
 V = z * c   # ""
 h = 0.738
@@ -197,6 +201,11 @@ def update_plot(event):
         pathx = solution[:, 0]
         pathy = solution[:, 1]
         pathz = solution[:, 2]
+        
+        solutionForward = odeint(ODEs, state_0, NForward, args = (lam,))
+        pathx = np.append(pathx[::-1], solutionForward[:, 0])
+        pathy = np.append(pathy[::-1], solutionForward[:, 1])
+        pathz = np.append(pathz[::-1], solutionForward[:, 2])
 
         #Update tracks
         main_tracks[i].set_data(pathx, pathy)
@@ -278,24 +287,31 @@ for i in range(pathnum):
     pathy = solution[:, 1]
     pathz = solution[:, 2]
 
+    solutionForward = odeint(ODEs, state_0, NForward, args = (lam,))
+    pathx = np.append(pathx[::-1], solutionForward[:, 0])
+    pathy = np.append(pathy[::-1], solutionForward[:, 1])
+    pathz = np.append(pathz[::-1], solutionForward[:, 2])
+    NAxis = np.append(N[::-1], NForward)
+    zAxis = np.append(z[::-1], zForward)
+
     path_gamma_phi = gamma_phi(pathx, pathy)
 
-    Radn_dens_plot, = dens_ax.plot(N, pathz**2, 'r',
+    Radn_dens_plot, = dens_ax.plot(NAxis, pathz**2, 'r',
             label = "$\Omega_r = z^2$")
-    Mass_dens_plot, = dens_ax.plot(N,
+    Mass_dens_plot, = dens_ax.plot(NAxis,
          1 - pathx**2 - pathy**2 - pathz**2, 'g',
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
-    Phi_dens_plot, = dens_ax.plot(N, pathx**2 + pathy**2, 'b',
+    Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathy**2, 'b',
             label = "$\Omega_\phi = x^2 + y^2$")
 
     x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
 
-    track_ax.plot(x_i,y_i,z_i, 'cx')
+    track_ax.plot(x_i,y_i,z_i, 'cX')
     track_i = track_ax.plot(
                     pathx, pathy, pathz, 'm', linewidth=2)[0]
-    accel_plot, = accel_ax.plot(N,
+    accel_plot, = accel_ax.plot(NAxis,
                     accelerationExpression(pathx,pathy,pathz))
-    effective_eos, = gamma_ax.plot(N, gamma_phi(pathx, pathy), 'k',
+    effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
             label = r'$\gamma_\phi = {2x^2}/{(x^2+y^2)}$')
 
     main_tracks.append(track_i)
@@ -304,7 +320,7 @@ for i in range(pathnum):
     
     d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandScalar, 0, z, args=(
-            z, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
+            zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
     
 
@@ -317,7 +333,7 @@ for i in range(pathnum):
 for Omega_Lambda in [0.65, 0.7, 0.75]:
     d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandConst, 0, z, args=(
-            z, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
+            zAxis, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
             )).transpose()[0]
     
     d_lum_ax.plot(d_L, V, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
