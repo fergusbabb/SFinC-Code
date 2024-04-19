@@ -50,7 +50,7 @@ accel_ax = fig.add_axes(accel_axis_dims)
 gamma_axis_dims = [.55,.7,.4,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
-d_lum_ax_dims = [.05,.125,.35,.35] 
+d_lum_ax_dims = [.075,.125,.35,.35] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
 
 #Bounding Circle
@@ -70,7 +70,7 @@ pathnum = 1
 
 lam_0 = 0.38583349
 Ni = -10
-N = np.linspace(Ni, 20, 512)
+N = np.linspace(0, -50, 51200)
 z = np.exp(-N) - 1
 c = 3e5     # Given in km/s
 V = z * c   # ""
@@ -162,7 +162,7 @@ def accelerationExpression(x, y, z):
 def gamma_phi(x, y):
     return (2*x**2) / (x**2 + y**2)
 
-#_______________________________Integrand Form_______________________________
+#_______________________________Integrand Forms______________________________
 
 def d_L_IntegrandConst(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
     return 1/np.sqrt((1 - Omega_Lambda)*(1+z)**3 + 
@@ -177,7 +177,7 @@ def d_L_IntegrandScalar(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_phi_0,
 
 #_______________________________Update track plots___________________________
 def update_plot(event):
-    #Before update_plot is called lam and gam sliders are updated
+    #Before update_plot is called lam sliders are updated
     #Sliders will always have current lambda/ gamma values
     lam = lambda_slide.get()
     fixedPoints = fixedPoints_func(lam).transpose()
@@ -185,7 +185,7 @@ def update_plot(event):
     fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
     fixedPoints_plot.set_3d_properties(fixedPoints[2,:]) 
     #Plot all paths with updated values
-    
+    print(lam)
     for i in range(pathnum):
         #Solve the system of ODEs using odeint
         solution = odeint(ODEs, state_0, N, args = (lam,))
@@ -235,7 +235,7 @@ canvas.draw() #Show canvas (ie show figure)
 #Lambda Slider
 lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
                        height = 2)
-lambda_slide = tk.Scale(window, from_ = np.sqrt(6), to = 0,
+lambda_slide = tk.Scale(window, from_ = 1, to = 0,
                        width = 20, length = 250, resolution=0.001)
 
 lambda_slide.set(lam_0)
@@ -261,7 +261,7 @@ for i in range(pathnum):
     fixedPoints = fixedPoints_func(lam).transpose()
     fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
     fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
-
+    print(lam)
     # Solve the system of ODEs using odeint
     solution = odeint(ODEs, state_0, N, args = (lam,))
     pathx = solution[:, 0]
@@ -301,15 +301,15 @@ for i in range(pathnum):
     integral_plot, = d_lum_ax.plot(d_L, V,
                         label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0))
 
-'''
-for Omega_Lambda in [0, 0.3, 0.7, 1]:
+
+for Omega_Lambda in [0, 0.3, 0.7]:
     d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandConst, 0, z, args=(
             z, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
             )).transpose()[0]
     
-    d_lum_ax.plot(V, d_L, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
-'''
+    d_lum_ax.plot(d_L, V, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
+
 
 track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
              xticks = [-1, -0.5, 0, 0.5, 1],
@@ -329,8 +329,10 @@ dens_ax.set_ylabel("Density Parameters")
 dens_ax.set_xlabel("$N$")
 dens_ax.legend()
 
-d_lum_ax.set_ylabel("V (km/s)")
-d_lum_ax.set_xlabel("$d_L$ (Mpc)")
+#d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
+
+d_lum_ax.set_ylabel("$d_L$ [Mpc]")
+d_lum_ax.set_xlabel("$1+z$ [km/s]")
 d_lum_ax.legend()
 
 
