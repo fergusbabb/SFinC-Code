@@ -229,7 +229,7 @@ def update_plot(event):
         #Update redshift plot
         d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandScalar, 0, z, args=(
-            z, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
+            zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
         
         integral_plot.set_xdata(d_L)
@@ -329,7 +329,7 @@ for i in range(pathnum):
 
 
 
-#Plot the redshift plots for LCDM with different values of lambda
+#Plot the redshift plots for LCDM with different values of Cosm. Const.
 for Omega_Lambda in [0.65, 0.7, 0.75]:
     d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandConst, 0, z, args=(
