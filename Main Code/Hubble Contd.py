@@ -212,7 +212,7 @@ def update_plot(event):
             z, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
         
-        integral_plot.set_ydata(d_L)
+        integral_plot.set_xdata(d_L)
         #integrand_plot.set_ydata(integrand(N, pathx, pathy, pathz, Ni, x_i, y_i, z_i))
         #integrand_plotx.set_ydata(pathx)
         #integrand_ploty.set_ydata(pathy)
