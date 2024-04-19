@@ -69,10 +69,10 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'r', linewidth=1)
 pathnum = 1
 
 lam_0 = 0.38583349
-Ni = -20
+Ni = -4
 N = np.linspace(0, Ni, 512)
 z = np.exp(-N) - 1
-c = 3e5     # Given in km/s
+c = 1#3e5     # Given in km/s
 V = z * c   # ""
 h = 0.738
 H_0 = 100*h # km/(s Mpc)
@@ -95,7 +95,7 @@ state_0 = [np.sqrt(x0Squared),
            np.sqrt(y0Squared),
            np.sqrt(Omega_r0)]
 
-#_________________________Initialise plots___________________________________
+#_________________________Initialise plots________________________________
 #Tkinter works as:
 #1) Main Window 
 #2) Set up canvases inside window 
@@ -290,7 +290,7 @@ for i in range(pathnum):
 
     x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
 
-    track_ax.plot(x_i,y_i,z_i, 'cx')
+    track_ax.plot(x_i,y_i,z_i, 'co')
     track_i = track_ax.plot(
                     pathx, pathy, pathz, 'm', linewidth=2)[0]
     accel_plot, = accel_ax.plot(N,
@@ -320,7 +320,7 @@ for Omega_Lambda in [0.65, 0.7, 0.75]:
             z, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
             )).transpose()[0]
     
-    d_lum_ax.plot(d_L, V, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
+    d_lum_ax.plot(d_L, z, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
 
 
 
@@ -347,10 +347,12 @@ dens_ax.set_xlabel("$N$")
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
 
 d_lum_ax.set_ylabel("$d_L$ [Mpc]")
-d_lum_ax.set_xlabel("$1+z$ [km/s]")
-d_lum_ax.legend(loc=4)
+d_lum_ax.set_xlabel("$z$ [km/s]")
+d_lum_ax.set_xlim(left = 0.01)
+#d_lum_ax.legend(loc=4)
 d_lum_ax.set_xscale('log', base=10, subs=[10**x for x in (0.25, 0.5, 0.75)], nonpositive='mask')
-d_lum_ax.set_yscale('log', base=10, subs=[10**x for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+#d_lum_ax.set_yscale('log', base=10, subs=[10**x for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
+print(z[0])
 window.mainloop()
 #End
