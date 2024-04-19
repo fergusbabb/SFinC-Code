@@ -164,11 +164,15 @@ def gamma_phi(x, y):
 
 #_______________________________Integrand Forms______________________________
 
-def d_L_IntegrandConst(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
+def d_L_IntegrandConst(currentTotal, z, zaxis,
+                        Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
+    #Return 1/W(z) for constant LCDM model
     return 1/np.sqrt((1 - Omega_Lambda)*(1+z)**3 + 
                      (Omega_Lambda))
 
-def d_L_IntegrandScalar(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
+def d_L_IntegrandScalar(currentTotal, z, zaxis,
+                         Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
+    #Return 1/W(z) with variable scalar field
     index = np.abs(zaxis-z).argmin()
     return 1/np.sqrt(Omega_m0*(1+z)**3 +
                      Omega_r0*(1+z)**4 + 
@@ -182,6 +186,7 @@ def update_plot(event):
     lam = lambda_slide.get()
     fixedPoints = fixedPoints_func(lam).transpose()
 
+    #Update fixed points
     fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
     fixedPoints_plot.set_3d_properties(fixedPoints[2,:]) 
     
@@ -193,25 +198,30 @@ def update_plot(event):
         pathy = solution[:, 1]
         pathz = solution[:, 2]
 
+        #Update tracks
         main_tracks[i].set_data(pathx, pathy)
         main_tracks[i].set_3d_properties(pathz)
 
-        accel_plot.set_ydata(accelerationExpression(
-                    pathx,pathy,pathz))
+        #Update acceleration plot
+        accel_plot_new_data = accelerationExpression(
+                                    pathx,pathy,pathz)
+        accel_plot.set_ydata(accel_plot_new_data)
 
+        #Update relative density plots
         Radn_dens_plot.set_ydata(pathz**2)
         Mass_dens_plot.set_ydata(
             1 - pathx**2 - pathy**2 - pathz**2)
         Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
         
+        #Update EoS plot
         path_gamma_phi = gamma_phi(pathx, pathy) 
         effective_eos.set_ydata(path_gamma_phi)
         
+        #Update redshift plot
         d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandScalar, 0, z, args=(
             z, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
-        
         integral_plot.set_ydata(d_L)
 
     #Show plots
@@ -251,7 +261,6 @@ lambda_slide_label.configure(bg = 'white', borderwidth=0)
 #Initial plot
 main_tracks = []
 fixedPoints_plot, = track_ax.plot([], [], [], 'o')
-
 for i in range(pathnum):
     lam = lambda_slide.get()
     fixedPoints = fixedPoints_func(lam).transpose()
@@ -298,6 +307,8 @@ for i in range(pathnum):
                         label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0))
 
 
+
+#Plot the redshift plots for LCDM with different values of lambda
 for Omega_Lambda in [0, 0.3, 0.7]:
     d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandConst, 0, z, args=(
@@ -306,6 +317,9 @@ for Omega_Lambda in [0, 0.3, 0.7]:
     
     d_lum_ax.plot(d_L, V, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
 
+
+
+#_____________________Setting plot labels etc________________________________
 
 track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
              xticks = [-1, -0.5, 0, 0.5, 1],
