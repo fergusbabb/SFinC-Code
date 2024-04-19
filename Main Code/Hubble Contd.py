@@ -292,10 +292,11 @@ for i in range(pathnum):
     pathy = np.append(pathy[::-1], solutionForward[:, 1])
     pathz = np.append(pathz[::-1], solutionForward[:, 2])
     NAxis = np.append(N[::-1], NForward)
-    zAxis = np.append(z[::-1], zForward)
+    zAxis = np.append(z[::-1], NForward)
 
     path_gamma_phi = gamma_phi(pathx, pathy)
 
+    dens_ax.plot([0,0], [-0.2,1.2], 'k--')
     Radn_dens_plot, = dens_ax.plot(NAxis, pathz**2, 'r',
             label = "$\Omega_r = z^2$")
     Mass_dens_plot, = dens_ax.plot(NAxis,
@@ -306,9 +307,10 @@ for i in range(pathnum):
 
     x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
 
-    track_ax.plot(x_i,y_i,z_i, 'cX')
+
     track_i = track_ax.plot(
                     pathx, pathy, pathz, 'm', linewidth=2)[0]
+    track_ax.plot(x_i,y_i,z_i, 'cX')
     accel_plot, = accel_ax.plot(NAxis,
                     accelerationExpression(pathx,pathy,pathz))
     effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
