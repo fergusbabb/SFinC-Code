@@ -70,7 +70,7 @@ pathnum = 1
 
 lam_0 = 0.38583349
 Ni = -10
-N = np.linspace(0, -50, 51200)
+N = np.linspace(0, -20, 512)
 z = np.exp(-N) - 1
 c = 3e5     # Given in km/s
 V = z * c   # ""
@@ -184,8 +184,8 @@ def update_plot(event):
 
     fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
     fixedPoints_plot.set_3d_properties(fixedPoints[2,:]) 
+    
     #Plot all paths with updated values
-    print(lam)
     for i in range(pathnum):
         #Solve the system of ODEs using odeint
         solution = odeint(ODEs, state_0, N, args = (lam,))
@@ -232,7 +232,7 @@ canvas.draw() #Show canvas (ie show figure)
 lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
                        height = 2)
 lambda_slide = tk.Scale(window, from_ = 1, to = 0,
-                       width = 20, length = 250, resolution=0.001)
+                       width = 20, length = 250, resolution=0.0000000001)
 
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
@@ -323,7 +323,7 @@ gamma_ax.legend()
 
 dens_ax.set_ylabel("Density Parameters")
 dens_ax.set_xlabel("$N$")
-dens_ax.legend()
+#dens_ax.legend()
 
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
 
