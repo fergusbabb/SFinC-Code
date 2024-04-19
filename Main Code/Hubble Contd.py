@@ -213,10 +213,6 @@ def update_plot(event):
             )).transpose()[0]
         
         integral_plot.set_ydata(d_L)
-        #integrand_plot.set_ydata(integrand(N, pathx, pathy, pathz, Ni, x_i, y_i, z_i))
-        #integrand_plotx.set_ydata(pathx)
-        #integrand_ploty.set_ydata(pathy)
-        #integrand_plotz.set_ydata(pathz)
 
     #Show plots
     fig.canvas.draw()
