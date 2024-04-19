@@ -69,8 +69,8 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'r', linewidth=1)
 pathnum = 1
 
 lam_0 = 0.38583349
-Ni = -10
-N = np.linspace(0, -20, 512)
+Ni = -20
+N = np.linspace(0, Ni, 512)
 z = np.exp(-N) - 1
 c = 3e5     # Given in km/s
 V = z * c   # ""
@@ -222,16 +222,12 @@ def update_plot(event):
         d_L_IntegrandScalar, 0, z, args=(
             z, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
-<<<<<<< HEAD
-        integral_plot.set_ydata(d_L)
-=======
         
         integral_plot.set_xdata(d_L)
         #integrand_plot.set_ydata(integrand(N, pathx, pathy, pathz, Ni, x_i, y_i, z_i))
         #integrand_plotx.set_ydata(pathx)
         #integrand_ploty.set_ydata(pathy)
         #integrand_plotz.set_ydata(pathz)
->>>>>>> 72620286fbc3def6ef430f58bd6526077e3501d6
 
     #Show plots
     fig.canvas.draw()
@@ -250,8 +246,8 @@ canvas.draw() #Show canvas (ie show figure)
 #Lambda Slider
 lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
                        height = 2)
-lambda_slide = tk.Scale(window, from_ = 1, to = 0,
-                       width = 20, length = 250, resolution=0.0000000001)
+lambda_slide = tk.Scale(window, from_ = 0.3859, to = 0.3858,
+                       width = 20, length = 250, resolution=0.0000001)
 
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
@@ -260,7 +256,7 @@ lambda_slide.bind("<ButtonRelease-1>", update_plot)
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
 lambda_slide_label.place(relx=0.45, rely=0.025,
                          relheight=0.025, relwidth=0.05)
-lambda_slide.place(relx=0.45, rely=0.05, relheight=0.4, relwidth=0.05)
+lambda_slide.place(relx=0.4, rely=0.05, relheight=0.4, relwidth=0.1)
 lambda_slide.configure(bg = 'white', borderwidth=0)
 lambda_slide_label.configure(bg = 'white', borderwidth=0)
 
@@ -318,7 +314,7 @@ for i in range(pathnum):
 
 
 #Plot the redshift plots for LCDM with different values of lambda
-for Omega_Lambda in [0, 0.3, 0.7]:
+for Omega_Lambda in [0.65, 0.7, 0.75]:
     d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandConst, 0, z, args=(
             z, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
@@ -352,8 +348,9 @@ dens_ax.set_xlabel("$N$")
 
 d_lum_ax.set_ylabel("$d_L$ [Mpc]")
 d_lum_ax.set_xlabel("$1+z$ [km/s]")
-d_lum_ax.legend()
-
+d_lum_ax.legend(loc=4)
+d_lum_ax.set_xscale('log', base=10, subs=[10**x for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+d_lum_ax.set_yscale('log', base=10, subs=[10**x for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
 window.mainloop()
 #End
