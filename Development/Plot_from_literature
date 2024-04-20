@@ -8,17 +8,36 @@ from sndata.jla import Betoule14
 
 
 jla_data = Betoule14()
-#data.download_module_data()
+#jla_data.download_module_data()
 
-#for data in jla_data.iter_data():
 
-# Get a list of available objects
+#Get a list of available objects
 list_of_ids = jla_data.get_available_ids()
 
-# Get data for a given object
-demo_id = list_of_ids[0]
-data_table = jla_data.get_data_for_id(demo_id)
-print(data_table)
+#Initialised empty array for redshifts of all objects
+redshifts = np.zeros(len(list_of_ids))
+flux      = np.zeros(len(list_of_ids))
 
-# Don't forget to check the meta data!
-print(data_table.meta)
+#Iterates, storing all redshifts
+for i in range(0,len(list_of_ids)):
+    data_table = jla_data.get_data_for_id(list_of_ids[i])
+    redshifts[i] = data_table.meta['z']
+    flux[i]    = np.mean(data_table['flux'])
+    
+    if i == 0:
+        print(data_table.meta)
+        '''
+        model = sncosmo.Model('salt2')
+        result, fitted_model = sncosmo.fit_lc(
+            data=data_table,
+            model=model,
+            vparam_names=['t0', 'x0', 'x1', 'c'])'''
+
+#plt.plot(redshifts, np.log10(flux), 'r.', label='Flux')
+#plt.legend()
+#plt.show()
+
+alpha = 0.135 #+0.033/-0.017
+beta  = 3.19  #+0.140/-0.240
+#print(redshifts)
+
