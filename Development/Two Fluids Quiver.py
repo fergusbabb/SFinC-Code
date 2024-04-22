@@ -5,6 +5,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, 
 NavigationToolbar2Tk)
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.colors import Normalize
+import matplotlib.cm as cm
 
 #Tkinter for widgets and interactivity. Scipy for ode solving
 import tkinter as tk
@@ -87,6 +89,7 @@ def ODEs(state, N, lam):
 
 #_______________________________Update track plots___________________________
 
+
 def update_plot(event):
     #Before update_plot is called lam and gam sliders are updated
     #Sliders will always have current lambda/ gamma values
@@ -100,6 +103,15 @@ def update_plot(event):
         initial_conditions = [x_0, y_0, z_0]  
         #Initial values for x y and z
 
+        #Update the quiver vectors
+        vectors = np.array([ODEs([pt[0], pt[1], pt[2]], n, lam) for pt in filtered_points])
+        u, v, w = vectors[:, 0], vectors[:, 1], vectors[:, 2]
+        global quiver
+        quiver.remove()
+        quiver = ax.quiver(x_ins, y_ins, z_ins, u, v, w,
+                    normalize=True, cmap=cmap, length = 0.075,
+                    color=cmap(norm(magnitude)), norm=norm,
+                    alpha = 0.5)
         
         #Solve the system of ODEs using odeint
         solution = odeint(ODEs, initial_conditions, n, args = (lam,))
@@ -113,7 +125,6 @@ def update_plot(event):
 
     #Show plots
     fig.canvas.draw()
-
 
 #____________________________Defining Widgets_____________________________________
 #When cursor clicks on region plot update to clicked value
@@ -136,6 +147,49 @@ lambda_slide_label.configure(bg = 'white', borderwidth=0)
 
 
 
+#________________________________Initialise the Quiver______________________________
+
+def scaled_fibonacci_sphere(max_radius, num_shells, base_points):
+    all_points = []
+    # Creating shells from the innermost to the outermost
+    for shell in range(1, num_shells + 1):
+        radius = max_radius * (shell / num_shells)
+        # Decrease points quadratically with decreasing radius
+        samples = int(base_points * (radius / max_radius)**2)
+        phi = np.pi * (3. - np.sqrt(5.))  # Golden angle in radians
+
+        for i in range(samples):
+            y = 1 - (i / float(samples - 1)) * 2  # y goes from 1 to -1
+            r = np.sqrt(1 - y * y)  # radius at y
+
+            theta = phi * i  # golden angle increment
+
+            x = np.cos(theta) * r * radius
+            z = np.sin(theta) * r * radius
+            y *= radius
+
+            all_points.append([x, y, z])
+
+    return np.array(all_points)
+
+# Parameters
+max_radius = 1
+num_shells = 10  # Number of concentric shells
+base_points = 1000  # Points on the outermost shell
+
+# Generate points
+all_points = scaled_fibonacci_sphere(max_radius, num_shells, base_points)
+
+filtered_points = np.vstack((
+    all_points[
+    (all_points[:, 0] >= -1) & (all_points[:, 0] <= 1) &
+    (all_points[:, 1] >=  0) & (all_points[:, 1] <= 1) &
+    (all_points[:, 2] >=  0) & (all_points[:, 2] <= 1)
+],
+[0,0,0]
+))
+
+
 #___________________________________Initial Plot____________________________________
 
 #Define log a linspace for ode
@@ -148,16 +202,35 @@ acceleration_plot_tracks = []
 x_tracks = []
 y_tracks = []
 
+
+vectors = np.array([ODEs([pt[0], pt[1], pt[2]], n, lam_0) for pt in filtered_points])
+u, v, w = vectors[:, 0], vectors[:, 1], vectors[:, 2]
+x_ins, y_ins, z_ins = filtered_points[:, 0], filtered_points[:, 1], filtered_points[:, 2]
+
+magnitude = np.sqrt(u**2 + v**2 + w**2).flatten()
+norm = Normalize()
+norm.autoscale(magnitude)
+
+cmap = cm.spring
+quiver = ax.quiver(x_ins, y_ins, z_ins, u, v, w,
+                    normalize=True, cmap=cmap, length = 0.075,
+                    color=cmap(norm(magnitude)), norm=norm,
+                    alpha = 0.5)
+
+cbar = plt.colorbar(quiver, ax=ax, orientation='vertical')
+cbar.set_label('Magnitude of derivatives')
+
 for i in range(pathnum):
     z_0 = 0.9999
     y_0 = 0.0001
     x_0 = 0.0001
 
     initial_conditions = [x_0, y_0, z_0]  
-    #Initial values for x y and z
-    
+
+
     lam = lambda_slide.get()
     #gam = gamma_slide.get()
+    
 
     # Solve the system of ODEs using odeint
     solution = odeint(ODEs, initial_conditions, n, args = (lam,))
