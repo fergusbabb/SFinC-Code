@@ -16,14 +16,14 @@ def vectorPrime(state, N, lam):
 
     return [xprime, yprime, zprime]
 
-lam = np.linspace(0, 1, 11)
+lam = np.linspace(0, 10, 101)
 lambdaConsistent = np.array([])
 
 Omega_phi = 0.73
 gamma_phi = 0.013
 
 Omega_r = 4.984e-5
-peakOmega_rConsistent = np.array([])
+peakOmega_mConsistent = np.array([])
 
 xSquared = gamma_phi / (2 * Omega_phi)
 ySquared = Omega_phi - xSquared
@@ -35,7 +35,7 @@ state_0 = [np.sqrt(xSquared),
 N = np.linspace(0, -25, 301) 
 
 def simulate(lam):
-    peakOmega_r = []
+    peakOmega_m = []
     for lamValue in lam:
         path = integrate.odeint(vectorPrime, state_0, N, args=(lamValue,))
         pathx = path.transpose()[0]
@@ -44,15 +44,15 @@ def simulate(lam):
 
         pathMatter = 1 - pathx**2 - pathy**2 - pathz**2        
         peakMatter = np.max(pathMatter)
-        peakOmega_r.append(peakMatter)
+        peakOmega_m.append(peakMatter)
 
 ##        plt.scatter(lamValue, peakz**2)
         
-    return peakOmega_r
+    return peakOmega_m
 
 while lam[-1] - lam[0] > 1e-10:
     peaks = simulate(lam)
-    peakOmega_rConsistent = np.append(peakOmega_rConsistent, peaks)
+    peakOmega_mConsistent = np.append(peakOmega_mConsistent, peaks)
     maxIndex = np.argmax(peaks)
     print("Index: " + str(maxIndex) + "\t Omega_r: " + str(peaks[maxIndex]) + "\t lambda: " + str(lam[maxIndex]))
 
@@ -61,6 +61,6 @@ while lam[-1] - lam[0] > 1e-10:
 
 order = np.argsort(lambdaConsistent)
 
-plt.plot(lambdaConsistent[order], peakOmega_rConsistent[order])
+plt.plot(lambdaConsistent[order], peakOmega_mConsistent[order])
 plt.ylim([0, 1])
 plt.show()

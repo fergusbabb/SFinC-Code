@@ -2,16 +2,25 @@ import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
 
-lam = np.array([1, 3])
+lam = np.array([0.38583349,
+                3.0])
 
 ## Initial conditions
-x0 = -0.01
-y0 = 0.01 / np.sqrt(len(lam))
-z0 = 0.9
+Omega_phi = 0.73
+gamma_phi = 0.013
 
-start = np.append(x0, np.append([y0 for lambda_n in lam], z0))
+Omega_r = 4.984e-5
+peakOmega_rConsistent = np.array([])
 
-print(np.sum(start**2))
+xSquared = gamma_phi / (2 * Omega_phi)
+ySquared = Omega_phi - xSquared
+
+##start = np.append(x0, np.append([y0 for lambda_n in lam], z0))
+
+state_0 = [np.sqrt(xSquared),
+           np.sqrt(ySquared * (99999/100000)),
+           np.sqrt(ySquared * (1/100000)),
+           np.sqrt(Omega_r)]
 
 
 fig, ax = plt.subplots(2, 2)
@@ -53,7 +62,7 @@ ax[0, 0].plot([0 for x in unitCircleX[:26]], unitCircleX[:26], unitCircleY[:26],
 ax[0, 0].plot([-1, 1], [0, 0], [0, 0], "r")
 
 N = np.linspace(0, 20, 401)
-reverseN = np.linspace(0, -8, 101)
+reverseN = np.linspace(0, -15, 101)
 a = np.exp(N)
 
 ax[0, 1].plot([reverseN[-1], N[-1]], [0, 0], "k--")
@@ -88,7 +97,7 @@ fixedPoints = np.array([
 
 ## FORWARD PATH
 
-path = integrate.odeint(vectorPrime, start, N)
+path = integrate.odeint(vectorPrime, state_0, N)
 pathTranspose = path.transpose()
 
 pathx   = pathTranspose[0]
@@ -113,7 +122,7 @@ ax[0, 1].plot(N, accelerationExpression(pathx, pathy_total, pathz))
 
 ## REVERSE PATH
 
-reversePath = integrate.odeint(vectorPrime, start, reverseN)
+reversePath = integrate.odeint(vectorPrime, state_0, reverseN)
 reversePathTranspose = reversePath.transpose()
 
 reversePathx = reversePathTranspose[0]
