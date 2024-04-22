@@ -5,6 +5,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, 
 NavigationToolbar2Tk)
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.colors import Normalize
+import matplotlib.cm as cm
 
 #Tkinter for widgets and interactivity. Scipy for ode solving
 import tkinter as tk
@@ -38,7 +40,6 @@ fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
 track_axis_dims = [.0,.5,.45,.5]
 track_ax = fig.add_axes(track_axis_dims, projection='3d')
-track_ax.set_box_aspect([2, 1, 1])
 track_ax.view_init(elev=24, azim=66)
 
 dens_axis_dims = [.55,.1,.4,.275]
@@ -69,6 +70,8 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'r', linewidth=1)
 pathnum = 1
 
 lam_0 = 0.38583349
+lam_min = 0
+lam_max = 1
 Ni = -20
 NiForward = 10
 
@@ -196,6 +199,16 @@ def update_plot(event):
     
     #Plot all paths with updated values
     for i in range(pathnum):
+        #Update the quiver vectors
+        quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam) for pt in filtered_points])
+        u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
+        global quiver
+        quiver.remove()
+        quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
+                    normalize=True, cmap=cmap, length = 0.075,
+                    color=cmap(norm(magnitude)), norm=norm,
+                    alpha = 0.5)
+        
         #Solve the system of ODEs using odeint
         solution = odeint(ODEs, state_0, N, args = (lam,))
         pathx = solution[:, 0]
@@ -255,8 +268,8 @@ canvas.draw() #Show canvas (ie show figure)
 #Lambda Slider
 lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
                        height = 2)
-lambda_slide = tk.Scale(window, from_ = 0.3859, to = 0.3858,
-                       width = 20, length = 250, resolution=0.0000001)
+lambda_slide = tk.Scale(window, from_ = lam_min, to = lam_max,
+                       width = 20, length = 250, resolution=0.001)
 
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
@@ -265,9 +278,71 @@ lambda_slide.bind("<ButtonRelease-1>", update_plot)
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
 lambda_slide_label.place(relx=0.45, rely=0.025,
                          relheight=0.025, relwidth=0.05)
-lambda_slide.place(relx=0.4, rely=0.05, relheight=0.4, relwidth=0.1)
+lambda_slide.place(relx=0.45, rely=0.05, relheight=0.4, relwidth=0.05)
 lambda_slide.configure(bg = 'white', borderwidth=0)
 lambda_slide_label.configure(bg = 'white', borderwidth=0)
+
+#________________________________Initialise the Quiver______________________________
+
+def scaled_fibonacci_sphere(max_radius, num_shells, base_points):
+    all_points = []
+
+    #Creating shells from the innermost to the outermost
+    for shell in range(1, num_shells + 1):
+        radius = max_radius*(shell/num_shells)
+        #Decrease points with decreasing radius
+        samples = int(base_points * (radius / max_radius)**2)
+        phi = np.pi * (3. - np.sqrt(5.))  #Golden angle in radians
+
+        for i in range(samples):
+            y = 1 - (i / float(samples - 1)) * 2  #y goes from 1 to -1
+            r = np.sqrt(1 - y * y)  #radius at y
+
+            theta = phi * i  #golden angle increment
+
+            x = np.cos(theta) * r * radius
+            z = np.sin(theta) * r * radius
+            y *= radius
+
+            all_points.append([x, y, z])
+
+    return np.array(all_points)
+
+#Parameters
+max_radius = 1
+num_shells = 10  #Number of concentric shells
+base_points = 1000  #Points on the outermost shell
+
+#Generate points nicely spaced based on fibbonaci. Makes fewer points 
+#closer to the center so it looks nicely uniform 
+all_points = scaled_fibonacci_sphere(max_radius, num_shells, base_points)
+
+#Only take the points we want, add the origin
+filtered_points = np.vstack((
+    all_points[
+    (all_points[:, 0] >= -1) & (all_points[:, 0] <= 1) &
+    (all_points[:, 1] >=  0) & (all_points[:, 1] <= 1) &
+    (all_points[:, 2] >=  0) & (all_points[:, 2] <= 1)
+],
+[0,0,0]
+))
+
+quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam_0) for pt in filtered_points])
+u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
+x_ins, y_ins, z_ins = filtered_points[:, 0], filtered_points[:, 1], filtered_points[:, 2]
+
+magnitude = np.sqrt(u**2 + v**2 + w**2).flatten()
+norm = Normalize()
+norm.autoscale(magnitude)
+
+cmap = cm.spring
+quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
+                    normalize=True, cmap=cmap, length = 0.075,
+                    color=cmap(norm(magnitude)), norm=norm,
+                    alpha = 0.5)
+
+cbar = plt.colorbar(quiver, ax=track_ax, orientation='vertical')
+cbar.set_label('Magnitude of derivatives')
 
 
 #___________________________________Initial Plot_____________________________
@@ -345,11 +420,11 @@ for Omega_Lambda in [0.65, 0.7, 0.75]:
 #_____________________Setting plot labels etc________________________________
 
 track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
+             xlim = [-1,1], ylim = [0,1], zlim = [0,1],
              xticks = [-1, -0.5, 0, 0.5, 1],
              yticks = [0, 0.5, 1],
              zticks = [0, 0.5, 1])
 track_ax.set_box_aspect([2, 1, 1])
-
 
 accel_ax.set_ylabel("Acceleration")
 accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
@@ -371,6 +446,6 @@ d_lum_ax.set_xlim(left = 0.01)
 d_lum_ax.set_xscale('log', base=10, subs=[10**x for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 #d_lum_ax.set_yscale('log', base=10, subs=[10**x for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
-print(z[0])
+#print(z[0])
 window.mainloop()
 #End
