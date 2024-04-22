@@ -100,8 +100,7 @@ def update_plot(event):
         z_0 = 0.9999
         y_0 = 0.0001
         x_0 = 0.001
-        initial_conditions = [x_0, y_0, z_0]  
-        #Initial values for x y and z
+        initial_conditions = [x_0, y_0, z_0]
 
         #Update the quiver vectors
         vectors = np.array([ODEs([pt[0], pt[1], pt[2]], n, lam) for pt in filtered_points])
