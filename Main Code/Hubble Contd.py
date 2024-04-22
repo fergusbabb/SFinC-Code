@@ -20,8 +20,8 @@ ctypes.windll.shcore.SetProcessDpiAwareness(1)
 #Personal plotting preferences
 
 plt.style.use('classic')
-plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-                     "font.serif": ["Computer Modern Serif"]})
+##plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+##                     "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=12, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
@@ -77,9 +77,14 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'r', linewidth=1)
 #__________________________Initial values_____________________________
 pathnum = 1
 
-lam_0 = 0.38583349
-lam_min = 0
-lam_max = 4
+lam1_0 = 0.38583349
+lam1_min = 0
+lam1_max = 4
+
+lam2_0 = 1
+lam2_min = 0
+lam2_max = 4
+
 Ni = -20
 NiForward = 10
 
@@ -92,8 +97,6 @@ V = z * c   # ""
 h = 0.738
 H_0 = 100*h # km/(s Mpc)
 xinit = np.linspace(-0.99, 0.99, pathnum)
-
-lambdaConsistent = np.array([])
 
 #Observed Values
 Omega_phi_0 = 0.73
@@ -109,6 +112,7 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 
 state_0 = [np.sqrt(x0Squared),
            np.sqrt(y0Squared),
+           np.sqrt(y0Squared) * 1e-1,
            np.sqrt(Omega_r0)]
 
 #_________________________Initialise plots________________________________
@@ -126,21 +130,21 @@ track_ax.set_zlabel('$z$')
 #_____________________________Define ODE for 2 fluids_______________________
 
 def ODEs(state, N, lam):
-    # coords[0] corresponds to the variable x
-    # coords[1] corresponds to the variable y
-    # coords[2] corresponds to the variable y
+    # coords[0]    corresponds to the variable x
+    # coords[1:-1] corresponds to the variables yn
+    # coords[-1]   corresponds to the variable z
 
     x = state[0]
-    y = state[1]
-    z = state[2]
+    y = np.array(state[1:-1])
+    z = state[-1]
 
-    HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
+    HdotSection = 1 + x**2 - np.sum(y**2) + (1/3)*z**2
 
-    xprime = (-3*x) + (lam * np.sqrt(1.5) * y**2)  + (1.5*x * HdotSection)
-    yprime =         (-lam * np.sqrt(1.5) * x * y) + (1.5*y * HdotSection)
-    zprime = (-2*z)                                + (1.5*z * HdotSection)
+    xprime = (-3*x) + (np.sqrt(1.5) *  np.sum(lam * y**2)) + (1.5*x * HdotSection)
+    yprime =          (np.sqrt(1.5) *        -lam * x * y) + (1.5*y * HdotSection)
+    zprime = (-2*z)                                        + (1.5*z * HdotSection)
 
-    return [xprime, yprime, zprime]
+    return np.append(xprime, np.append(yprime, zprime))
 
 #___________________________Function for fixed points________________________
 def fixedPoints_func(lam):
@@ -152,25 +156,26 @@ def fixedPoints_func(lam):
     [1, 0, 0],
     [-1, 0, 0]
     ])
+    
+    for n, lambdaValue in enumerate(lam):
+        if lambdaValue**2 < 6:
+            fixedPoints = np.append(fixedPoints,
+                                    [[lambdaValue/np.sqrt(6),
+                                        np.sqrt(1 - (lambdaValue**2)/6), 0]], axis=0)
+            fixedPoints_labels.append('$C_' + str(n+1) + '$')
 
-    if lam**2 < 6:
-        fixedPoints = np.append(fixedPoints,
-                                [[lam/np.sqrt(6),
-                                    np.sqrt(1 - (lam**2)/6), 0]], axis=0)
-        fixedPoints_labels.append('$C$')
+        if lambdaValue**2 > 3:
+            fixedPoints = np.append(fixedPoints,
+                                    [[np.sqrt(3/2)/lambdaValue,
+                                        np.sqrt(3/2)/lambdaValue, 0]], axis=0)
+            fixedPoints_labels.append('$D' + str(n+1) + '$')
 
-    if lam**2 > 3:
-        fixedPoints = np.append(fixedPoints,
-                                [[np.sqrt(3/2)/lam,
-                                    np.sqrt(3/2)/lam, 0]], axis=0)
-        fixedPoints_labels.append('$D$')
-
-    if lam**2 > 8/3:
-        fixedPoints = np.append(fixedPoints,
-                                [[2 * np.sqrt(2/3) / lam,
-                                2 / (lam * np.sqrt(3)),
-                                np.sqrt(1 - (4/lam**2))]], axis=0)
-        fixedPoints_labels.append('$E$')
+        if lambdaValue**2 > 4:#8/3:
+            fixedPoints = np.append(fixedPoints,
+                                    [[2 * np.sqrt(2/3) / lambdaValue,
+                                    2 / (lambdaValue * np.sqrt(3)),
+                                    np.sqrt(1 - (4/lambdaValue**2))]], axis=0)
+            fixedPoints_labels.append('$E' + str(n+1) + '$')
     return fixedPoints, fixedPoints_labels
 
 #_______________________________Acceleration Expression______________________
@@ -203,12 +208,11 @@ def d_L_IntegrandScalar(currentTotal, z, zaxis,
 def update_plot(event):
     #Before update_plot is called lam sliders are updated
     #Sliders will always have current lambda/ gamma values
-    lam = lambda_slide.get()
-    fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
-    fixedPoints = fixedPoints.transpose()
+    lam1 = lambda1_slide.get()
+    lam2 = lambda2_slide.get()
 
     #Update fixed points
-    fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
+    fixedPoints, fixedPoints_labels = fixedPoints_func([lam1, lam2])
     fixedPoints = fixedPoints.transpose()
     fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
     fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
@@ -220,13 +224,13 @@ def update_plot(event):
         fixedPoint_label_j = track_ax.text(fixed_x, fixed_y, fixed_z, fixedPoints_labels[j])
         fixedPoint_labels.append(fixedPoint_label_j)
         
-        print(fixedPoint_label_j)
+##        print(fixedPoint_label_j)
     
     #Plot all paths with updated values
     for i in range(pathnum):
 
         #Update the quiver vectors
-        quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam)
+        quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam1)
                                     for pt in filtered_pts])
         u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
         
@@ -239,16 +243,20 @@ def update_plot(event):
                     alpha = 0.5)
         
         #Solve the system of ODEs using odeint
-        solution = odeint(ODEs, state_0, N, args = (lam,))
-        pathx = solution[:, 0]
-        pathy = solution[:, 1]
-        pathz = solution[:, 2]
+        solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
+        pathx  = solution[:, 0]
+        pathy1 = solution[:, 1]
+        pathy2 = solution[:, 2]
+        pathz  = solution[:, 3]
         
         #Add both ways
-        solutionForward = odeint(ODEs, state_0, NForward, args = (lam,))
-        pathx = np.append(pathx[::-1], solutionForward[:, 0])
-        pathy = np.append(pathy[::-1], solutionForward[:, 1])
-        pathz = np.append(pathz[::-1], solutionForward[:, 2])
+        solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
+        pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
+        pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
+        pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
+        pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
+
+        pathy = np.sqrt(pathy1**2 + pathy2**2)
 
         #Update tracks
         main_tracks[i].set_data(pathx, pathy)
@@ -261,9 +269,10 @@ def update_plot(event):
 
         #Update relative density plots
         Radn_dens_plot.set_ydata(pathz**2)
-        Mass_dens_plot.set_ydata(
-                            1 - pathx**2 - pathy**2 - pathz**2)
+        Mass_dens_plot.set_ydata(1 - pathx**2 - pathy**2 - pathz**2)
         Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
+        y1_dens_plot.set_ydata(pathy1**2)
+        y2_dens_plot.set_ydata(pathy2**2)
         
         #Update EoS plot
         path_gamma_phi = gamma_phi(pathx, pathy) 
@@ -293,20 +302,28 @@ canvas.draw() #Show canvas (ie show figure)
 NavigationToolbar2Tk(canvas, window)
 
 
-#Lambda Slider Label. Initialise, place, and hide weird borders
-lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
-                       height = 2)
-lambda_slide_label.place(relx=0.45, rely=0.025,
-                         relheight=0.025, relwidth=0.05)
-lambda_slide_label.configure(bg = 'white', borderwidth=0)
+#Lambda Slider Labels. Initialise, place, and hide weird borders
+lambda1_slide_label = tk.Label(window, text = '$\lambda_1$', width = 15, height = 2)
+lambda1_slide_label.place(relx=0.43, rely=0.025, relheight=0.025, relwidth=0.05)
+lambda1_slide_label.configure(bg = 'white', borderwidth=0)
+
+lambda2_slide_label = tk.Label(window, text = '$\lambda_2$', width = 15, height = 2)
+lambda2_slide_label.place(relx=0.48, rely=0.025, relheight=0.025, relwidth=0.05)
+lambda2_slide_label.configure(bg = 'white', borderwidth=0)
+
 
 #Lambda Slider. Initialise, add interaction, place, hide borders
-lambda_slide = tk.Scale(window, from_ = lam_min, to = lam_max,
-                       width = 20, length = 250, resolution=0.001)
-lambda_slide.set(lam_0)
-lambda_slide.bind("<ButtonRelease-1>", update_plot)
-lambda_slide.place(relx=0.45, rely=0.05, relheight=0.4, relwidth=0.05)
-lambda_slide.configure(bg = 'white', borderwidth=0)
+lambda1_slide = tk.Scale(window, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
+lambda1_slide.set(lam1_0)
+lambda1_slide.bind("<ButtonRelease-1>", update_plot)
+lambda1_slide.place(relx=0.45, rely=0.05, relheight=0.4, relwidth=0.035)
+lambda1_slide.configure(bg = 'white', borderwidth=0)
+
+lambda2_slide = tk.Scale(window, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
+lambda2_slide.set(lam2_0)
+lambda2_slide.bind("<ButtonRelease-1>", update_plot)
+lambda2_slide.place(relx=0.485, rely=0.05, relheight=0.4, relwidth=0.035)
+lambda2_slide.configure(bg = 'white', borderwidth=0)
 
 #Place Canvas
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
@@ -352,15 +369,15 @@ all_points = fibonacci_sphere(max_radius, num_shells, base_points)
 #Only take the points we want, add the origin
 filtered_pts = np.vstack((
     all_points[
-    (all_points[:, 0] >= -1) & (all_points[:, 0] <= 1) &
-    (all_points[:, 1] >=  0) & (all_points[:, 1] <= 1) &
-    (all_points[:, 2] >=  0) & (all_points[:, 2] <= 1)
-],
-[0,0,0]
+        (all_points[:, 0] >= -1) & (all_points[:, 0] <= 1) &
+        (all_points[:, 1] >=  0) & (all_points[:, 1] <= 1) &
+        (all_points[:, 2] >=  0) & (all_points[:, 2] <= 1)
+    ],
+    [0,0,0]
 ))
 
 #Finds gradient at all anchor points, sets them as the direction vectors
-quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam_0)
+quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam1_0)
                             for pt in filtered_pts])
 u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
 x_ins, y_ins, z_ins = filtered_pts[:, 0], filtered_pts[:, 1], filtered_pts[:, 2]
@@ -390,8 +407,9 @@ fixedPoints_plot, = track_ax.plot([], [], [], 'o')
 fixedPoint_labels = []
 
 for i in range(pathnum):
-    lam = lambda_slide.get()
-    fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
+    lam1 = lambda1_slide.get()
+    lam2 = lambda2_slide.get()
+    fixedPoints, fixedPoints_labels = fixedPoints_func(np.array([lam1, lam2]))
     fixedPoints = fixedPoints.transpose()
     fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
     fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
@@ -401,20 +419,26 @@ for i in range(pathnum):
         fixedPoint_label_j = track_ax.text(fixed_x, fixed_y, fixed_z, fixedPoints_labels[j])
         fixedPoint_labels.append(fixedPoint_label_j)
 
-        print(fixedPoint_label_j)
+##        print(fixedPoint_label_j)
 
     # Solve the system of ODEs using odeint
-    solution = odeint(ODEs, state_0, N, args = (lam,))
-    pathx = solution[:, 0]
-    pathy = solution[:, 1]
-    pathz = solution[:, 2]
+    solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
+    pathx  = solution[:, 0]
+    pathy1 = solution[:, 1]
+    pathy2 = solution[:, 2]
+    pathz  = solution[:, 3]
 
-    solutionForward = odeint(ODEs, state_0, NForward, args = (lam,))
-    pathx = np.append(pathx[::-1], solutionForward[:, 0])
-    pathy = np.append(pathy[::-1], solutionForward[:, 1])
-    pathz = np.append(pathz[::-1], solutionForward[:, 2])
+    solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
+    pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
+    pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
+    pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
+    pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
+
+    pathy = np.sqrt(pathy1**2 + pathy2**2)
+    
     NAxis = np.append(N[::-1], NForward)
     zAxis = np.append(z[::-1], NForward)
+  
 
     path_gamma_phi = gamma_phi(pathx, pathy)
 
@@ -426,8 +450,12 @@ for i in range(pathnum):
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
     Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathy**2, 'b',
             label = "$\Omega_\phi = x^2 + y^2$")
+    y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
+            label = "$y_1^2$")
+    y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
+            label = "$y_2^2$")
 
-    x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
+    x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
 
 
     track_i = track_ax.plot(
