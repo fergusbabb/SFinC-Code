@@ -38,24 +38,24 @@ window.geometry('1600x950')
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
-track_axis_dims = [.0,.5,.45,.5]
+track_axis_dims = [-.025,.5,.45,.5]
 track_ax = fig.add_axes(track_axis_dims, projection='3d')
 track_ax.view_init(elev=24, azim=66)
 
 #Colour bar axes
-cbar_ax_dims = [.4,.6,.015,.35]
+cbar_ax_dims = [.375,.575,.015,.35]
 cbar_ax = fig.add_axes(cbar_ax_dims)
 
 #Relative Density axes
-dens_axis_dims = [.55,.1,.4,.275]
+dens_axis_dims = [.575,.1,.4,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
 
 #Acceleration axes
-accel_axis_dims = [.55,.4,.4,.275]
+accel_axis_dims = [.575,.4,.4,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
 
 #EoS Axes
-gamma_axis_dims = [.55,.7,.4,.275]
+gamma_axis_dims = [.575,.7,.4,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
@@ -304,11 +304,11 @@ NavigationToolbar2Tk(canvas, window)
 
 #Lambda Slider Labels. Initialise, place, and hide weird borders
 lambda1_slide_label = tk.Label(window, text = '$\lambda_1$', width = 15, height = 2)
-lambda1_slide_label.place(relx=0.43, rely=0.025, relheight=0.025, relwidth=0.05)
+lambda1_slide_label.place(relx=0.4, rely=0.025, relheight=0.025, relwidth=0.07)
 lambda1_slide_label.configure(bg = 'white', borderwidth=0)
 
 lambda2_slide_label = tk.Label(window, text = '$\lambda_2$', width = 15, height = 2)
-lambda2_slide_label.place(relx=0.48, rely=0.025, relheight=0.025, relwidth=0.05)
+lambda2_slide_label.place(relx=0.475, rely=0.025, relheight=0.025, relwidth=0.07)
 lambda2_slide_label.configure(bg = 'white', borderwidth=0)
 
 
@@ -316,13 +316,13 @@ lambda2_slide_label.configure(bg = 'white', borderwidth=0)
 lambda1_slide = tk.Scale(window, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
 lambda1_slide.set(lam1_0)
 lambda1_slide.bind("<ButtonRelease-1>", update_plot)
-lambda1_slide.place(relx=0.45, rely=0.05, relheight=0.4, relwidth=0.035)
+lambda1_slide.place(relx=0.425, rely=0.05, relheight=0.4, relwidth=0.035)
 lambda1_slide.configure(bg = 'white', borderwidth=0)
 
 lambda2_slide = tk.Scale(window, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
 lambda2_slide.set(lam2_0)
 lambda2_slide.bind("<ButtonRelease-1>", update_plot)
-lambda2_slide.place(relx=0.485, rely=0.05, relheight=0.4, relwidth=0.035)
+lambda2_slide.place(relx=0.475, rely=0.05, relheight=0.4, relwidth=0.035)
 lambda2_slide.configure(bg = 'white', borderwidth=0)
 
 #Place Canvas
@@ -520,8 +520,8 @@ d_lum_ax.set_xlim(left = 0.01)
 #d_lum_ax.legend(loc=4)
 d_lum_ax.set_xscale('log', base=10, subs=[10**x
                          for x in (0.25, 0.5, 0.75)], nonpositive='mask')
-#d_lum_ax.set_yscale('log', base=10, subs=[10**x
-#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+d_lum_ax.set_yscale('log', base=10, subs=[10**x
+                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
 
 

@@ -17,15 +17,18 @@ list_of_ids = jla_data.get_available_ids()
 #Initialised empty array for redshifts of all objects
 redshifts = np.zeros(len(list_of_ids))
 flux      = np.zeros(len(list_of_ids))
+redsh_err = np.zeros(len(list_of_ids))
+flux_err  = np.zeros(len(list_of_ids))
 
 #Iterates, storing all redshifts
 for i in range(0,len(list_of_ids)):
     data_table = jla_data.get_data_for_id(list_of_ids[i])
     redshifts[i] = data_table.meta['z']
+    
     flux[i]    = np.mean(data_table['flux'])
     
     if i == 0:
-        print(data_table.meta)
+        #print(data_table.meta)
         '''
         model = sncosmo.Model('salt2')
         result, fitted_model = sncosmo.fit_lc(
@@ -39,5 +42,5 @@ for i in range(0,len(list_of_ids)):
 
 alpha = 0.135 #+0.033/-0.017
 beta  = 3.19  #+0.140/-0.240
-#print(redshifts)
+print(redshifts)
 
