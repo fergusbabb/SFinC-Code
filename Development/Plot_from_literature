@@ -6,41 +6,72 @@ import astropy.io
 import sncosmo
 from sndata.jla import Betoule14
 
-
+'''
 jla_data = Betoule14()
 #jla_data.download_module_data()
-
+jla_data.register_filters(True)
+band_types = jla_data.band_names
 
 #Get a list of available objects
 list_of_ids = jla_data.get_available_ids()
 
-#Initialised empty array for redshifts of all objects
-redshifts = np.zeros(len(list_of_ids))
-flux      = np.zeros(len(list_of_ids))
-redsh_err = np.zeros(len(list_of_ids))
-flux_err  = np.zeros(len(list_of_ids))
+model = sncosmo.Model(source='salt2')
 
 #Iterates, storing all redshifts
-for i in range(0,len(list_of_ids)):
-    data_table = jla_data.get_data_for_id(list_of_ids[i])
-    redshifts[i] = data_table.meta['z']
-    
-    flux[i]    = np.mean(data_table['flux'])
-    
-    if i == 0:
-        #print(data_table.meta)
-        '''
-        model = sncosmo.Model('salt2')
-        result, fitted_model = sncosmo.fit_lc(
-            data=data_table,
-            model=model,
-            vparam_names=['t0', 'x0', 'x1', 'c'])'''
+for i in range(0,1):
+    data_table_i = jla_data.get_data_for_id(list_of_ids[i])
 
-#plt.plot(redshifts, np.log10(flux), 'r.', label='Flux')
-#plt.legend()
-#plt.show()
 
-alpha = 0.135 #+0.033/-0.017
-beta  = 3.19  #+0.140/-0.240
-print(redshifts)
+    redshifts = data_table_i.meta['z']
+    red_err   = data_table_i.meta['z_err']
+    times     = data_table_i['time']
+
+    model.set(z=redshifts)
+    for f in enumerate(band_types):
+
+        #salt2flux = model.bandflux(f, times, zp=27.5, zpsys='AB')
+        #plt.plot(times, salt2flux)
+
+        result, fitted_model = sncosmo.fit_lc(data_table_i, model, ['t0', 'x0', 'x1', 'c'])
+        sncosmo.plot_lc(data, model=fitted_model, errors=result.errors)
+    #print('Table shape is', np.shape(data_table_i))
+'''
+
+
+#alpha = 0.135 #+0.033/-0.017
+#beta  = 3.19  #+0.140/-0.240
+#M = -19.36 for H0 = 70
+#print(redshifts)
+
+
+from sndata.csp import DR3
+from iminuit import Minuit
+# At instantiation, the DR3 class determines where the data
+# is located on your machine
+dr3 = DR3()
+#dr3.download_module_data()
+
+dr3.register_filters()
+
+# Get data for SN 2004dt
+data_table = dr3.get_data_for_id('2004dt')
+
+# Fit the data
+model = sncosmo.Model('salt2')
+model.set(z=data_table.meta['z'])
+result, fitted_model = sncosmo.fit_lc(
+    data=data_table,
+    model=model,
+    vparam_names=['t0', 'x0', 'x1', 'c'])
+
+sncosmo.plot_lc(data_table, model=fitted_model, errors=result.errors)
+plt.show()
+
+
+
+
+
+
+
+
 
