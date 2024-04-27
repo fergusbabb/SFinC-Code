@@ -53,19 +53,34 @@ dr3 = DR3()
 
 dr3.register_filters()
 
-# Get data for SN 2004dt
-data_table = dr3.get_data_for_id('2004dt')
 
-# Fit the data
+list_of_ids = dr3.get_available_ids()
+
 model = sncosmo.Model('salt2')
+
+'''
+for id in enumerate(list_of_ids):
+    data_table = dr3.get_data_for_id(id[1])
+
+    model.set(z=data_table.meta['z'])
+    result, fitted_model = sncosmo.fit_lc(
+    data=data_table,
+    model=model,
+    vparam_names=['t0', 'x0', 'x1', 'c'])
+
+    #print("best-fit values:", result.parameters) #z, t0, x0, x1, c
+'''
+
+data_table = dr3.get_data_for_id(list_of_ids[0])
+
 model.set(z=data_table.meta['z'])
 result, fitted_model = sncosmo.fit_lc(
     data=data_table,
     model=model,
     vparam_names=['t0', 'x0', 'x1', 'c'])
-
 sncosmo.plot_lc(data_table, model=fitted_model, errors=result.errors)
 plt.show()
+
 
 
 
