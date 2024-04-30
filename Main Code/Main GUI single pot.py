@@ -38,7 +38,7 @@ window.geometry('1600x950')
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
-track_axis_dims = [.0,.5,.45,.5]
+track_axis_dims = [.0,.525,.45,.5]
 track_ax = fig.add_axes(track_axis_dims, projection='3d')
 track_ax.view_init(elev=24, azim=66)
 
@@ -204,23 +204,23 @@ def update_plot(event):
     #Before update_plot is called lam sliders are updated
     #Sliders will always have current lambda/ gamma values
     lam = lambda_slide.get()
-    fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
-    fixedPoints = fixedPoints.transpose()
+    state_0 = [float(x_entry_val.get()), 
+               float(y_entry_val.get()), 
+               float(z_entry_val.get())]
 
-    #Update fixed points
-    fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
-    fixedPoints = fixedPoints.transpose()
-    fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
-    fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
+    for plot in fixedPoint_plots:
+        plot.remove()
+    fixedPoint_plots.clear()  # Clear the list of plot objects
 
-    #fixedPoint_labels = []
-    for j in range(0,len(fixedPoints_labels)):
-        fixedPoint_labels[j-1].set_visible(False)
-        fixed_x, fixed_y, fixed_z = fixedPoints[0,j], fixedPoints[1,j], fixedPoints[2,j]
-        fixedPoint_label_j = track_ax.text(fixed_x, fixed_y, fixed_z, fixedPoints_labels[j])
-        fixedPoint_labels.append(fixedPoint_label_j)
-        
-        print(fixedPoint_label_j)
+    # Get new fixed points and plot them
+    fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
+    for i, point in enumerate(fixedPoints):
+        plot, = track_ax.plot(point[0], point[1], point[2], 'or')
+        fixedPoint_plots.append(plot)
+
+    x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
+    state0_point.set_data(x_i, y_i)
+    state0_point.set_3d_properties(z_i)
     
     #Plot all paths with updated values
     for i in range(pathnum):
@@ -294,19 +294,50 @@ NavigationToolbar2Tk(canvas, window)
 
 
 #Lambda Slider Label. Initialise, place, and hide weird borders
-lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
-                       height = 2)
-lambda_slide_label.place(relx=0.45, rely=0.025,
-                         relheight=0.025, relwidth=0.05)
-lambda_slide_label.configure(bg = 'white', borderwidth=0)
+lambda_label_ax = fig.add_axes([.455,.9525,.05,.05])
+lambda_label_ax.text(0,0,'$\lambda$ value')
+lambda_label_ax.set_axis_off()
 
 #Lambda Slider. Initialise, add interaction, place, hide borders
 lambda_slide = tk.Scale(window, from_ = lam_min, to = lam_max,
                        width = 20, length = 250, resolution=0.001)
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
-lambda_slide.place(relx=0.45, rely=0.05, relheight=0.4, relwidth=0.05)
+lambda_slide.place(relx=0.45, rely=0.05, relheight=0.35, relwidth=0.05)
 lambda_slide.configure(bg = 'white', borderwidth=0)
+
+
+def submit():
+    x0 = float(x_entry_val.get())
+    y0 = float(y_entry_val.get())
+    z0 = float(z_entry_val.get())
+
+    if x0**2 + y0**2 + z0**2 <= 1:
+        update_plot(0)
+    else:
+        print('Not valid values, check $x^2+y^2+z^2 <= 1$')
+
+x_entry_val=tk.StringVar()
+y_entry_val=tk.StringVar()
+z_entry_val=tk.StringVar()
+
+x_entry_label = tk.Label(window, text = '$x$:')
+y_entry_label = tk.Label(window, text = '$y$:')
+z_entry_label = tk.Label(window, text = '$z$:')
+
+x_entry = tk.Entry(window, textvariable = x_entry_val
+            ).place(relx=0.05, rely=0.45, relheight=0.05, relwidth=0.075)
+y_entry = tk.Entry(window, textvariable = y_entry_val
+            ).place(relx=0.15, rely=0.45, relheight=0.05, relwidth=0.075)
+z_entry = tk.Entry(window, textvariable = z_entry_val
+            ).place(relx=0.25, rely=0.45, relheight=0.05, relwidth=0.075)
+
+x_entry_val.set(state_0[0])    
+y_entry_val.set(state_0[1])
+z_entry_val.set(state_0[2])
+
+sub_btn=tk.Button(window, text = 'Submit', command = submit
+            ).place(relx=0.45, rely=0.45, relheight=0.05, relwidth=0.05)
 
 #Place Canvas
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
@@ -386,25 +417,18 @@ cbar.set_label('Magnitude of derivatives')
 
 #Initial plot
 main_tracks = []
-fixedPoints_plot, = track_ax.plot([], [], [], 'o')
-fixedPoint_labels = []
+fixedPoint_plots = []
 
 gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
 gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
 
 for i in range(pathnum):
     lam = lambda_slide.get()
-    fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
-    fixedPoints = fixedPoints.transpose()
-    fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
-    fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
 
-    for j in range(0,len(fixedPoints_labels)):
-        fixed_x, fixed_y, fixed_z = fixedPoints[0,j], fixedPoints[1,j], fixedPoints[2,j]
-        fixedPoint_label_j = track_ax.text(fixed_x, fixed_y, fixed_z, fixedPoints_labels[j])
-        fixedPoint_labels.append(fixedPoint_label_j)
-
-        print(fixedPoint_label_j)
+    fixedPoints, fixedPoints_labels = fixedPoints_func(lam_0)
+    for point in fixedPoints:
+        plot, = track_ax.plot(point[0], point[1], point[2], 'or')
+        fixedPoint_plots.append(plot)
 
     # Solve the system of ODEs using odeint
     solution = odeint(ODEs, state_0, N, args = (lam,))
@@ -435,7 +459,7 @@ for i in range(pathnum):
 
     track_i = track_ax.plot(
                     pathx, pathy, pathz, 'm', linewidth=2)[0]
-    track_ax.plot(x_i,y_i,z_i, 'cX')
+    state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
     accel_plot, = accel_ax.plot(NAxis,
                     accelerationExpression(pathx,pathy,pathz))
     effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
@@ -495,8 +519,8 @@ d_lum_ax.set_xlim(left = 0.01)
 #d_lum_ax.legend(loc=4)
 d_lum_ax.set_xscale('log', base=10, subs=[10**x
                          for x in (0.25, 0.5, 0.75)], nonpositive='mask')
-#d_lum_ax.set_yscale('log', base=10, subs=[10**x
-#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+d_lum_ax.set_yscale('log', base=10, subs=[10**x
+                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
 
 

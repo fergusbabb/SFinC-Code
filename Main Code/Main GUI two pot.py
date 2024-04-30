@@ -38,24 +38,24 @@ window.geometry('1600x950')
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
-track_axis_dims = [-.025,.5,.45,.5]
+track_axis_dims = [-.025,.525,.45,.5]
 track_ax = fig.add_axes(track_axis_dims, projection='3d')
 track_ax.view_init(elev=24, azim=66)
 
 #Colour bar axes
-cbar_ax_dims = [.375,.575,.015,.35]
+cbar_ax_dims = [.375,.6,.015,.35]
 cbar_ax = fig.add_axes(cbar_ax_dims)
 
 #Relative Density axes
-dens_axis_dims = [.575,.1,.4,.275]
+dens_axis_dims = [.6,.1,.35,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
 
 #Acceleration axes
-accel_axis_dims = [.575,.4,.4,.275]
+accel_axis_dims = [.6,.4,.35,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
 
 #EoS Axes
-gamma_axis_dims = [.575,.7,.4,.275]
+gamma_axis_dims = [.6,.7,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
@@ -78,11 +78,11 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'r', linewidth=1)
 pathnum = 1
 
 lam1_0 = 0.38583349
-lam1_min = 0
+lam1_min = -4
 lam1_max = 4
 
 lam2_0 = 1
-lam2_min = 0
+lam2_min = -4
 lam2_max = 4
 
 Ni = -20
@@ -211,20 +211,15 @@ def update_plot(event):
     lam1 = lambda1_slide.get()
     lam2 = lambda2_slide.get()
 
-    #Update fixed points
-    fixedPoints, fixedPoints_labels = fixedPoints_func([lam1, lam2])
-    fixedPoints = fixedPoints.transpose()
-    fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
-    fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
+    for plot in fixedPoint_plots:
+        plot.remove()
+    fixedPoint_plots.clear()  # Clear the list of plot objects
 
-    #fixedPoint_labels = []
-    for j in range(0,len(fixedPoints_labels)):
-        fixedPoint_labels[j-1].set_visible(False)
-        fixed_x, fixed_y, fixed_z = fixedPoints[0,j], fixedPoints[1,j], fixedPoints[2,j]
-        fixedPoint_label_j = track_ax.text(fixed_x, fixed_y, fixed_z, fixedPoints_labels[j])
-        fixedPoint_labels.append(fixedPoint_label_j)
-        
-##        print(fixedPoint_label_j)
+    # Get new fixed points and plot them
+    fixedPoints, fixedPoints_labels = fixedPoints_func([lam1,lam2])
+    for i, point in enumerate(fixedPoints):
+        plot, = track_ax.plot(point[0], point[1], point[2], 'or')
+        fixedPoint_plots.append(plot)
     
     #Plot all paths with updated values
     for i in range(pathnum):
@@ -303,26 +298,25 @@ NavigationToolbar2Tk(canvas, window)
 
 
 #Lambda Slider Labels. Initialise, place, and hide weird borders
-lambda1_slide_label = tk.Label(window, text = '$\lambda_1$', width = 15, height = 2)
-lambda1_slide_label.place(relx=0.4, rely=0.025, relheight=0.025, relwidth=0.07)
-lambda1_slide_label.configure(bg = 'white', borderwidth=0)
+lambda1_label_ax = fig.add_axes([.435,.9525,.05,.05])
+lambda1_label_ax.text(0,0,'$\lambda_1$ value')
+lambda1_label_ax.set_axis_off()
 
-lambda2_slide_label = tk.Label(window, text = '$\lambda_2$', width = 15, height = 2)
-lambda2_slide_label.place(relx=0.475, rely=0.025, relheight=0.025, relwidth=0.07)
-lambda2_slide_label.configure(bg = 'white', borderwidth=0)
-
+lambda2_label_ax = fig.add_axes([.495,.9525,.05,.05])
+lambda2_label_ax.text(0,0,'$\lambda_2$ value')
+lambda2_label_ax.set_axis_off()
 
 #Lambda Slider. Initialise, add interaction, place, hide borders
 lambda1_slide = tk.Scale(window, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
 lambda1_slide.set(lam1_0)
 lambda1_slide.bind("<ButtonRelease-1>", update_plot)
-lambda1_slide.place(relx=0.425, rely=0.05, relheight=0.4, relwidth=0.035)
+lambda1_slide.place(relx=0.43, rely=0.05, relheight=0.35, relwidth=0.05)
 lambda1_slide.configure(bg = 'white', borderwidth=0)
 
 lambda2_slide = tk.Scale(window, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
 lambda2_slide.set(lam2_0)
 lambda2_slide.bind("<ButtonRelease-1>", update_plot)
-lambda2_slide.place(relx=0.475, rely=0.05, relheight=0.4, relwidth=0.035)
+lambda2_slide.place(relx=0.49, rely=0.05, relheight=0.35, relwidth=0.05)
 lambda2_slide.configure(bg = 'white', borderwidth=0)
 
 #Place Canvas
@@ -403,8 +397,7 @@ cbar.set_label('Magnitude of derivatives')
 
 #Initial plot
 main_tracks = []
-fixedPoints_plot, = track_ax.plot([], [], [], 'o')
-fixedPoint_labels = []
+fixedPoint_plots = []
 
 gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
 gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
@@ -412,17 +405,12 @@ gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
 for i in range(pathnum):
     lam1 = lambda1_slide.get()
     lam2 = lambda2_slide.get()
-    fixedPoints, fixedPoints_labels = fixedPoints_func(np.array([lam1, lam2]))
-    fixedPoints = fixedPoints.transpose()
-    fixedPoints_plot.set_data(fixedPoints[0,:], fixedPoints[1,:])
-    fixedPoints_plot.set_3d_properties(fixedPoints[2,:])
 
-    for j in range(0,len(fixedPoints_labels)):
-        fixed_x, fixed_y, fixed_z = fixedPoints[0,j], fixedPoints[1,j], fixedPoints[2,j]
-        fixedPoint_label_j = track_ax.text(fixed_x, fixed_y, fixed_z, fixedPoints_labels[j])
-        fixedPoint_labels.append(fixedPoint_label_j)
+    fixedPoints, fixedPoints_labels = fixedPoints_func([lam1,lam2])
+    for point in fixedPoints:
+        plot, = track_ax.plot(point[0], point[1], point[2], 'or')
+        fixedPoint_plots.append(plot)
 
-##        print(fixedPoint_label_j)
 
     # Solve the system of ODEs using odeint
     solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
