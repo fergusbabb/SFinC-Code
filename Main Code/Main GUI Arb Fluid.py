@@ -48,8 +48,8 @@ lam_gam_ax = fig.add_axes(lam_gam_dims)
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
 track_ax.plot(np.cos(theta), np.sin(theta),
-         'r', linewidth=1, label='Bounding Circle')
-track_ax.plot([-1,1], [0,0], 'r', linewidth=1)
+         'k', linewidth=1, label='Bounding Circle')
+track_ax.plot([-1,1], [0,0], 'k', linewidth=1)
 
 
 #Initial values
@@ -125,7 +125,7 @@ def compute_fill(gam):
     x = np.linspace(-1, 1, 401)
     boundary = acceleration_y_boundary(x, gam)
     xWhere = np.where(boundary < np.sqrt(1-x**2), True, False)
-    return track_ax.fill_between(x, boundary, np.sqrt(1-x**2), where = xWhere)
+    return track_ax.fill_between(x, boundary, np.sqrt(1-x**2), where = xWhere, alpha=0.25)
     
     
 #_______________________________Update track plots___________________________
@@ -150,8 +150,7 @@ def update_plot(event):
 
     #Plot all paths with updated values
     for i in range(pathnum):
-        initial_conditions = [xinit[i], 0.01]  #Initial values for x and y
-
+        initial_conditions = [xinit[i], yinit[i]]  #Initial values for x and y
         
         #Solve the system of ODEs using odeint
         solution = odeint(ODEs, initial_conditions, n, args = (lam, gam))
@@ -286,8 +285,33 @@ canvas.get_tk_widget().place(relheight=1,relwidth=1)
 #___________________________________Initial Plot____________________________________
 
 #Define log a linspace for ode
-n = np.linspace(0, 10, 1000)
-xinit = np.linspace(-0.99, 0.99, pathnum)
+n = np.linspace(0, 50, 5000)
+
+def initial_points(radius, semicirc_num, diam_num):
+    # Correct the use of num_points which is not defined
+    delta_theta = np.pi / (semicirc_num - 1)
+    points = []
+    for i in range(semicirc_num):
+        theta = i * delta_theta  # Angle for the point
+        x = radius * np.cos(theta)
+        y = radius * np.sin(theta)
+        points.append([x, y])  # Use list instead of tuple for easier manipulation
+
+    points = np.array(points)  # Convert to numpy array with shape (semicirc_num, 2)
+
+    # Points along the diameter
+    diam_x_points = np.linspace(-radius, radius, diam_num)
+    diam_y_points = np.ones(diam_num) * (1 - radius)
+    diam_points = np.array([diam_x_points, diam_y_points]).T  # Correct shaping (diam_num, 2)
+
+    # Concatenate along axis 0 (rows)
+    initial_points = np.concatenate((points, diam_points), axis=0)
+    return initial_points
+
+
+points_init = initial_points(0.975, 30, pathnum-30)
+xinit = points_init[:,0]
+yinit = points_init[:,1]
 
 #Initial plot
 main_tracks = []
@@ -296,11 +320,11 @@ x_tracks = []
 y_tracks = []
 
 fill = compute_fill(gam_0)
-fill.set_color([0.1, 0.4, 0.7, 0.5])
+#fill.set_color([0.1, 0.4, 0.7, 0.5])
 
 fixedPoint_plots = []
 for i in range(pathnum):
-    initial_conditions = [xinit[i], 0.01]  #Initial values for x and y
+    initial_conditions = [xinit[i], yinit[i]]  #Initial values for x and y
     
     lam = lambda_slide.get()
     gam = gamma_slide.get()
@@ -330,16 +354,23 @@ track_ax.set(xticks=[-1,-.5,0,.5,1], yticks=[0,.5,1],
 
 
 #Interactive plot, plot lines as in P40
-lam_gam_ax.set(xlim=[0,12], ylim=[0,2],)
 lam_gam_ax.set_xlabel('$\lambda^2$', x=1.02)
 lam_gam_ax.set_ylabel('$\gamma$', rotation = 0, y=1.02)
+lam_gam_ax.set(xlim=[0,12], ylim=[0,2],
+               yticks=[0,2/3,1,2], yticklabels=['$0$','$2/3$','$1$','$2$'],
+               xticks=[0,2,6,12],  xticklabels=['$0$','$2$','$6$','$12$'])
+lam_gam_ax.text(1,1.5,'Ia')
+lam_gam_ax.text(3,1.5,'Ib')
+lam_gam_ax.text(4,2/3,'II')
+lam_gam_ax.text(9,1.5,'III')
+
 lam_gam_ax.plot([0,6], [12,2],'k', linestyle = '-')
 lam_gam_ax.plot([0,12],[0,0],'k')
 lam_gam_ax.plot([0,0],[0,2],'k')
 lam_gam_ax.plot([6,6],[0,2],'k')
 lam_gam_ax.plot([0,6],[0,2],'k')
 lam_gam_ax.plot([2,2],[0,2],'k', linestyle = ':')
-lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
+#lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
 
 
 window.mainloop()
