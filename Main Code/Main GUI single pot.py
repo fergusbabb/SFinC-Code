@@ -34,6 +34,9 @@ window = tk.Tk()
 window.title('GUI for Matter and Radiation')
 window.geometry('1600x950')
 
+window_4_report = tk.Tk()
+window_4_report.title('Window to generate plots for report')
+window_4_report.geometry('750x500')
 
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
@@ -65,13 +68,13 @@ d_lum_ax = fig.add_axes(d_lum_ax_dims)
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
 track_ax.plot(np.cos(theta), np.sin(theta),
-         'r', linewidth=1, label='Bounding Circle')
+         'k', linewidth=1, label='Bounding Circle')
 track_ax.plot(np.cos(theta), np.zeros(150), np.sin(theta),
-         'r', linewidth=1)
+         'k', linewidth=1)
 track_ax.plot(np.zeros(75),np.cos(theta[0:75]),np.sin(theta[0:75]),
-         'r', linewidth=1)
-track_ax.plot([-1,0,1], [0,0,0], [0,0,0], 'r', linewidth=1)
-track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'r', linewidth=1)
+         'k', linewidth=1)
+track_ax.plot([-1,0,1], [0,0,0], [0,0,0], 'k', linewidth=1)
+track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 
 
 #__________________________Initial values_____________________________
@@ -107,9 +110,9 @@ y0Squared = Omega_phi_0 - x0Squared
 
 Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 
-state_0 = [np.sqrt(x0Squared),
-           np.sqrt(y0Squared),
-           np.sqrt(Omega_r0)]
+state_0 = [round(np.sqrt(x0Squared),3),
+           round(np.sqrt(y0Squared),3),
+           round(np.sqrt(Omega_r0),3)]
 
 #_________________________Initialise plots________________________________
 #Tkinter works as:
@@ -321,23 +324,32 @@ x_entry_val=tk.StringVar()
 y_entry_val=tk.StringVar()
 z_entry_val=tk.StringVar()
 
-x_entry_label = tk.Label(window, text = '$x$:')
-y_entry_label = tk.Label(window, text = '$y$:')
-z_entry_label = tk.Label(window, text = '$z$:')
+x_entry_label_ax = fig.add_axes([0.075,.525,.05,.075])
+x_entry_label_ax.text(0,0,'$x_0$:')
+x_entry_label_ax.set_axis_off()
 
-x_entry = tk.Entry(window, textvariable = x_entry_val
-            ).place(relx=0.05, rely=0.45, relheight=0.05, relwidth=0.075)
-y_entry = tk.Entry(window, textvariable = y_entry_val
-            ).place(relx=0.15, rely=0.45, relheight=0.05, relwidth=0.075)
-z_entry = tk.Entry(window, textvariable = z_entry_val
-            ).place(relx=0.25, rely=0.45, relheight=0.05, relwidth=0.075)
+y_entry_label_ax = fig.add_axes([0.175,.525,.05,.075])
+y_entry_label_ax.text(0,0,'$y_0$:')
+y_entry_label_ax.set_axis_off()
+
+z_entry_label_ax = fig.add_axes([0.275,.525,.05,.075])
+z_entry_label_ax.text(0,0,'$z_0$:')
+z_entry_label_ax.set_axis_off()
+
+
+x_entry = tk.Entry(window, textvariable = x_entry_val, relief='solid'
+            ).place(relx=0.1, rely=0.457, relheight=0.03, relwidth=0.05)
+y_entry = tk.Entry(window, textvariable = y_entry_val, relief='solid'
+            ).place(relx=0.2, rely=0.457, relheight=0.03, relwidth=0.05)
+z_entry = tk.Entry(window, textvariable = z_entry_val, relief='solid'
+            ).place(relx=0.3, rely=0.457, relheight=0.03, relwidth=0.05)
 
 x_entry_val.set(state_0[0])    
 y_entry_val.set(state_0[1])
 z_entry_val.set(state_0[2])
 
 sub_btn=tk.Button(window, text = 'Submit', command = submit
-            ).place(relx=0.45, rely=0.45, relheight=0.05, relwidth=0.05)
+            ).place(relx=0.375, rely=0.45, relheight=0.05, relwidth=0.05)
 
 #Place Canvas
 canvas.get_tk_widget().place(relheight=1,relwidth=1)

@@ -34,6 +34,9 @@ window = tk.Tk()
 window.title('GUI for Double Potential')
 window.geometry('1600x950')
 
+window_4_report = tk.Tk()
+window_4_report.title('Window to generate plots for report')
+window_4_report.geometry('750x500')
 
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
@@ -59,19 +62,19 @@ gamma_axis_dims = [.6,.7,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
-d_lum_ax_dims = [.075,.125,.35,.35] 
+d_lum_ax_dims = [.125,.125,.35,.35] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
 track_ax.plot(np.cos(theta), np.sin(theta),
-         'r', linewidth=1, label='Bounding Circle')
+         'k', linewidth=1, label='Bounding Circle')
 track_ax.plot(np.cos(theta), np.zeros(150), np.sin(theta),
-         'r', linewidth=1)
+         'k', linewidth=1)
 track_ax.plot(np.zeros(75),np.cos(theta[0:75]),np.sin(theta[0:75]),
-         'r', linewidth=1)
-track_ax.plot([-1,0,1], [0,0,0], [0,0,0], 'r', linewidth=1)
-track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'r', linewidth=1)
+         'k', linewidth=1)
+track_ax.plot([-1,0,1], [0,0,0], [0,0,0], 'k', linewidth=1)
+track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 
 
 #__________________________Initial values_____________________________
@@ -110,10 +113,10 @@ y0Squared = Omega_phi_0 - x0Squared
 
 Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 
-state_0 = [np.sqrt(x0Squared),
-           np.sqrt(y0Squared),
-           np.sqrt(y0Squared) * 1e-1,
-           np.sqrt(Omega_r0)]
+state_0 = [round(np.sqrt(x0Squared),3),
+           round(np.sqrt(y0Squared),3),
+           round(np.sqrt(y0Squared) * 1e-1,3),
+           round(np.sqrt(Omega_r0),3)]
 
 #_________________________Initialise plots________________________________
 #Tkinter works as:
@@ -211,6 +214,11 @@ def update_plot(event):
     lam1 = lambda1_slide.get()
     lam2 = lambda2_slide.get()
 
+    state_0 = [float(x_entry_val.get()), 
+               float(y1_entry_val.get()),
+               float(y2_entry_val.get()), 
+               float(z_entry_val.get())]
+    
     for plot in fixedPoint_plots:
         plot.remove()
     fixedPoint_plots.clear()  # Clear the list of plot objects
@@ -220,6 +228,10 @@ def update_plot(event):
     for i, point in enumerate(fixedPoints):
         plot, = track_ax.plot(point[0], point[1], point[2], 'or')
         fixedPoint_plots.append(plot)
+    
+    x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
+    state0_point.set_data(x_i, y_i)
+    state0_point.set_3d_properties(z_i)
     
     #Plot all paths with updated values
     for i in range(pathnum):
@@ -318,6 +330,58 @@ lambda2_slide.set(lam2_0)
 lambda2_slide.bind("<ButtonRelease-1>", update_plot)
 lambda2_slide.place(relx=0.49, rely=0.05, relheight=0.35, relwidth=0.05)
 lambda2_slide.configure(bg = 'white', borderwidth=0)
+
+def submit():
+    x0 = float(x_entry_val.get())
+    y01 = float(y1_entry_val.get())
+    y02 = float(y2_entry_val.get())
+    z0 = float(z_entry_val.get())
+
+    if x0**2 + y01**2 + y02**2 + z0**2 <= 1:
+        update_plot(0)
+    else:
+        print('Not valid values, check $x^2 + y1^2 + y02^2 + z^2 <= 1$')
+
+x_entry_val=tk.StringVar()
+y1_entry_val=tk.StringVar()
+y2_entry_val=tk.StringVar()
+z_entry_val=tk.StringVar()
+
+x_entry_label_ax = fig.add_axes([0.045,.525,.05,.075])
+x_entry_label_ax.text(0,0,'$x_0$:')
+x_entry_label_ax.set_axis_off()
+
+y1_entry_label_ax = fig.add_axes([0.1225,.525,.05,.075])
+y1_entry_label_ax.text(0,0,'$y_{01}$:')
+y1_entry_label_ax.set_axis_off()
+
+y2_entry_label_ax = fig.add_axes([0.2025,.525,.05,.075])
+y2_entry_label_ax.text(0,0,'$y_{01}$:')
+y2_entry_label_ax.set_axis_off()
+
+
+z_entry_label_ax = fig.add_axes([0.285,.525,.05,.075])
+z_entry_label_ax.text(0,0,'$z_0$:')
+z_entry_label_ax.set_axis_off()
+
+
+x_entry = tk.Entry(window, textvariable = x_entry_val, relief='solid'
+            ).place(relx=0.06, rely=0.457, relheight=0.03, relwidth=0.05)
+y1_entry = tk.Entry(window, textvariable = y1_entry_val, relief='solid'
+            ).place(relx=0.14, rely=0.457, relheight=0.03, relwidth=0.05)
+y2_entry = tk.Entry(window, textvariable = y2_entry_val, relief='solid'
+            ).place(relx=0.22, rely=0.457, relheight=0.03, relwidth=0.05)
+z_entry = tk.Entry(window, textvariable = z_entry_val, relief='solid'
+            ).place(relx=0.3, rely=0.457, relheight=0.03, relwidth=0.05)
+
+x_entry_val.set(state_0[0])    
+y1_entry_val.set(state_0[1])
+y2_entry_val.set(state_0[2])
+z_entry_val.set(state_0[3])
+
+sub_btn=tk.Button(window, text = 'Submit', command = submit
+            ).place(relx=0.375, rely=0.45, relheight=0.05, relwidth=0.05)
+
 
 #Place Canvas
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
@@ -451,7 +515,7 @@ for i in range(pathnum):
 
     track_i = track_ax.plot(
                     pathx, pathy, pathz, 'm', linewidth=2)[0]
-    track_ax.plot(x_i,y_i,z_i, 'cX')
+    state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
     accel_plot, = accel_ax.plot(NAxis,
                     accelerationExpression(pathx,pathy,pathz))
     effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
