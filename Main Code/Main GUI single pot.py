@@ -389,6 +389,9 @@ main_tracks = []
 fixedPoints_plot, = track_ax.plot([], [], [], 'o')
 fixedPoint_labels = []
 
+gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
+gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
+
 for i in range(pathnum):
     lam = lambda_slide.get()
     fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
