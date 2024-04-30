@@ -67,25 +67,6 @@ xinit = np.linspace(-0.99, 0.99, pathnum)
 #3) Set up Figures attached to canvases 
 #4) Add axes to figures as usual
 
-track_ax.set_xlabel('$x$', x=1.02)
-track_ax.set_ylabel('$y$', rotation = 0, y=1.02)
-
-#plot_label = tk.Label(window, text = "Master Plot", width = 10, 
-#                       height = 2).pack(anchor='n')
-
-#Interactive plot, plot lines as in P40
-lam_gam_ax.set(xlim=[0,12],ylim=[0,2])
-lam_gam_ax.set_xlabel('$\lambda^2$', x=1.02)
-lam_gam_ax.set_ylabel('$\gamma$', rotation = 0, y=1.02)
-lam_gam_ax.plot([0,6], [12,2],'k', linestyle = '-')
-lam_gam_ax.plot([0,12],[0,0],'k')
-lam_gam_ax.plot([0,0],[0,2],'k')
-lam_gam_ax.plot([6,6],[0,2],'k')
-lam_gam_ax.plot([0,6],[0,2],'k')
-lam_gam_ax.plot([2,2],[0,2],'k', linestyle = ':')
-lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
-
-
 canvas = FigureCanvasTkAgg(fig, window) 
 #Canvas is where figure is placed to window
 canvas.draw() #Show canvas (ie show figure)
@@ -104,6 +85,29 @@ def ODEs(coords, t, lam, gam):
     dy_dN =      - lam*a*y*x  + a**2*y*A
 
     return [dx_dN, dy_dN]
+
+#___________________________Function for fixed points________________________
+def fixedPoints_func(lam, gam):
+    fixedPoints_labels = ['$O$', '$A^+$', '$A^-$','$B$']
+
+    fixedPoints = np.array([
+    [0, 0],
+    [1, 0],
+    [-1, 0]
+    ])
+
+    if lam**2 < 6:
+        fixedPoints = np.append(fixedPoints,
+                                [[lam/np.sqrt(6),
+                                    np.sqrt(1 - (lam**2)/6)]], axis=0)
+        fixedPoints_labels.append('$C$')
+
+    if lam**2 > 3*gam:
+        fixedPoints = np.append(fixedPoints,
+                                [[np.sqrt(3/2)*gam/lam,
+                                    np.sqrt(3*(2-gam)*gam/2)/lam]], axis=0)
+        fixedPoints_labels.append('$D$')
+    return fixedPoints, fixedPoints_labels
 
 #____________________________Acceleration Region___________________________
 def acceleration(x, y, gam):
@@ -131,6 +135,16 @@ def update_plot(event):
     lam = lambda_slide.get()
     gam =  gamma_slide.get()
 
+    for plot in fixedPoint_plots:
+        plot.remove()
+    fixedPoint_plots.clear()  # Clear the list of plot objects
+
+    # Get new fixed points and plot them
+    fixedPoints, fixedPoints_labels = fixedPoints_func(lam, gam)
+    for i, point in enumerate(fixedPoints):
+        plot, = track_ax.plot(point[0], point[1], 'or')
+        fixedPoint_plots.append(plot)
+    
     #Update cursor star point
     clickpoint.set_data(lam**2, gam)
 
@@ -145,12 +159,7 @@ def update_plot(event):
         solution_x = solution[:, 0]
         solution_y = solution[:, 1]
 
-        solution_acceleration = acceleration(solution_x, solution_y, gam)
-
         main_tracks[i].set_data(solution_x, solution_y)
-        #acceleration_plot_tracks[i].set_ydata(solution_acceleration)
-        #x_tracks[i].set_ydata(solution_x)
-        #y_tracks[i].set_ydata(solution_y)
 
         #Update the quiver vectors
         quiver_vectors = np.array([ODEs([pt[0], pt[1]], N, lam, gam)
@@ -190,7 +199,7 @@ def fibonacci_semicircle(max_radius, num_points):
             points.append([x, y])
 
     return np.array(points)
-
+#This function ONLY done with Chat GPT
 
 # Parameters
 radius = 0.95
@@ -245,15 +254,12 @@ def regions_plot(event):
 #When cursor clicks on region plot update to clicked value
 cid = fig.canvas.mpl_connect('button_press_event', regions_plot)
 
-
-#Lambda Slider Label. Initialise, place, and hide weird borders
-#lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
-#                       height = 2)
-#lambda_slide_label.place(relx=0.75, rely=0.5,
-#                         relheight=0.025, relwidth=0.05)
-#lambda_slide_label.configure(bg = 'white', borderwidth=0)
-
 #Lambda Slider. Initialise, add interaction, place, hide borders
+
+lambda_label_ax = fig.add_axes([.765,.505,.05,.05])
+lambda_label_ax.text(0,0,'$\lambda$ value')
+lambda_label_ax.set_axis_off()
+
 lambda_slide = tk.Scale(window, from_ = 0, to = np.sqrt(12),
                        width = 20, length = 250, resolution=0.001)
 lambda_slide.set(lam_0)
@@ -261,15 +267,11 @@ lambda_slide.bind("<ButtonRelease-1>", update_plot)
 lambda_slide.place(relx=0.75, rely=0.5, relheight=0.3, relwidth=0.075)
 lambda_slide.configure(bg = 'white', borderwidth=0)
 
-#Gamma slider
-##Gamma slider Label. Initialise, place, and hide weird borders
-#gamma_slide_label = tk.Label(window, text = 'r$\gamma$ value', width = 15, 
-#                       height = 2)
-#gamma_slide_label.place(relx=0.45, rely=0.025,
-#                         relheight=0.025, relwidth=0.05)
-#gamma_slide_label.configure(bg = 'white', borderwidth=0)
+#Gamma slider. Initialise, add interaction, place, hide borders
+gamma_label_ax = fig.add_axes([.865,.505,.05,.05])
+gamma_label_ax.text(0,0,'$\gamma$ value')
+gamma_label_ax.set_axis_off()
 
-##Gamma slider. Initialise, add interaction, place, hide borders
 gamma_slide = tk.Scale(window, from_ = 0, to = 2,
                        width = 20, length = 250, resolution=0.001)
 gamma_slide.set(gam_0)
@@ -296,6 +298,7 @@ y_tracks = []
 fill = compute_fill(gam_0)
 fill.set_color([0.1, 0.4, 0.7, 0.5])
 
+fixedPoint_plots = []
 for i in range(pathnum):
     initial_conditions = [xinit[i], 0.01]  #Initial values for x and y
     
@@ -307,24 +310,36 @@ for i in range(pathnum):
 
     solution_x = solution[:, 0]
     solution_y = solution[:, 1]
-
-    #x_plot_i = ax4.plot(n, solution_x, 'm', linewidth=.5)[0]
-    #x_tracks.append(x_plot_i)
-    #x_plot_i.set_visible(True)
-
-    #y_plot_i = ax4.plot(n, solution_y, 'c', linewidth=.5)[0]
-    #y_tracks.append(y_plot_i)
-    #y_plot_i.set_visible(True)
-
-    #solution_acceleration = acceleration(solution_x, solution_y, gam)
     
-    #acceleration_plot_i = ax3.plot(n, solution_acceleration, 'r', linewidth=.5)[0]
-    #acceleration_plot_tracks.append(acceleration_plot_i)
-    #acceleration_plot_i.set_visible(True)
-
     track_i = track_ax.plot(solution_x, solution_y, 'k', linewidth=.5, alpha=0.4)[0]
     main_tracks.append(track_i)
     track_i.set_visible(True)
+
+    fixedPoints, fixedPoints_labels = fixedPoints_func(lam_0, gam_0)
+    for point in fixedPoints:
+        plot, = track_ax.plot(point[0], point[1], 'or')
+        fixedPoint_plots.append(plot)
+
+#_____________________Setting plot labels etc________________________________
+
+track_ax.set_xlabel('$x$', x=1.02)
+track_ax.set_ylabel('$y$', rotation = 0, y=1.02)
+track_ax.set(xticks=[-1,-.5,0,.5,1], yticks=[0,.5,1],
+             xticklabels = ['$-1$','$-1/2$','$0$','$1/2$','$1$'],
+             yticklabels = ['$0$','$1/2$','$1$'])
+
+
+#Interactive plot, plot lines as in P40
+lam_gam_ax.set(xlim=[0,12], ylim=[0,2],)
+lam_gam_ax.set_xlabel('$\lambda^2$', x=1.02)
+lam_gam_ax.set_ylabel('$\gamma$', rotation = 0, y=1.02)
+lam_gam_ax.plot([0,6], [12,2],'k', linestyle = '-')
+lam_gam_ax.plot([0,12],[0,0],'k')
+lam_gam_ax.plot([0,0],[0,2],'k')
+lam_gam_ax.plot([6,6],[0,2],'k')
+lam_gam_ax.plot([0,6],[0,2],'k')
+lam_gam_ax.plot([2,2],[0,2],'k', linestyle = ':')
+lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
 
 
 window.mainloop()
