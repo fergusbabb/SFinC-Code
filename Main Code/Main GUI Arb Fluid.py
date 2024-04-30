@@ -27,22 +27,22 @@ plt.rcParams['ytick.labelsize'] = 10
 #_________________________Set up main window___________________________________
 #Standard tkinter window set up
 window = tk.Tk()
-window.title('Autonomous Systems')
-window.geometry('1600x950')
+window.title('GUI for Arbitrary Fluid')
+window.geometry('1000x950')
 
 
 #Tracks plot figure
-fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
+fig = Figure(figsize=(10, 9.5)) #1000x950 pixels
 fig.set_facecolor('white')
-track_axis_dims = [.0,.5,.45,.5]
-track_ax = fig.add_axes(track_axis_dims)
+track_axis_dims = [.05,.6,.75,.3]
+track_ax = fig.add_axes(track_axis_dims, aspect='equal')
 
 #Colour bar axes
-cbar_ax_dims = [.4,.6,.015,.35]
+cbar_ax_dims = [.8,.6,.015,.3]
 cbar_ax = fig.add_axes(cbar_ax_dims)
 
 #Hubble plot Axes
-lam_gam_dims = [.075,.125,.35,.35] 
+lam_gam_dims = [.15,.2,.55,.3] 
 lam_gam_ax = fig.add_axes(lam_gam_dims)
 
 #Bounding Circle
@@ -148,9 +148,9 @@ def update_plot(event):
         solution_acceleration = acceleration(solution_x, solution_y, gam)
 
         main_tracks[i].set_data(solution_x, solution_y)
-        acceleration_plot_tracks[i].set_ydata(solution_acceleration)
-        x_tracks[i].set_ydata(solution_x)
-        y_tracks[i].set_ydata(solution_y)
+        #acceleration_plot_tracks[i].set_ydata(solution_acceleration)
+        #x_tracks[i].set_ydata(solution_x)
+        #y_tracks[i].set_ydata(solution_y)
 
         #Update the quiver vectors
         quiver_vectors = np.array([ODEs([pt[0], pt[1]], N, lam, gam)
@@ -245,31 +245,40 @@ def regions_plot(event):
 #When cursor clicks on region plot update to clicked value
 cid = fig.canvas.mpl_connect('button_press_event', regions_plot)
 
-#Lambda Slider
-lambda_slide_label = tk.Label(window, text = 'r$\lambda$ value', width = 15, 
-                       height = 2)
-lambda_slide = tk.Scale(window, from_ = 0, to = np.sqrt(12), orient = 'horizontal',
-                       width = 20, length = 250, resolution=0.01)
-lambda_slide.bind("<ButtonRelease-1>", update_plot)
-lambda_slide.set(lam_0)
 
+#Lambda Slider Label. Initialise, place, and hide weird borders
+#lambda_slide_label = tk.Label(window, text = '$\lambda$', width = 15, 
+#                       height = 2)
+#lambda_slide_label.place(relx=0.75, rely=0.5,
+#                         relheight=0.025, relwidth=0.05)
+#lambda_slide_label.configure(bg = 'white', borderwidth=0)
+
+#Lambda Slider. Initialise, add interaction, place, hide borders
+lambda_slide = tk.Scale(window, from_ = 0, to = np.sqrt(12),
+                       width = 20, length = 250, resolution=0.001)
+lambda_slide.set(lam_0)
+lambda_slide.bind("<ButtonRelease-1>", update_plot)
+lambda_slide.place(relx=0.75, rely=0.5, relheight=0.3, relwidth=0.075)
+lambda_slide.configure(bg = 'white', borderwidth=0)
 
 #Gamma slider
-gamma_slide_label = tk.Label(window, text = 'r$\gamma$ value', width = 15, 
-                       height = 2)
-gamma_slide = tk.Scale(window, from_ = 0, to = 2, orient = 'horizontal',
-                       width = 20, length = 250, resolution=0.01)
-gamma_slide.bind("<ButtonRelease-1>", update_plot)
+##Gamma slider Label. Initialise, place, and hide weird borders
+#gamma_slide_label = tk.Label(window, text = 'r$\gamma$ value', width = 15, 
+#                       height = 2)
+#gamma_slide_label.place(relx=0.45, rely=0.025,
+#                         relheight=0.025, relwidth=0.05)
+#gamma_slide_label.configure(bg = 'white', borderwidth=0)
+
+##Gamma slider. Initialise, add interaction, place, hide borders
+gamma_slide = tk.Scale(window, from_ = 0, to = 2,
+                       width = 20, length = 250, resolution=0.001)
 gamma_slide.set(gam_0)
+gamma_slide.bind("<ButtonRelease-1>", update_plot)
+gamma_slide.place(relx=0.85, rely=0.5, relheight=0.3, relwidth=0.075)
+gamma_slide.configure(bg = 'white', borderwidth=0)
 
-
-canvas.get_tk_widget().grid( row=1, column=1, rowspan=3, columnspan=2, ipadx=10, ipady=10)
-lambda_slide_label.grid(     row=1, column=3, rowspan=1, columnspan=1                    )
-lambda_slide.grid(           row=1, column=3, rowspan=1, columnspan=1                    )
-gamma_slide_label.grid(      row=2, column=3, rowspan=1, columnspan=1                    )
-gamma_slide.grid(            row=2, column=3, rowspan=1, columnspan=1                    )
-
-
+#Place Canvas
+canvas.get_tk_widget().place(relheight=1,relwidth=1)
 
 
 #___________________________________Initial Plot____________________________________
@@ -307,7 +316,7 @@ for i in range(pathnum):
     #y_tracks.append(y_plot_i)
     #y_plot_i.set_visible(True)
 
-    solution_acceleration = acceleration(solution_x, solution_y, gam)
+    #solution_acceleration = acceleration(solution_x, solution_y, gam)
     
     #acceleration_plot_i = ax3.plot(n, solution_acceleration, 'r', linewidth=.5)[0]
     #acceleration_plot_tracks.append(acceleration_plot_i)

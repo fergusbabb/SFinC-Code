@@ -31,7 +31,7 @@ plt.rcParams['ytick.labelsize'] = 10
 #_________________________Set up main window________________________________
 #Standard tkinter window set up
 window = tk.Tk()
-window.title('Autonomous Systems')
+window.title('GUI for Matter and Radiation')
 window.geometry('1600x950')
 
 
@@ -375,7 +375,7 @@ cmap = cm.spring
 quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
                     normalize=True, cmap=cmap, length = 0.075,
                     color=cmap(norm(magnitude)), norm=norm,
-                    alpha = 0.5)
+                    alpha = 0.75)
 
 #Plot the colourbar
 cbar = plt.colorbar(quiver, cax=cbar_ax, orientation='vertical')

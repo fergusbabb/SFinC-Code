@@ -31,7 +31,7 @@ plt.rcParams['ytick.labelsize'] = 10
 #_________________________Set up main window________________________________
 #Standard tkinter window set up
 window = tk.Tk()
-window.title('Autonomous Systems')
+window.title('GUI for Double Potential')
 window.geometry('1600x950')
 
 
@@ -240,7 +240,7 @@ def update_plot(event):
         quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
                     normalize=True, cmap=cmap, length = 0.075,
                     color=cmap(norm(magnitude)), norm=norm,
-                    alpha = 0.5)
+                    alpha = 0.75)
         
         #Solve the system of ODEs using odeint
         solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
@@ -405,6 +405,9 @@ cbar.set_label('Magnitude of derivatives')
 main_tracks = []
 fixedPoints_plot, = track_ax.plot([], [], [], 'o')
 fixedPoint_labels = []
+
+gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
+gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
 
 for i in range(pathnum):
     lam1 = lambda1_slide.get()
