@@ -88,12 +88,12 @@ lam2_0 = -1
 lam2_min = -5
 lam2_max = 10
 
-Ni = -5
-NiForward = 10
+Ni = -2
+NiForward = 8
 
 N = np.linspace(0, Ni, 5120)
 NForward = np.linspace(0, NiForward, 256)
-
+zForward = np.exp(-NForward)-1
 z = np.exp(-N) - 1
 c = 1 #3e5     # Given in km/s
 V = z * c   # ""
@@ -284,8 +284,8 @@ def update_plot(event):
         Radn_dens_plot.set_ydata(pathz**2)
         Mass_dens_plot.set_ydata(1 - pathx**2 - pathy**2 - pathz**2)
         Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
-        y1_dens_plot.set_ydata(pathy1**2)
-        y2_dens_plot.set_ydata(pathy2**2)
+        #y1_dens_plot.set_ydata(pathy1**2)
+        #y2_dens_plot.set_ydata(pathy2**2)
         
         #Update EoS plot
         path_gamma_phi = gamma_phi(pathx, pathy) 
@@ -511,10 +511,10 @@ for i in range(pathnum):
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
     Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathy**2, 'b',
             label = "$\Omega_\phi = x^2 + y^2$")
-    y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
-            label = "$y_1^2$")
-    y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
-            label = "$y_2^2$")
+    #y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
+    #        label = "$y_1^2$")
+    #y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
+    #        label = "$y_2^2$")
 
     x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
 
@@ -570,7 +570,10 @@ gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
 gamma_ax.legend()
 
 dens_ax.set_ylabel("Density Parameters")
-dens_ax.set_xlabel("$N$")
+#dens_ax.set_xlabel("$-\ln(1+z)$")
+dens_ax.set_xlabel("$z$")
+#dens_ax.set(xticklabels=np.around(np.exp(-dens_ax.get_xticks())-1,3))
+#print(np.exp(-dens_ax.get_xticks())-1)
 #dens_ax.legend()
 
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
