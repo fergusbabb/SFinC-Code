@@ -80,18 +80,18 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 #__________________________Initial values_____________________________
 pathnum = 1
 
-lam1_0 = 0.38583349
-lam1_min = -4
-lam1_max = 4
+lam1_0 = 1 #0.38583349
+lam1_min = -5
+lam1_max = 10
 
-lam2_0 = 1
-lam2_min = -4
-lam2_max = 4
+lam2_0 = -1
+lam2_min = -5
+lam2_max = 10
 
-Ni = -20
+Ni = -5
 NiForward = 10
 
-N = np.linspace(0, Ni, 512)
+N = np.linspace(0, Ni, 5120)
 NForward = np.linspace(0, NiForward, 256)
 
 z = np.exp(-N) - 1
@@ -113,10 +113,16 @@ y0Squared = Omega_phi_0 - x0Squared
 
 Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 
-state_0 = [round(np.sqrt(x0Squared),3),
-           round(np.sqrt(y0Squared),3),
-           round(np.sqrt(y0Squared) * 1e-1,3),
-           round(np.sqrt(Omega_r0),3)]
+#state_0 = [round(np.sqrt(x0Squared),3),
+#           round(np.sqrt(y0Squared),3),
+#           round(np.sqrt(y0Squared) * 1e-1,3),
+#           round(np.sqrt(Omega_r0),3)]
+
+state_0 = [0.0000001,
+           0.00001,
+           0.00001,
+           0.975]
+
 
 #_________________________Initialise plots________________________________
 #Tkinter works as:
@@ -356,7 +362,7 @@ y1_entry_label_ax.text(0,0,'$y_{01}$:')
 y1_entry_label_ax.set_axis_off()
 
 y2_entry_label_ax = fig.add_axes([0.2025,.525,.05,.075])
-y2_entry_label_ax.text(0,0,'$y_{01}$:')
+y2_entry_label_ax.text(0,0,'$y_{02}$:')
 y2_entry_label_ax.set_axis_off()
 
 
@@ -572,6 +578,7 @@ dens_ax.set_xlabel("$N$")
 d_lum_ax.set_ylabel("$d_L$ [Mpc]")
 d_lum_ax.set_xlabel("$z$ [km/s]")
 d_lum_ax.set_xlim(left = 0.01)
+d_lum_ax.set(ylim=[1e-1,1e3])
 #d_lum_ax.legend(loc=4)
 d_lum_ax.set_xscale('log', base=10, subs=[10**x
                          for x in (0.25, 0.5, 0.75)], nonpositive='mask')
