@@ -91,10 +91,11 @@ lam2_max = 10
 Ni = -5
 NiForward = 10
 
-N = np.linspace(0, Ni, 5120)
+N = np.linspace(0, Ni, 1)
 NForward = np.linspace(0, NiForward, 256)
 
-z = np.exp(-N) - 1
+z = np.exp(-N)
+zForward = np.exp(-NForward)
 c = 1 #3e5     # Given in km/s
 V = z * c   # ""
 h = 0.738
@@ -498,22 +499,22 @@ for i in range(pathnum):
     pathy = np.sqrt(pathy1**2 + pathy2**2)
     
     NAxis = np.append(N[::-1], NForward)
-    zAxis = np.append(z[::-1], NForward)
+    zAxis = np.append(z[::-1], zForward)
   
 
     path_gamma_phi = gamma_phi(pathx, pathy)
 
     dens_ax.plot([0,0], [-0.2,1.2], 'k--')
-    Radn_dens_plot, = dens_ax.plot(NAxis, pathz**2, 'r',
+    Radn_dens_plot, = dens_ax.plot(zAxis, pathz**2, 'r',
             label = "$\Omega_r = z^2$")
-    Mass_dens_plot, = dens_ax.plot(NAxis,
+    Mass_dens_plot, = dens_ax.plot(zAxis,
          1 - pathx**2 - pathy**2 - pathz**2, 'g',
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
-    Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathy**2, 'b',
+    Phi_dens_plot, = dens_ax.plot(zAxis, pathx**2 + pathy**2, 'b',
             label = "$\Omega_\phi = x^2 + y^2$")
-    y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
+    y1_dens_plot, =  dens_ax.plot(zAxis, pathy1**2, 'b--',
             label = "$y_1^2$")
-    y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
+    y2_dens_plot, =  dens_ax.plot(zAxis, pathy2**2, 'b--',
             label = "$y_2^2$")
 
     x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
@@ -522,9 +523,9 @@ for i in range(pathnum):
     track_i = track_ax.plot(
                     pathx, pathy, pathz, 'm', linewidth=2)[0]
     state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
-    accel_plot, = accel_ax.plot(NAxis,
+    accel_plot, = accel_ax.plot(zAxis,
                     accelerationExpression(pathx,pathy,pathz))
-    effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
+    effective_eos, = gamma_ax.plot(zAxis, gamma_phi(pathx, pathy), 'k',
             label = r'$\gamma_\phi = {2x^2}/{(x^2+y^2)}$')
 
     main_tracks.append(track_i)
@@ -585,6 +586,7 @@ d_lum_ax.set_xscale('log', base=10, subs=[10**x
 d_lum_ax.set_yscale('log', base=10, subs=[10**x
                          for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
+dens_ax.set_xscale('log', base=10, nonpositive='mask')
 
 
 #Run the code
