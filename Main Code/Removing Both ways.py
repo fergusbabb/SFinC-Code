@@ -34,9 +34,9 @@ window = tk.Tk()
 window.title('GUI for Double Potential')
 window.geometry('1600x950')
 
-window_4_report = tk.Tk()
-window_4_report.title('Window to generate plots for report')
-window_4_report.geometry('750x500')
+#window_4_report = tk.Tk()
+#window_4_report.title('Window to generate plots for report')
+#window_4_report.geometry('750x500')
 
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
@@ -88,11 +88,11 @@ lam2_0 = -1
 lam2_min = -5
 lam2_max = 10
 
-Ni = -8
-NiForward = 16
+Ni = -20
+#NiForward = 16
 
 N = np.linspace(0, Ni, 8000)
-NForward = np.linspace(0, NiForward, 16000)
+#NForward = np.linspace(0, NiForward, 16000)
 
 z = np.exp(-N) - 1
 c = 1 #3e5     # Given in km/s
@@ -118,7 +118,7 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 #           round(np.sqrt(y0Squared) * 1e-1,3),
 #           round(np.sqrt(Omega_r0),3)]
 
-state_0 = [0.0000001,
+state_0 = [0.000001,
            0.00001,
            0.00001,
            0.975]
@@ -268,11 +268,11 @@ def update_plot(event):
         pathz  = solution[:, 3]
         
         #Add both ways
-        solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
-        pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
-        pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
-        pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
-        pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
+        #solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
+        #pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
+        #pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
+        #pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
+        #pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
 
         pathy = np.sqrt(pathy1**2 + pathy2**2)
 
@@ -285,22 +285,22 @@ def update_plot(event):
                                     pathx,pathy,pathz)
         accel_plot.set_ydata(accel_plot_new_data)
 
-        NAxis = np.append(N[::-1], NForward)
+        #NAxis = np.append(N[::-1], NForward)
         #Find when in N each event occured
         indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
-        NAxis -= NAxis[indexToday]
+        N -= N[indexToday]
     
         indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
         indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens))
         indexMPeak = np.argmax(mass_dens)
-        rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-        mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+        rScalingLine.set_xdata([N[0], N[-1]])
+        mScalingLine.set_xdata([N[0], N[-1]])
         #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
 
         #todayLine.set_ydata([0,0])
-        MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
-        MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
-        MPeakLine.set_xdata([NAxis[indexMPeak], NAxis[indexMPeak]])
+        MR_eqLine.set_xdata([N[indexMR_eq], N[indexMR_eq]])
+        MPhi_eqLine.set_xdata([N[indexMPhi_eq], N[indexMPhi_eq]])
+        MPeakLine.set_xdata([N[indexMPeak], N[indexMPeak]])
 
         #Update relative density plots
         Radn_dens_plot.set_ydata(pathz**2)
@@ -309,13 +309,13 @@ def update_plot(event):
         #y1_dens_plot.set_ydata(pathy1**2)
         #y2_dens_plot.set_ydata(pathy2**2)
         
-        mr_eq_val = getRedshift(NAxis[indexMR_eq])
+        mr_eq_val = getRedshift(N[indexMR_eq])
         mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
 
-        m_max_val = getRedshift(NAxis[indexMPeak])
+        m_max_val = getRedshift(N[indexMPeak])
         m_max_text.set_text(f'max$(\Omega_m):\; z={m_max_val:.3f}$')
     
-        msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
+        msf_eq_val = getRedshift(N[indexMPhi_eq])
         msf_eq_text.set_text(f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
 
         #rsf_eq_val = 
@@ -504,8 +504,8 @@ cbar.set_label('Magnitude of derivatives')
 main_tracks = []
 fixedPoint_plots = []
 
-rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
-mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
+rScalingLine, = gamma_ax.plot([N[-1], N[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
+mScalingLine, = gamma_ax.plot([N[-1], N[-1]], [1, 1], "k--", linewidth = 0.5)
 
 for i in range(pathnum):
     lam1 = lambda1_slide.get()
@@ -524,11 +524,11 @@ for i in range(pathnum):
     pathy2 = solution[:, 2]
     pathz  = solution[:, 3]
 
-    solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
-    pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
-    pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
-    pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
-    pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
+    #solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
+    #pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
+    #pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
+    #pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
+    #pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
     
     pathySquared = pathy1**2 + pathy2**2
     pathy = np.sqrt(pathySquared)
@@ -536,8 +536,8 @@ for i in range(pathnum):
     path_gamma_phi = gamma_phi(pathx, pathy)
     
 
-    NAxis = np.append(N[::-1], NForward)
-    zAxis = np.append(z[::-1], NForward)
+    #N = np.append(N[::-1], N)
+    zAxis = z
     
     
     rad_dens = pathz**2
@@ -546,7 +546,7 @@ for i in range(pathnum):
     total_dens = rad_dens + mass_dens + phi_dens
     
     indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
-    NAxis -= NAxis[indexToday]
+    N -= N[indexToday]
 
     #Find when in N each event occured
     indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
@@ -559,21 +559,21 @@ for i in range(pathnum):
     #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
 
     todayLine, = dens_ax.plot([0,0], [-0.2,1.2], 'k--')
-    MR_eqLine, = dens_ax.plot([NAxis[indexMR_eq],NAxis[indexMR_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
-    MPhi_eqLine, = dens_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
-    MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k:', linewidth = 0.75)
+    MR_eqLine, = dens_ax.plot([N[indexMR_eq],N[indexMR_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
+    MPhi_eqLine, = dens_ax.plot([N[indexMPhi_eq],N[indexMPhi_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
+    MPeakLine, = dens_ax.plot([N[indexMPeak],N[indexMPeak]], [-0.2,1.2], 'k:', linewidth = 0.75)
 
-    mr_eq_val = getRedshift(NAxis[indexMR_eq])
+    mr_eq_val = getRedshift(N[indexMR_eq])
     mr_eq_ax = fig.add_axes([0.425,.45,.05,.075])
     mr_eq_text = mr_eq_ax.text(0,0,f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
     mr_eq_ax.set_axis_off()
 
-    m_max_val = getRedshift(NAxis[indexMPeak])
+    m_max_val = getRedshift(N[indexMPeak])
     m_max_ax = fig.add_axes([0.425,.425,.05,.075])
     m_max_text = m_max_ax.text(0,0,f'max$(\Omega_m):\; z={m_max_val:.3f}$')
     m_max_ax.set_axis_off()
     
-    msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
+    msf_eq_val = getRedshift(N[indexMPhi_eq])
     msf_eq_ax = fig.add_axes([0.425,.4,.05,.075])
     msf_eq_text = msf_eq_ax.text(0,0,f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
     msf_eq_ax.set_axis_off()
@@ -583,11 +583,11 @@ for i in range(pathnum):
     #rsf_eq_text = rsf_eq_ax.text(0,0,f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
     #rsf_eq_ax.set_axis_off()
 
-    Radn_dens_plot, = dens_ax.plot(NAxis, rad_dens, 'r.',
+    Radn_dens_plot, = dens_ax.plot(N, rad_dens, 'r.',
             label = "$\Omega_r = z^2$")
-    Mass_dens_plot, = dens_ax.plot(NAxis, mass_dens, 'g.',
+    Mass_dens_plot, = dens_ax.plot(N, mass_dens, 'g.',
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
-    Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b.',
+    Phi_dens_plot, = dens_ax.plot(N, phi_dens, 'b.',
             label = "$\Omega_\phi = x^2 + y^2$")
     
     #y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
@@ -603,9 +603,9 @@ for i in range(pathnum):
     track_i = track_ax.plot(
                     pathx, pathy, pathz, 'm', linewidth=2)[0]
     state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
-    accel_plot, = accel_ax.plot(NAxis,
+    accel_plot, = accel_ax.plot(N,
                     accelerationExpression(pathx,pathy,pathz))
-    effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
+    effective_eos, = gamma_ax.plot(N, gamma_phi(pathx, pathy), 'k',
             label = r'$\gamma_\phi = {2x^2}/{(x^2+y^2)}$')
 
     main_tracks.append(track_i)
