@@ -89,7 +89,7 @@ lam2_min = -5
 lam2_max = 10
 
 Ni = -5
-NiForward = 10
+NiForward = 20
 
 N = np.linspace(0, Ni, 5120)
 NForward = np.linspace(0, NiForward, 256)
@@ -543,7 +543,7 @@ for i in range(pathnum):
 
 
 #Plot the redshift plots for LCDM with different values of Cosm. Const.
-for Omega_Lambda in [0.65, 0.7, 0.75]:
+for Omega_Lambda in [0.7]:
     d_L = (c/H_0) * (1 + z) * odeint(
         d_L_IntegrandConst, 0, z, args=(
             zAxis, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
