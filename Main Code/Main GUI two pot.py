@@ -37,6 +37,9 @@ window.geometry('1600x950')
 window_4_report = tk.Tk()
 window_4_report.title('Window to generate plots for report')
 window_4_report.geometry('750x500')
+fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig2.set_facecolor('white')
+ax2 = fig2.add_axes([.1,.2,.8,.7,])
 
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
@@ -284,19 +287,19 @@ def update_plot(event):
         accel_plot_new_data = accelerationExpression(
                                     pathx,pathy,pathz)
         accel_plot.set_ydata(accel_plot_new_data)
-
+    
         NAxis = np.append(N[::-1], NForward)
         #Find when in N each event occured
         indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
-        NAxis -= NAxis[indexToday]
+        
     
         indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
-        indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens))
+        indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
         indexMPeak = np.argmax(mass_dens)
         rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
         mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
         #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
-
+        NAxis -= NAxis[indexToday]
         #todayLine.set_ydata([0,0])
         MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
         MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
@@ -308,6 +311,8 @@ def update_plot(event):
         Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
         #y1_dens_plot.set_ydata(pathy1**2)
         #y2_dens_plot.set_ydata(pathy2**2)
+
+        window_plot.set_ydata(np.abs(phi_dens-Omega_phi_0))
         
         mr_eq_val = getRedshift(NAxis[indexMR_eq])
         mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
@@ -336,6 +341,7 @@ def update_plot(event):
 
     #Show plots
     fig.canvas.draw()
+    fig2.canvas.draw()
 
 
 
@@ -426,6 +432,15 @@ sub_btn=tk.Button(window, text = 'Submit', command = submit
 
 #Place Canvas
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
+
+
+#Canvas is where figure is placed to window
+canvas2 = FigureCanvasTkAgg(fig2, window_4_report)
+canvas2.draw() #Show canvas (ie show figure)
+canvas2.get_tk_widget().place(relheight=1,relwidth=1)
+
+#Show the navigation toolbar
+NavigationToolbar2Tk(canvas2, window_4_report)
 
 #________________________________Initialise the Quiver______________________________
 #The method for placing anchor points for the Quivers was aided with ChatGPT
@@ -546,13 +561,14 @@ for i in range(pathnum):
     total_dens = rad_dens + mass_dens + phi_dens
     
     indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
-    NAxis -= NAxis[indexToday]
-
+    
     #Find when in N each event occured
     indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
-    indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens))
+    indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
     indexMPeak = np.argmax(mass_dens)
-    
+    NAxis -= NAxis[indexToday]
+
+    window_plot, = ax2.plot(NAxis, np.abs(phi_dens-Omega_phi_0))
     
     #rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
     #mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
@@ -583,11 +599,11 @@ for i in range(pathnum):
     #rsf_eq_text = rsf_eq_ax.text(0,0,f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
     #rsf_eq_ax.set_axis_off()
 
-    Radn_dens_plot, = dens_ax.plot(NAxis, rad_dens, 'r.',
+    Radn_dens_plot, = dens_ax.plot(NAxis, rad_dens, 'r',
             label = "$\Omega_r = z^2$")
-    Mass_dens_plot, = dens_ax.plot(NAxis, mass_dens, 'g.',
+    Mass_dens_plot, = dens_ax.plot(NAxis, mass_dens, 'g',
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
-    Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b.',
+    Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b',
             label = "$\Omega_\phi = x^2 + y^2$")
     
     #y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
@@ -652,6 +668,7 @@ accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 
 gamma_ax.set_ylabel("$\gamma_\phi$")
 gamma_ax.set_yticks([0, 1, 4/3, 2])
+gamma_ax.set(yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
 gamma_ax.legend()
 
