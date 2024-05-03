@@ -192,6 +192,11 @@ def accelerationExpression(x, y, z):
     HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
     return (1/2) * (-3*x**2 + 3*y**2 - z**2 - 1)
 
+#_______________________________Find Redshift from e-foldings________________
+def getRedshift(N):
+    return np.exp(-N) - 1
+
+
 #_______________________________Effective Eos Parameter______________________
 def gamma_phi(x, y):
     return (2*x**2) / (x**2 + y**2)
@@ -215,6 +220,7 @@ def d_L_IntegrandScalar(currentTotal, z, zaxis,
 
 #_______________________________Update track plots___________________________
 def update_plot(event):
+    global NAxis
     #Before update_plot is called lam sliders are updated
     #Sliders will always have current lambda/ gamma values
     lam1 = lambda1_slide.get()
@@ -279,6 +285,22 @@ def update_plot(event):
         accel_plot_new_data = accelerationExpression(
                                     pathx,pathy,pathz)
         accel_plot.set_ydata(accel_plot_new_data)
+
+        # Shift so N=0 is today
+        indexToday = np.argmin(np.abs(pathx**2 + pathySquared - Omega_phi_0))
+        indexMR_eq = np.argmin(np.abs(1 - pathx**2 - pathySquared - 2*pathz**2)[0:indexToday])
+        indexMPhi_eq = np.argmin(np.abs(1 - 2*pathx**2 - 2*pathySquared - pathz**2)[indexMR_eq:-1]) + indexMR_eq
+        indexMPeak = np.argmin(pathx**2 + pathySquared + pathz**2)
+        
+        NAxis -= NAxis[indexToday]
+        rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+        mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+        gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
+
+##        todayLine.set_ydata([0,0])
+        MR_eqLine.set_ydata([NAxis[indexMR_eq],NAxis[indexMR_eq]])
+        MPhi_eqLine.set_ydata([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]])
+        MPeakLine.set_ydata([NAxis[indexMPeak],NAxis[indexMPeak]])
 
         #Update relative density plots
         Radn_dens_plot.set_ydata(pathz**2)
@@ -469,8 +491,8 @@ cbar.set_label('Magnitude of derivatives')
 main_tracks = []
 fixedPoint_plots = []
 
-gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
-gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
+rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
+mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
 
 for i in range(pathnum):
     lam1 = lambda1_slide.get()
@@ -494,22 +516,41 @@ for i in range(pathnum):
     pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
     pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
     pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
-
-    pathy = np.sqrt(pathy1**2 + pathy2**2)
+    
+    pathySquared = pathy1**2 + pathy2**2
+    pathy = np.sqrt(pathySquared)
+    
+    path_gamma_phi = gamma_phi(pathx, pathy)
     
     NAxis = np.append(N[::-1], NForward)
     zAxis = np.append(z[::-1], NForward)
-  
 
-    path_gamma_phi = gamma_phi(pathx, pathy)
+    # Find when in N each event occured
+    indexToday = np.argmin(np.abs(pathx**2 + pathySquared - Omega_phi_0))
+    indexMR_eq = np.argmin(np.abs(1 - pathx**2 - pathySquared - 2*pathz**2)[0:indexToday])
+    indexMPhi_eq = np.argmin(np.abs(1 - 2*pathx**2 - 2*pathySquared - pathz**2)[indexMR_eq:-1]) + indexMR_eq
+    indexMPeak = np.argmin(pathx**2 + pathySquared + pathz**2)
+    
+    NAxis -= NAxis[indexToday]
+    rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
 
-    dens_ax.plot([0,0], [-0.2,1.2], 'k--')
+    todayLine, = dens_ax.plot([0,0], [-0.2,1.2], 'k--')
+    MR_eqLine, = dens_ax.plot([NAxis[indexMR_eq],NAxis[indexMR_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
+    MPhi_eqLine, = dens_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
+    MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k:', linewidth = 0.75)
+
+    print("Matter-S.F. equality happens at \tz = " + str(getRedshift(NAxis[indexMPhi_eq])))
+    print("Peak Matter domination happens at \tz = " + str(getRedshift(NAxis[indexMPeak])))
+    print("Matter-Radiation equality happens at \tz = " + str(getRedshift(NAxis[indexMR_eq])))
+
     Radn_dens_plot, = dens_ax.plot(NAxis, pathz**2, 'r',
             label = "$\Omega_r = z^2$")
     Mass_dens_plot, = dens_ax.plot(NAxis,
-         1 - pathx**2 - pathy**2 - pathz**2, 'g',
+         1 - pathx**2 - pathySquared - pathz**2, 'g',
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
-    Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathy**2, 'b',
+    Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathySquared, 'b',
             label = "$\Omega_\phi = x^2 + y^2$")
     y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
             label = "$y_1^2$")
@@ -566,6 +607,7 @@ accel_ax.set_ylabel("Acceleration")
 accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
 
 gamma_ax.set_ylabel("$\gamma_\phi$")
+gamma_ax.set_yticks([0, 1, 4/3, 2])
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
 gamma_ax.legend()
 
