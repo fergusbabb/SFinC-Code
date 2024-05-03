@@ -62,7 +62,7 @@ gamma_axis_dims = [.6,.7,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
-d_lum_ax_dims = [.125,.125,.35,.35] 
+d_lum_ax_dims = [.0675,.125,.35,.35] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
 
 #Bounding Circle
@@ -88,11 +88,11 @@ lam2_0 = -1
 lam2_min = -5
 lam2_max = 10
 
-Ni = -5
-NiForward = 20
+Ni = -8
+NiForward = 16
 
-N = np.linspace(0, Ni, 5120)
-NForward = np.linspace(0, NiForward, 256)
+N = np.linspace(0, Ni, 8000)
+NForward = np.linspace(0, NiForward, 16000)
 
 z = np.exp(-N) - 1
 c = 1 #3e5     # Given in km/s
@@ -286,7 +286,7 @@ def update_plot(event):
                                     pathx,pathy,pathz)
         accel_plot.set_ydata(accel_plot_new_data)
 
-        # Shift so N=0 is today
+        # hift so N=0 is today
         indexToday = np.argmin(np.abs(pathx**2 + pathySquared - Omega_phi_0))
         indexMR_eq = np.argmin(np.abs(1 - pathx**2 - pathySquared - 2*pathz**2)[0:indexToday])
         indexMPhi_eq = np.argmin(np.abs(1 - 2*pathx**2 - 2*pathySquared - pathz**2)[indexMR_eq:-1]) + indexMR_eq
@@ -295,20 +295,33 @@ def update_plot(event):
         NAxis -= NAxis[indexToday]
         rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
         mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-        gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
+        #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
 
-##        todayLine.set_ydata([0,0])
-        MR_eqLine.set_ydata([NAxis[indexMR_eq],NAxis[indexMR_eq]])
-        MPhi_eqLine.set_ydata([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]])
-        MPeakLine.set_ydata([NAxis[indexMPeak],NAxis[indexMPeak]])
+        #todayLine.set_ydata([0,0])
+        MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
+        MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
+        MPeakLine.set_xdata([NAxis[indexMPeak], NAxis[indexMPeak]])
 
         #Update relative density plots
         Radn_dens_plot.set_ydata(pathz**2)
         Mass_dens_plot.set_ydata(1 - pathx**2 - pathy**2 - pathz**2)
         Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
-        y1_dens_plot.set_ydata(pathy1**2)
-        y2_dens_plot.set_ydata(pathy2**2)
+        #y1_dens_plot.set_ydata(pathy1**2)
+        #y2_dens_plot.set_ydata(pathy2**2)
         
+        mr_eq_val = getRedshift(NAxis[indexMR_eq])
+        mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
+
+        m_max_val = getRedshift(NAxis[indexMPeak])
+        m_max_text.set_text(f'max$(\Omega_m):\; z={m_max_val:.3f}$')
+    
+        msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
+        msf_eq_text.set_text(f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
+
+        #rsf_eq_val = 
+        #rsf_eq_text.set_text(f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
+
+
         #Update EoS plot
         path_gamma_phi = gamma_phi(pathx, pathy) 
         effective_eos.set_ydata(path_gamma_phi)
@@ -532,18 +545,38 @@ for i in range(pathnum):
     indexMPeak = np.argmin(pathx**2 + pathySquared + pathz**2)
     
     NAxis -= NAxis[indexToday]
-    rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-    mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-    gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
+    #rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    #mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
 
     todayLine, = dens_ax.plot([0,0], [-0.2,1.2], 'k--')
     MR_eqLine, = dens_ax.plot([NAxis[indexMR_eq],NAxis[indexMR_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
     MPhi_eqLine, = dens_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
     MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k:', linewidth = 0.75)
 
-    print("Matter-S.F. equality happens at \tz = " + str(getRedshift(NAxis[indexMPhi_eq])))
-    print("Peak Matter domination happens at \tz = " + str(getRedshift(NAxis[indexMPeak])))
-    print("Matter-Radiation equality happens at \tz = " + str(getRedshift(NAxis[indexMR_eq])))
+    mr_eq_val = getRedshift(NAxis[indexMR_eq])
+    mr_eq_ax = fig.add_axes([0.425,.45,.05,.075])
+    mr_eq_text = mr_eq_ax.text(0,0,f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
+    mr_eq_ax.set_axis_off()
+
+    m_max_val = getRedshift(NAxis[indexMPeak])
+    m_max_ax = fig.add_axes([0.425,.425,.05,.075])
+    m_max_text = m_max_ax.text(0,0,f'max$(\Omega_m):\; z={m_max_val:.3f}$')
+    m_max_ax.set_axis_off()
+    
+    msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
+    msf_eq_ax = fig.add_axes([0.425,.4,.05,.075])
+    msf_eq_text = msf_eq_ax.text(0,0,f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
+    msf_eq_ax.set_axis_off()
+
+    #rsf_eq_val = 
+    #rsf_eq_ax = fig.add_axes([0.425,.375,.05,.075])
+    #rsf_eq_text = rsf_eq_ax.text(0,0,f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
+    #rsf_eq_ax.set_axis_off()
+    
+    #print("Matter-S.F. equality happens at \tz = " + str(getRedshift(NAxis[indexMPhi_eq])))
+    #print("Peak Matter domination happens at \tz = " + str(getRedshift(NAxis[indexMPeak])))
+    #print("Matter-Radiation equality happens at \tz = " + str(getRedshift(NAxis[indexMR_eq])))
 
     Radn_dens_plot, = dens_ax.plot(NAxis, pathz**2, 'r',
             label = "$\Omega_r = z^2$")
@@ -552,10 +585,10 @@ for i in range(pathnum):
             label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
     Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathySquared, 'b',
             label = "$\Omega_\phi = x^2 + y^2$")
-    y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
-            label = "$y_1^2$")
-    y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
-            label = "$y_2^2$")
+    #y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
+    #        label = "$y_1^2$")
+    #y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
+    #        label = "$y_2^2$")
 
     x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
 
@@ -580,6 +613,10 @@ for i in range(pathnum):
 
     integral_plot, = d_lum_ax.plot(d_L, V,
                         label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0))
+    
+    gamma_ax.set(xlim=[-8,3])
+    accel_ax.set(xlim=[-8,3])
+    dens_ax.set(xlim=[-8,3])
 
 
 

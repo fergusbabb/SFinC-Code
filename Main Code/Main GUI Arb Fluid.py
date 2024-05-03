@@ -30,6 +30,9 @@ window = tk.Tk()
 window.title('GUI for Arbitrary Fluid')
 window.geometry('1000x950')
 
+window_4_report = tk.Tk()
+window_4_report.title('Window to generate plots for report')
+window_4_report.geometry('750x500')
 
 #Tracks plot figure
 fig = Figure(figsize=(10, 9.5)) #1000x950 pixels
