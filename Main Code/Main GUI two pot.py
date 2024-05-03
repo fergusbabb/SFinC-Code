@@ -83,11 +83,11 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 #__________________________Initial values_____________________________
 pathnum = 1
 
-lam1_0 = 1 #0.38583349
+lam1_0 = 1.4 #0.38583349
 lam1_min = -5
 lam1_max = 10
 
-lam2_0 = -1
+lam2_0 = 10
 lam2_min = -5
 lam2_max = 10
 
@@ -580,22 +580,22 @@ for i in range(pathnum):
     MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k:', linewidth = 0.75)
 
     mr_eq_val = getRedshift(NAxis[indexMR_eq])
-    mr_eq_ax = fig.add_axes([0.425,.45,.05,.075])
+    mr_eq_ax = fig.add_axes([0.45,.45,.05,.075])
     mr_eq_text = mr_eq_ax.text(0,0,f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
     mr_eq_ax.set_axis_off()
 
     m_max_val = getRedshift(NAxis[indexMPeak])
-    m_max_ax = fig.add_axes([0.425,.425,.05,.075])
+    m_max_ax = fig.add_axes([0.45,.425,.05,.075])
     m_max_text = m_max_ax.text(0,0,f'max$(\Omega_m):\; z={m_max_val:.3f}$')
     m_max_ax.set_axis_off()
     
     msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
-    msf_eq_ax = fig.add_axes([0.425,.4,.05,.075])
+    msf_eq_ax = fig.add_axes([0.45,.4,.05,.075])
     msf_eq_text = msf_eq_ax.text(0,0,f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
     msf_eq_ax.set_axis_off()
 
     #rsf_eq_val = 
-    #rsf_eq_ax = fig.add_axes([0.425,.375,.05,.075])
+    #rsf_eq_ax = fig.add_axes([0.45,.375,.05,.075])
     #rsf_eq_text = rsf_eq_ax.text(0,0,f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
     #rsf_eq_ax.set_axis_off()
 
