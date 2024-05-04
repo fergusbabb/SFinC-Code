@@ -65,8 +65,11 @@ gamma_axis_dims = [.6,.7,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
-d_lum_ax_dims = [.0675,.125,.35,.35] 
+d_lum_ax_dims = [.0675,.225,.35,.2675] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
+
+d_lum_err_dims = [.0675, .1125,.35,.1]
+d_lum_err_ax = fig.add_axes(d_lum_err_dims)
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
@@ -206,11 +209,16 @@ def gamma_phi(x, y):
 
 #_______________________________Integrand Forms______________________________
 
-def d_L_IntegrandConst(currentTotal, z, zaxis,
-                        Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
-    #Return 1/W(z) for constant LCDM model
-    return 1/np.sqrt((1 - Omega_Lambda)*(1+z)**3 + 
-                     (Omega_Lambda))
+def d_L_Dark_Energy(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_Lambda0, w_Lambda):
+    return 1/np.sqrt(Omega_m0*(1+z)**3 +
+                     Omega_r0*(1+z)**4 + 
+                     Omega_Lambda0*(1+z)**(3 * (1 + w_Lambda)))
+
+#def d_L_IntegrandConst(currentTotal, z, zaxis,
+#                        Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
+#    #Return 1/W(z) for constant LCDM model
+#    return 1/np.sqrt((1 - Omega_Lambda)*(1+z)**3 + 
+#                     (Omega_Lambda))
 
 def d_L_IntegrandScalar(currentTotal, z, zaxis,
                          Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
@@ -337,7 +345,7 @@ def update_plot(event):
             zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
         
-        integral_plot.set_xdata(d_L)
+        integral_plot.set_ydata(d_L)
 
     #Show plots
     fig.canvas.draw()
@@ -634,23 +642,48 @@ for i in range(pathnum):
             )).transpose()[0]
     
 
-    integral_plot, = d_lum_ax.plot(d_L, V,
-                        label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0))
+    integral_plot, = d_lum_ax.plot(z, d_L,
+                        label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0), color = 'r')
     
     gamma_ax.set(xlim=[-8,3])
     accel_ax.set(xlim=[-8,3])
     dens_ax.set(xlim=[-8,3])
 
 
+d_lum_w_plots = []
+d_L_for_fill = []
+d_lum_err_plots = []
+Omega_Lambda0 = Omega_phi_0
+
+w_Lam_0 = -1
+w_pos_err = 0.25
+w_neg_err = -0.25
+
+for w_Lambda in [w_Lam_0 + w_neg_err,
+                 w_Lam_0,
+                 w_Lam_0 + w_pos_err]:
+    d_L = (c/H_0) * (1 + z) * odeint(
+        d_L_Dark_Energy, 0, z, args=(
+            zAxis, Omega_m0, Omega_r0, Omega_Lambda0, w_Lambda
+        )
+    ).transpose()[0]
+
+    #d_lum_w_i, = d_lum_ax.plot(z, d_L, label = "$w_\Lambda = $" + str(w_Lambda))
+    d_L_for_fill.append(d_L)
+    #d_lum_w_plots.append(d_lum_w_i)
+
+d_lum_ax.fill_between(z, d_L_for_fill[0], d_L_for_fill[-1], alpha=0.2)
+d_lum_ax.plot(z, d_L_for_fill[1], label = "$w_\Lambda = $" + str(w_Lam_0), color = 'b')
+
 
 #Plot the redshift plots for LCDM with different values of Cosm. Const.
-for Omega_Lambda in [0.7]:
-    d_L = (c/H_0) * (1 + z) * odeint(
-        d_L_IntegrandConst, 0, z, args=(
-            zAxis, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
-            )).transpose()[0]
-    
-    d_lum_ax.plot(d_L, z, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
+#for Omega_Lambda in [0.7]:
+#    d_L = (c/H_0) * (1 + z) * odeint(
+#        d_L_IntegrandConst, 0, z, args=(
+#            zAxis, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
+#            )).transpose()[0]
+#    
+#    d_lum_ax.plot(d_L, z, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
 
 
 
@@ -679,14 +712,18 @@ dens_ax.set_xlabel("$N$")
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
 
 d_lum_ax.set_ylabel("$d_L$ [Mpc]")
-d_lum_ax.set_xlabel("$z$ [km/s]")
-d_lum_ax.set_xlim(left = 0.01)
-d_lum_ax.set(ylim=[1e-1,1e3])
+d_lum_err_ax.set_xlabel("$z$ [km/s]")
+#d_lum_err_ax.set_xlim([0.01,1])
+#d_lum_ax.set_xlim([0.01,1])
+#d_lum_ax.set(ylim=[1e-1,100])
+d_lum_ax.tick_params(axis='x', which='both', labelbottom=False) 
 #d_lum_ax.legend(loc=4)
-d_lum_ax.set_xscale('log', base=10, subs=[10**x
-                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
-d_lum_ax.set_yscale('log', base=10, subs=[10**x
-                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+#d_lum_ax.set_xscale('log', base=10, subs=[10**x
+#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+#d_lum_err_ax.set_xscale('log', base=10, subs=[10**x
+#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+#d_lum_ax.set_yscale('log', base=10, subs=[10**x
+#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
 
 
