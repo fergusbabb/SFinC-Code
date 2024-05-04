@@ -558,10 +558,7 @@ for i in range(pathnum):
     
     path_gamma_phi = gamma_phi(pathx, pathy)
     
-
-    NAxis = np.append(N[::-1], NForward)
-    zAxis = np.append(z[::-1], NForward)
-    
+    NAxis = np.append(N[::-1], NForward)    
     
     rad_dens = pathz**2
     mass_dens = 1 - pathx**2 - pathySquared - pathz**2
@@ -575,6 +572,7 @@ for i in range(pathnum):
     indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
     indexMPeak = np.argmax(mass_dens)
     NAxis -= NAxis[indexToday]
+    zAxis = getRedshift(NAxis)
 
     window_plot, = ax2.plot(NAxis, np.abs(phi_dens-Omega_phi_0))
     
