@@ -685,9 +685,11 @@ def setup_luminosity_plots():
     for (Omega_Lambda0, color), d_L_values in zip(configurations, d_L_for_fill):
         # Plot the middle value normally and fill between the bounds
         plot_d_luminosity(d_lum_ax, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
-                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0}, w_{{\Lambda}}={w_Lam_0}$", color)
+                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0},"+
+                          f"w_{{\Lambda}}={w_Lam_0}$", color)
         plot_d_luminosity(ax2, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
-                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0}, w_{{\Lambda}}={w_Lam_0}$", color)
+                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0},"+
+                          f"w_{{\Lambda}}={w_Lam_0}", color)
 #Call it to actually plot
 setup_luminosity_plots()
 
