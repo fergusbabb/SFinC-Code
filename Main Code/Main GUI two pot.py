@@ -320,7 +320,7 @@ def update_plot(event):
         #y1_dens_plot.set_ydata(pathy1**2)
         #y2_dens_plot.set_ydata(pathy2**2)
 
-        window_plot.set_ydata(np.abs(phi_dens-Omega_phi_0))
+        #window_plot.set_ydata(np.abs(phi_dens-Omega_phi_0))
         
         mr_eq_val = getRedshift(NAxis[indexMR_eq])
         mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
@@ -346,6 +346,7 @@ def update_plot(event):
             )).transpose()[0]
         
         integral_plot.set_ydata(d_L)
+        integral_plot_ax2.set_ydata(d_L)
 
     #Show plots
     fig.canvas.draw()
@@ -574,7 +575,6 @@ for i in range(pathnum):
     NAxis -= NAxis[indexToday]
     zAxis = getRedshift(NAxis)
 
-    window_plot, = ax2.plot(NAxis, np.abs(phi_dens-Omega_phi_0))
     
     #rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
     #mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
@@ -638,52 +638,58 @@ for i in range(pathnum):
         d_L_IntegrandScalar, 0, z, args=(
             zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
-    
+
 
     integral_plot, = d_lum_ax.plot(z, d_L,
-                        label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0), color = 'r')
+                        label = f"$\Omega_{{\phi 0}} = {Omega_phi_0}$", color = 'b', linewidth=2)
+    integral_plot_ax2, = ax2.plot(z, d_L,
+                        label = f"$\Omega_{{\phi 0}} = {Omega_phi_0}$", color = 'b', linewidth=2)
     
     gamma_ax.set(xlim=[-8,3])
     accel_ax.set(xlim=[-8,3])
     dens_ax.set(xlim=[-8,3])
 
 
-d_lum_w_plots = []
-d_L_for_fill = []
-d_lum_err_plots = []
-Omega_Lambda0 = Omega_phi_0
-
 w_Lam_0 = -1
-w_pos_err = 0.25
-w_neg_err = -0.25
+w_pos_err = 0.5
+w_neg_err = -0.5
 
-for w_Lambda in [w_Lam_0 + w_neg_err,
-                 w_Lam_0,
-                 w_Lam_0 + w_pos_err]:
-    d_L = (c/H_0) * (1 + z) * odeint(
-        d_L_Dark_Energy, 0, z, args=(
-            zAxis, Omega_m0, Omega_r0, Omega_Lambda0, w_Lambda
-        )
-    ).transpose()[0]
+def plot_d_luminosity(ax, z, d_L, d_L_bounds, label, color, fill_alpha=0.2):
+    ax.plot(z, d_L, label=label, color=color)
+    if d_L_bounds is not None:
+        ax.fill_between(z, d_L_bounds[0], d_L_bounds[1], alpha=fill_alpha, color=color)
 
-    #d_lum_w_i, = d_lum_ax.plot(z, d_L, label = "$w_\Lambda = $" + str(w_Lambda))
-    d_L_for_fill.append(d_L)
-    #d_lum_w_plots.append(d_lum_w_i)
+def setup_luminosity_plots():
+    d_L_for_fill = []
+    #Define colors and Omega_Lambda0 values
+    configurations = [
+        (0.68, 'red'),
+        (0.73, 'gold')
+    ]
 
-d_lum_ax.fill_between(z, d_L_for_fill[0], d_L_for_fill[-1], alpha=0.2)
-d_lum_ax.plot(z, d_L_for_fill[1], label = "$w_\Lambda = $" + str(w_Lam_0), color = 'b')
-
-
-#Plot the redshift plots for LCDM with different values of Cosm. Const.
-#for Omega_Lambda in [0.7]:
-#    d_L = (c/H_0) * (1 + z) * odeint(
-#        d_L_IntegrandConst, 0, z, args=(
-#            zAxis, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
-#            )).transpose()[0]
-#    
-#    d_lum_ax.plot(d_L, z, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
-
-
+    #Gather all d_L values for bounds and normal plotting
+    for Omega_Lambda0, color in configurations:
+        temp_list = []
+        for w_Lambda in [w_Lam_0 + w_neg_err,
+                         w_Lam_0,
+                         w_Lam_0 + w_pos_err]:
+            d_L = (c/H_0) * (1 + z) * odeint(
+                d_L_Dark_Energy, 0, z, args=(
+                    zAxis, 1-Omega_Lambda0-Omega_r0, Omega_r0, Omega_Lambda0, w_Lambda
+                )
+            ).transpose()[0]
+            temp_list.append(d_L)
+        d_L_for_fill.append(temp_list)  #Store d_L values for each configuration
+    
+    #Plot and fill between using stored d_L values
+    for (Omega_Lambda0, color), d_L_values in zip(configurations, d_L_for_fill):
+        # Plot the middle value normally and fill between the bounds
+        plot_d_luminosity(d_lum_ax, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
+                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0}, w_{{\Lambda}}={w_Lam_0}$", color)
+        plot_d_luminosity(ax2, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
+                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0}, w_{{\Lambda}}={w_Lam_0}$", color)
+#Call it to actually plot
+setup_luminosity_plots()
 
 #_____________________Setting plot labels etc________________________________
 
@@ -697,14 +703,12 @@ track_ax.set_box_aspect([2, 1, 1])
 accel_ax.set_ylabel("Acceleration")
 accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
 
-gamma_ax.set_ylabel("$\gamma_\phi$")
-gamma_ax.set_yticks([0, 1, 4/3, 2])
-gamma_ax.set(yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
+gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], 
+             yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
 gamma_ax.legend()
 
-dens_ax.set_ylabel("Density Parameters")
-dens_ax.set_xlabel("$N$")
+dens_ax.set(xlabel="$N$", ylabel="Density Parameters")
 #dens_ax.legend()
 
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
@@ -716,6 +720,7 @@ d_lum_err_ax.set_xlabel("$z$")
 #d_lum_ax.set(ylim=[1e-1,100])
 d_lum_ax.tick_params(axis='x', which='both', labelbottom=False) 
 #d_lum_ax.legend(loc=4)
+
 #d_lum_ax.set_xscale('log', base=10, subs=[10**x
 #                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 #d_lum_err_ax.set_xscale('log', base=10, subs=[10**x
@@ -723,8 +728,9 @@ d_lum_ax.tick_params(axis='x', which='both', labelbottom=False)
 #d_lum_ax.set_yscale('log', base=10, subs=[10**x
 #                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
-
-
+ax2.legend(loc=4)
+ax2.set_ylabel("$d_L$ [Mpc]")
+ax2.set_xlabel('$z$')
 #Run the code
 window.mainloop()
 #End
