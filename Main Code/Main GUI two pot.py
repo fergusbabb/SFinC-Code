@@ -710,7 +710,7 @@ dens_ax.set_xlabel("$N$")
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
 
 d_lum_ax.set_ylabel("$d_L$ [Mpc]")
-d_lum_err_ax.set_xlabel("$z$ [km/s]")
+d_lum_err_ax.set_xlabel("$z$")
 #d_lum_err_ax.set_xlim([0.01,1])
 #d_lum_ax.set_xlim([0.01,1])
 #d_lum_ax.set(ylim=[1e-1,100])
