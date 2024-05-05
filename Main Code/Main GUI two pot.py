@@ -340,7 +340,7 @@ def update_plot(event):
         effective_eos.set_ydata(path_gamma_phi)
         
         #Update redshift plot
-        d_L = (c/H_0) * (1 + z) * odeint(
+        d_L = (1 + z) * odeint(
         d_L_IntegrandScalar, 0, z, args=(
             zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
@@ -634,7 +634,7 @@ for i in range(pathnum):
     track_i.set_visible(True)
 
     
-    d_L = (c/H_0) * (1 + z) * odeint(
+    d_L = (1 + z) * odeint(
         d_L_IntegrandScalar, 0, z, args=(
             zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
             )).transpose()[0]
@@ -673,7 +673,7 @@ def setup_luminosity_plots():
         for w_Lambda in [w_Lam_0 + w_neg_err,
                          w_Lam_0,
                          w_Lam_0 + w_pos_err]:
-            d_L = (c/H_0) * (1 + z) * odeint(
+            d_L = (1 + z) * odeint(
                 d_L_Dark_Energy, 0, z, args=(
                     zAxis, 1-Omega_Lambda0-Omega_r0, Omega_r0, Omega_Lambda0, w_Lambda
                 )
@@ -715,7 +715,7 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters")
 
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
 
-d_lum_ax.set_ylabel("$d_L$ [Mpc]")
+d_lum_ax.set_ylabel("$H_0 d_L / c$")
 d_lum_err_ax.set_xlabel("$z$")
 #d_lum_err_ax.set_xlim([0.01,1])
 d_lum_ax.set_xlim([0.01,30])
@@ -731,7 +731,7 @@ d_lum_ax.tick_params(axis='x', which='both', labelbottom=False)
 #                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
 ax2.legend(loc=4)
-ax2.set_ylabel("$d_L$ [Mpc]")
+ax2.set_ylabel("$H_0 d_L / c$")
 ax2.set_xlabel('$z$')
 ax2.set_xlim([0.01,30])
 ax2.set(ylim=[0,3])
