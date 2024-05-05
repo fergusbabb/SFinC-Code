@@ -718,8 +718,8 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters")
 d_lum_ax.set_ylabel("$d_L$ [Mpc]")
 d_lum_err_ax.set_xlabel("$z$")
 #d_lum_err_ax.set_xlim([0.01,1])
-#d_lum_ax.set_xlim([0.01,1])
-#d_lum_ax.set(ylim=[1e-1,100])
+d_lum_ax.set_xlim([0.01,30])
+d_lum_ax.set(ylim=[0,3])
 d_lum_ax.tick_params(axis='x', which='both', labelbottom=False) 
 #d_lum_ax.legend(loc=4)
 
@@ -733,6 +733,12 @@ d_lum_ax.tick_params(axis='x', which='both', labelbottom=False)
 ax2.legend(loc=4)
 ax2.set_ylabel("$d_L$ [Mpc]")
 ax2.set_xlabel('$z$')
+ax2.set_xlim([0.01,30])
+ax2.set(ylim=[0,3])
+
+
+
+
 #Run the code
 window.mainloop()
 #End

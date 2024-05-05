@@ -128,7 +128,7 @@ def compute_fill(gam):
     x = np.linspace(-1, 1, 401)
     boundary = acceleration_y_boundary(x, gam)
     xWhere = np.where(boundary < np.sqrt(1-x**2), True, False)
-    return track_ax.fill_between(x, boundary, np.sqrt(1-x**2), where = xWhere, alpha=0.25)
+    return track_ax.fill_between(x, boundary, np.sqrt(1-x**2), where = xWhere, alpha=0.2, color = 'm')
     
     
 #_______________________________Update track plots___________________________
@@ -137,6 +137,10 @@ def update_plot(event):
     #Sliders will always have current lambda/ gamma values
     lam = lambda_slide.get()
     gam =  gamma_slide.get()
+
+    global fill
+    fill.remove()
+    fill = compute_fill(gam)# = plt.fill_between(x, acceleration_y_boundary(x), np.sqrt(1-x**2), where = xWhere)
 
     for plot in fixedPoint_plots:
         plot.remove()
@@ -177,10 +181,7 @@ def update_plot(event):
                     color=cmap(norm(magnitude)), norm=norm,
                     cmap=cmap)
         
-    global fill
-    fill.remove()
-    fill = compute_fill(gam)# = plt.fill_between(x, acceleration_y_boundary(x), np.sqrt(1-x**2), where = xWhere)
-    fill.set_color([0.1, 0.4, 0.7, 0.5])
+
 
     #Show plots
     fig.canvas.draw()
@@ -240,16 +241,17 @@ clickpoint, = lam_gam_ax.plot(lam_0**2, gam_0, 'r*')
 
 #Define function for interaction with plot
 def regions_plot(event):
-    #Find x,y of cursor
-    ix, iy = event.xdata, event.ydata
+    if event.inaxes == lam_gam_ax:
+        #Find x,y of cursor
+        ix, iy = event.xdata, event.ydata
+        #Update lambda, gamma values from interaction
+        lambda_slide.set(np.sqrt(ix))
+        gamma_slide.set(iy)
+        clickpoint.set_data(ix, iy)
 
-    #Update lambda, gamma values from interaction
-    lambda_slide.set(np.sqrt(ix))
-    gamma_slide.set(iy)
-    clickpoint.set_data(ix, iy)
-
-    #Update plot for new values
-    update_plot(event)
+        #Update plot for new values
+        update_plot(event)
+    
 
 
 #____________________________Defining Widgets_____________________________________
@@ -323,7 +325,6 @@ x_tracks = []
 y_tracks = []
 
 fill = compute_fill(gam_0)
-#fill.set_color([0.1, 0.4, 0.7, 0.5])
 
 fixedPoint_plots = []
 for i in range(pathnum):
@@ -375,6 +376,6 @@ lam_gam_ax.plot([0,6],[0,2],'k')
 lam_gam_ax.plot([2,2],[0,2],'k', linestyle = ':')
 #lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
 
-
+NavigationToolbar2Tk(canvas, window)
 window.mainloop()
 #End
