@@ -20,8 +20,8 @@ ctypes.windll.shcore.SetProcessDpiAwareness(1)
 #Personal plotting preferences
 
 plt.style.use('classic')
-##plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-##                     "font.serif": ["Computer Modern Serif"]})
+plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+                    "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=12, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
