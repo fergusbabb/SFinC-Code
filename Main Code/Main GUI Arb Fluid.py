@@ -20,9 +20,9 @@ ctypes.windll.shcore.SetProcessDpiAwareness(1)
 #Personal plotting preferences
 plt.rcParams.update({"text.usetex": True, "font.family": "serif",
                      "font.serif": ["Computer Modern Serif"]})
-plt.rc('axes', labelsize=12, titlesize=15)
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
+plt.rc('axes', labelsize=14, titlesize=15)
+plt.rcParams['xtick.labelsize'] = 12
+plt.rcParams['ytick.labelsize'] = 12
 
 #_________________________Set up main window___________________________________
 #Standard tkinter window set up
@@ -32,32 +32,46 @@ window.geometry('1000x950')
 
 window_4_report = tk.Tk()
 window_4_report.title('Window to generate plots for report')
+#for track plots
+#window_4_report.geometry('900x600')
+#fig2 = Figure(figsize=(9, 6)) #900x600 pixels
+
+#for lambda gamma plot
 window_4_report.geometry('750x500')
+fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig2.set_facecolor('white')
+
 
 #Tracks plot figure
 fig = Figure(figsize=(10, 9.5)) #1000x950 pixels
 fig.set_facecolor('white')
 track_axis_dims = [.05,.6,.75,.3]
 track_ax = fig.add_axes(track_axis_dims, aspect='equal')
+#track_axis_dims2 = [.1,.15,.75,.8]
+#track_ax = fig2.add_axes(track_axis_dims2, aspect='equal')
 
 #Colour bar axes
 cbar_ax_dims = [.8,.6,.015,.3]
 cbar_ax = fig.add_axes(cbar_ax_dims)
+#cbar_ax_dims2 = [.875,.25,.015,.6]
+#cbar_ax = fig2.add_axes(cbar_ax_dims2)
 
 #Hubble plot Axes
-lam_gam_dims = [.15,.2,.55,.3] 
-lam_gam_ax = fig.add_axes(lam_gam_dims)
+#lam_gam_dims = [.15,.2,.55,.3] 
+#lam_gam_ax = fig.add_axes(lam_gam_dims)
+lam_gam_dims2 = [.15,.25,.7,.6] 
+lam_gam_ax = fig2.add_axes(lam_gam_dims2)
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
 track_ax.plot(np.cos(theta), np.sin(theta),
-         'k', linewidth=1, label='Bounding Circle')
+         'k', linewidth=1)
 track_ax.plot([-1,1], [0,0], 'k', linewidth=1)
 
 
 #Initial values
 gam_0 = 1
-lam_0 = 3
+lam_0 = 1
 pathnum = 50
 N = np.linspace(0, 8, 1000) 
 xinit = np.linspace(-0.99, 0.99, pathnum)
@@ -128,7 +142,8 @@ def compute_fill(gam):
     x = np.linspace(-1, 1, 401)
     boundary = acceleration_y_boundary(x, gam)
     xWhere = np.where(boundary < np.sqrt(1-x**2), True, False)
-    return track_ax.fill_between(x, boundary, np.sqrt(1-x**2), where = xWhere, alpha=0.2, color = 'm')
+    return track_ax.fill_between(x, boundary, np.sqrt(1-x**2),
+                                 where = xWhere, alpha=0.2, color = 'orange', label = 'Accelerating region')
     
     
 #_______________________________Update track plots___________________________
@@ -180,11 +195,12 @@ def update_plot(event):
         quiver = track_ax.quiver(x_ins, y_ins, u, v,
                     color=cmap(norm(magnitude)), norm=norm,
                     cmap=cmap)
-        
+    track_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda = {lambda_slide.get():.2f}$')
 
 
     #Show plots
     fig.canvas.draw()
+    fig2.canvas.draw()
 
 def fibonacci_semicircle(max_radius, num_points):
     points = []
@@ -237,7 +253,7 @@ cbar.set_label('Magnitude of derivatives')
 
 #_________________________Cursor interactivity_______________________
 #Initial cursor point
-clickpoint, = lam_gam_ax.plot(lam_0**2, gam_0, 'r*')
+clickpoint, = lam_gam_ax.plot(lam_0**2, gam_0, 'r*', alpha=0)
 
 #Define function for interaction with plot
 def regions_plot(event):
@@ -264,7 +280,7 @@ lambda_label_ax = fig.add_axes([.765,.505,.05,.05])
 lambda_label_ax.text(0,0,'$\lambda$ value')
 lambda_label_ax.set_axis_off()
 
-lambda_slide = tk.Scale(window, from_ = 0, to = np.sqrt(12),
+lambda_slide = tk.Scale(window, from_ = 0.01, to = np.sqrt(12),
                        width = 20, length = 250, resolution=0.001)
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
@@ -276,7 +292,7 @@ gamma_label_ax = fig.add_axes([.865,.505,.05,.05])
 gamma_label_ax.text(0,0,'$\gamma$ value')
 gamma_label_ax.set_axis_off()
 
-gamma_slide = tk.Scale(window, from_ = 0, to = 2,
+gamma_slide = tk.Scale(window, from_ = 0.01, to = 2,
                        width = 20, length = 250, resolution=0.001)
 gamma_slide.set(gam_0)
 gamma_slide.bind("<ButtonRelease-1>", update_plot)
@@ -286,6 +302,13 @@ gamma_slide.configure(bg = 'white', borderwidth=0)
 #Place Canvas
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
 
+#Canvas is where figure is placed to window
+canvas2 = FigureCanvasTkAgg(fig2, window_4_report)
+canvas2.draw() #Show canvas (ie show figure)
+canvas2.get_tk_widget().place(relheight=1,relwidth=1)
+
+#Show the navigation toolbar
+NavigationToolbar2Tk(canvas2, window_4_report)
 
 #___________________________________Initial Plot____________________________________
 
@@ -350,12 +373,14 @@ for i in range(pathnum):
 
 #_____________________Setting plot labels etc________________________________
 
-track_ax.set_xlabel('$x$', x=1.02)
-track_ax.set_ylabel('$y$', rotation = 0, y=1.02)
+track_ax.set_xlabel('$x$', x=1)
+track_ax.set_ylabel('$y$', rotation = 0, y=1)
 track_ax.set(xticks=[-1,-.5,0,.5,1], yticks=[0,.5,1],
+             xlim = [-1.1,1.1], ylim=[-0.1,1.1],
              xticklabels = ['$-1$','$-1/2$','$0$','$1/2$','$1$'],
-             yticklabels = ['$0$','$1/2$','$1$'])
-
+             yticklabels = ['$0$','$1/2$','$1$'],
+             title = f'$\gamma={gamma_slide.get():.0f},\; \lambda = {lambda_slide.get():.0f}$')
+track_ax.legend()
 
 #Interactive plot, plot lines as in P40
 lam_gam_ax.set_xlabel('$\lambda^2$', x=1.02)
@@ -363,10 +388,10 @@ lam_gam_ax.set_ylabel('$\gamma$', rotation = 0, y=1.02)
 lam_gam_ax.set(xlim=[0,12], ylim=[0,2],
                yticks=[0,2/3,1,2], yticklabels=['$0$','$2/3$','$1$','$2$'],
                xticks=[0,2,6,12],  xticklabels=['$0$','$2$','$6$','$12$'])
-lam_gam_ax.text(1,1.5,'Ia')
-lam_gam_ax.text(3,1.5,'Ib')
-lam_gam_ax.text(4,2/3,'II')
-lam_gam_ax.text(9,1.5,'III')
+lam_gam_ax.text(1,1.5,'Ia', size='14')
+lam_gam_ax.text(3,1.5,'Ib', size='14')
+lam_gam_ax.text(4,2/3,'II', size='14')
+lam_gam_ax.text(9,1.5,'III', size='14')
 
 lam_gam_ax.plot([0,6], [12,2],'k', linestyle = '-')
 lam_gam_ax.plot([0,12],[0,0],'k')
