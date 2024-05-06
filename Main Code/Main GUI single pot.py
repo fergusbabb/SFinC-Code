@@ -70,10 +70,10 @@ accel_ax = fig.add_axes(accel_axis_dims)
 #accel_ax = fig2.add_axes(accel_axis_dims2)
 
 #EoS Axes
-#gamma_axis_dims = [.625,.675,.35,.275]
-#gamma_ax = fig.add_axes(gamma_axis_dims)
-gamma_axis_dims2 = [.15,.25,.8,.7]
-gamma_ax = fig2.add_axes(gamma_axis_dims2)
+gamma_axis_dims = [.625,.675,.35,.275]
+gamma_ax = fig.add_axes(gamma_axis_dims)
+#gamma_axis_dims2 = [.15,.25,.8,.7]
+#gamma_ax = fig2.add_axes(gamma_axis_dims2)
 
 #Hubble plot Axes
 d_lum_ax_dims = [.0675,.125,.35,.3675] 
@@ -245,8 +245,8 @@ def update_plot(event):
         fixedPoint_plots.append(plot)
 
     x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
-    state0_point.set_data(x_i, y_i)
-    state0_point.set_3d_properties(z_i)
+    #state0_point.set_data(x_i, y_i)
+    #state0_point.set_3d_properties(z_i)
     
 
     #Update the quiver vectors
@@ -260,7 +260,7 @@ def update_plot(event):
     quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
                 normalize=True, cmap=cmap, length = 0.075,
                 color=cmap(norm(magnitude)), norm=norm,
-                alpha = 0.5, linewidth=1)
+                alpha = 0.75, linewidth=1)
     
     #Solve the system of ODEs using odeint
     solution = odeint(ODEs, state_0, N, args = (lam,))
@@ -613,7 +613,7 @@ Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b')
 x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
 
 
-state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
+# state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
 track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
 accel_plot, = accel_ax.plot(NAxis,
@@ -639,8 +639,7 @@ d_L = (c) * (1 + z) * odeint(
 setup_luminosity_plots()
 
 integral_plot, = d_lum_ax.plot(V, d_L,
-                    label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0))
-
+                    label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0), color = 'b', linewidth=2)
 
 
 
@@ -698,12 +697,12 @@ accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
-#gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
+gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
 
 #Additional code, along with commenting out above line, for report figures
-gamma_ax.yaxis.set_ticks_position('both')
-gamma_ax.legend(fontsize=12)
-gamma_ax.set(xlabel="$N$")
+#gamma_ax.yaxis.set_ticks_position('both')
+#gamma_ax.legend(fontsize=12)
+#gamma_ax.set(xlabel="$N$")
 
 
 d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',

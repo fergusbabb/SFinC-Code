@@ -122,7 +122,7 @@ H_0 = 100*h # km/(s Mpc)
 xinit = np.linspace(-0.99, 0.99, pathnum)
 
 #Observed Values
-Omega_phi_0 = 0.73
+Omega_phi_0 = 0.738
 gamma_phi_value = 0.013
 Omega_r0 = 4.984e-5
 
@@ -266,8 +266,8 @@ def update_plot(event):
         fixedPoint_plots.append(plot)
     
     x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
-    state0_point.set_data(x_i, y_i)
-    state0_point.set_3d_properties(z_i)
+    #state0_point.set_data(x_i, y_i)
+    #state0_point.set_3d_properties(z_i)
     
     #Plot all paths with updated values
 
@@ -524,7 +524,7 @@ cmap = cm.spring
 quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
                     normalize=True, cmap=cmap, length = 0.075,
                     color=cmap(norm(magnitude)), norm=norm,
-                    alpha = 0.5, linewidth=1)
+                    alpha = 0.75, linewidth=1)
 
 #Plot the colourbar
 cbar = plt.colorbar(quiver, cax=cbar_ax, orientation='vertical')
@@ -667,7 +667,7 @@ Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b',
 x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
 
 
-state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
+# state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
 track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
 accel_plot, = accel_ax.plot(NAxis,
@@ -695,6 +695,18 @@ setup_luminosity_plots()
 
 integral_plot, = d_lum_ax.plot(z, d_L,
                     label = f"$\Omega_{{\phi 0}} = {Omega_phi_0}$", color = 'b', linewidth=2)
+
+#________________Plotting combined potential for two potentials___________
+
+# comb_pot_ax_dims = [.0675,.125,.35,.3675] 
+# comb_pot_ax = fig2.add_axes(comb_pot_ax_dims)
+
+# phi_range = np.linspace(-4,10,2000)
+
+# V0_1 = 1
+# V0_2 = 2
+
+# V1 = V0_1*np.exp(-abs(lam1_0))
 
 
 
@@ -750,7 +762,7 @@ accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
-#gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
+gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
 
 #Additional code, along with commenting out above line, for report figures
 # gamma_ax.yaxis.set_ticks_position('both')
@@ -764,7 +776,7 @@ d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
               xticklabels = ['$0$','$1$','$2$', '$3$'],
               yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
 
-#d_lum_ax.legend(loc=4)
+d_lum_ax.legend(loc='best', fontsize=12)
 
 
 
