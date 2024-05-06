@@ -32,6 +32,12 @@ window = tk.Tk()
 window.title('GUI for Double Potential')
 window.geometry('1600x950')
 
+
+'''
+To produce report figures comment out the ax_dims and ax = fig.add... , and uncomment
+the ax_dims2 and ax = fig2.add...
+'''
+
 window_4_report = tk.Tk()
 window_4_report.title('Window to generate plots for report')
 window_4_report.geometry('750x500')
@@ -57,25 +63,25 @@ cbar_ax = fig.add_axes(cbar_ax_dims)
 #Relative Density axes
 dens_axis_dims = [.625,.125,.35,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
-#dens_axis_dims2 = [.1,.25,.8,.7]
+#dens_axis_dims2 = [.15,.25,.8,.7]
 #dens_ax = fig2.add_axes(dens_axis_dims2)
 
 #Acceleration axes
 accel_axis_dims = [.625,.4,.35,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
-#accel_axis_dims2 = [.1,.25,.8,.7]
+#accel_axis_dims2 = [.15,.25,.8,.7]
 #accel_ax = fig2.add_axes(accel_axis_dims2)
 
 #EoS Axes
 gamma_axis_dims = [.625,.675,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
-#gamma_axis_dims2 = [.1,.25,.8,.7]
+#gamma_axis_dims2 = [.15,.25,.8,.7]
 #gamma_ax = fig2.add_axes(gamma_axis_dims2)
 
 #Hubble plot Axes
 d_lum_ax_dims = [.0675,.125,.35,.3675] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
-#d_lum_ax_dims2 = [.1,.25,.8,.7]
+#d_lum_ax_dims2 = [.15,.25,.8,.7]
 #d_lum_ax = fig2.add_axes(d_lum_ax_dims2)
 
 
@@ -655,7 +661,6 @@ Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b',
 #        label = "$y_1^2$")
 #y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
 #        label = "$y_2^2$")
-#dens_ax.legend()
 
 
 
@@ -667,8 +672,8 @@ track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
 accel_plot, = accel_ax.plot(NAxis,
                 accelerationExpression(pathx,pathy,pathz),'orange')
-effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
-        label = r'$\gamma_\phi = {2x^2}/{(x^2+y^2)}$')
+effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'springgreen',
+        label = r'$\gamma_\phi = 2x^2/(x^2+y^2)$')
 
 fixedPoints, fixedPoints_labels = fixedPoints_func([lam1,lam2])
 for point in fixedPoints:
@@ -691,9 +696,6 @@ setup_luminosity_plots()
 integral_plot, = d_lum_ax.plot(z, d_L,
                     label = f"$\Omega_{{\phi 0}} = {Omega_phi_0}$", color = 'b', linewidth=2)
 
-gamma_ax.set(xlim=[-8,3])
-accel_ax.set(xlim=[-8,3])
-dens_ax.set(xlim=[-8,3])
 
 
 #_____________________Setting plot labels etc________________________________
@@ -706,21 +708,14 @@ track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
 track_ax.set_box_aspect([2, 1, 1])
 track_ax.axis("off")
 
-accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
-             yticks=[-1,-1/2,0,1/2,1])
-accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
-
-gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], 
-             yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
-gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
-gamma_ax.legend()
-
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
-            yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
+            yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
+            xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
+            xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
 
-#Additional code for making report plots
+#Additional code for making paper plots
 # legend_lines1 = []
 # legend_lines1.append([todayLine, MR_eqLine, MPeakLine, MPhi_eqLine])
 # legend_lines2 = []
@@ -730,13 +725,37 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
 # dens_ax.text(NAxis[indexMPeak]-1,1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
 # dens_ax.text(NAxis[indexMPhi_eq]-0.5,1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
 
-
 # legend1 = dens_ax.legend(legend_lines1[0], ["Today","$\Omega_m=\Omega_r$","max$(\Omega_m)$",
-#                                             "$\Omega_m=\Omega_\phi$"], loc=2, fontsize=12)
+#                                             "$\Omega_m=\Omega_\phi$"], loc='upper left', fontsize=12)
 # legend2 = dens_ax.legend(legend_lines2[0], ['$\Omega_r$', '$\Omega_m$', '$\Omega_\phi$'],
-#                          loc=1, fontsize=12)
+#                          loc='center left', bbox_to_anchor=(0, .45), fontsize=12)
 # dens_ax.add_artist(legend1)
 
+# dens_ax.yaxis.set_ticks_position('both')
+
+
+accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
+             yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
+            xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
+            xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+accel_ax.tick_params(axis='x', which='both', labelbottom=False)
+
+#Additional code, along with commenting out above line, for report figures
+# accel_ax.yaxis.set_ticks_position('both')
+# accel_ax.set(xlabel="$N$")
+# static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
+
+
+
+gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
+            yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
+            xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+#gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
+
+#Additional code, along with commenting out above line, for report figures
+# gamma_ax.yaxis.set_ticks_position('both')
+# gamma_ax.legend(fontsize=12)
+# gamma_ax.set(xlabel="$N$")
 
 
 d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
@@ -745,7 +764,7 @@ d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
               xticklabels = ['$0$','$1$','$2$', '$3$'],
               yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
 
-
+#d_lum_ax.legend(loc=4)
 
 
 
