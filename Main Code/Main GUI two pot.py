@@ -18,8 +18,6 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
-
-#Personal plotting preferences
 plt.rcParams.update({"text.usetex": True, "font.family": "serif",
                      "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=14, titlesize=15)
@@ -53,23 +51,22 @@ cbar_ax_dims = [.375,.6,.015,.35]
 cbar_ax = fig.add_axes(cbar_ax_dims)
 
 #Relative Density axes
-dens_axis_dims = [.6,.1,.35,.275]
+dens_axis_dims = [.625,.125,.35,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
 
 #Acceleration axes
-accel_axis_dims = [.6,.4,.35,.275]
+accel_axis_dims = [.625,.4,.35,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
 
 #EoS Axes
-gamma_axis_dims = [.6,.7,.35,.275]
+gamma_axis_dims = [.625,.675,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
-d_lum_ax_dims = [.0675,.225,.35,.2675] 
+d_lum_ax_dims = [.0675,.125,.35,.3675] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
 
-d_lum_err_dims = [.0675, .1125,.35,.1]
-d_lum_err_ax = fig.add_axes(d_lum_err_dims)
+
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
@@ -98,7 +95,7 @@ Ni = -8
 NiForward = 16
 
 N = np.linspace(0, Ni, 8000)
-NForward = np.linspace(0, NiForward, 16000)
+NForward = np.linspace(0, NiForward, abs(int(NiForward*1000)))
 
 z = np.exp(-N) - 1
 c = 1 #3e5     # Given in km/s
@@ -256,97 +253,96 @@ def update_plot(event):
     state0_point.set_3d_properties(z_i)
     
     #Plot all paths with updated values
-    for i in range(pathnum):
 
-        #Update the quiver vectors
-        quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam1)
-                                    for pt in filtered_pts])
-        u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
-        
-        #3D Quiver doesn't have a built in update directions, so replot
-        global quiver
-        quiver.remove()
-        quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
-                    normalize=True, cmap=cmap, length = 0.075,
-                    color=cmap(norm(magnitude)), norm=norm,
-                    alpha = 0.75)
-        
-        #Solve the system of ODEs using odeint
-        solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
-        pathx  = solution[:, 0]
-        pathy1 = solution[:, 1]
-        pathy2 = solution[:, 2]
-        pathz  = solution[:, 3]
-        
-        #Add both ways
-        solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
-        pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
-        pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
-        pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
-        pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
 
-        pathy = np.sqrt(pathy1**2 + pathy2**2)
-
-        #Update tracks
-        main_tracks[i].set_data(pathx, pathy)
-        main_tracks[i].set_3d_properties(pathz)
-
-        #Update acceleration plot
-        accel_plot_new_data = accelerationExpression(
-                                    pathx,pathy,pathz)
-        accel_plot.set_ydata(accel_plot_new_data)
+    #Update the quiver vectors
+    quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam1)
+                                for pt in filtered_pts])
+    u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
     
-        NAxis = np.append(N[::-1], NForward)
-        #Find when in N each event occured
-        indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
-        
+    #3D Quiver doesn't have a built in update directions, so replot
+    global quiver
+    quiver.remove()
+    quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
+                normalize=True, cmap=cmap, length = 0.075,
+                color=cmap(norm(magnitude)), norm=norm,
+                alpha = 0.75, linewidth=1)
     
-        indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
-        indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
-        indexMPeak = np.argmax(mass_dens)
-        rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-        mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-        #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
-        NAxis -= NAxis[indexToday]
-        #todayLine.set_ydata([0,0])
-        MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
-        MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
-        MPeakLine.set_xdata([NAxis[indexMPeak], NAxis[indexMPeak]])
-
-        #Update relative density plots
-        Radn_dens_plot.set_ydata(pathz**2)
-        Mass_dens_plot.set_ydata(1 - pathx**2 - pathy**2 - pathz**2)
-        Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
-        #y1_dens_plot.set_ydata(pathy1**2)
-        #y2_dens_plot.set_ydata(pathy2**2)
-
-        #window_plot.set_ydata(np.abs(phi_dens-Omega_phi_0))
-        
-        mr_eq_val = getRedshift(NAxis[indexMR_eq])
-        mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
-
-        m_max_val = getRedshift(NAxis[indexMPeak])
-        m_max_text.set_text(f'max$(\Omega_m):\; z={m_max_val:.3f}$')
+    #Solve the system of ODEs using odeint
+    solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
+    pathx  = solution[:, 0]
+    pathy1 = solution[:, 1]
+    pathy2 = solution[:, 2]
+    pathz  = solution[:, 3]
     
-        msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
-        msf_eq_text.set_text(f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
+    #Add both ways
+    solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
+    pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
+    pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
+    pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
+    pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
+    pathy = np.sqrt(pathy1**2 + pathy2**2)
 
-        #rsf_eq_val = 
-        #rsf_eq_text.set_text(f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
+    #Update tracks
+    track.set_data(pathx, pathy)
+    track.set_3d_properties(pathz)
+
+    #Update acceleration plot
+    accel_plot_new_data = accelerationExpression(
+                                pathx,pathy,pathz)
+    accel_plot.set_ydata(accel_plot_new_data)
+
+    
+    #Find when in N each event occured
+    NAxis = np.append(N[::-1], NForward)
+    indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
+    
+
+    indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
+    indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
+    indexMPeak = np.argmax(mass_dens)
+    rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
+    NAxis -= NAxis[indexToday]
+    #todayLine.set_ydata([0,0])
+    MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
+    MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
+    MPeakLine.set_xdata([NAxis[indexMPeak], NAxis[indexMPeak]])
+
+    #Update relative density plots
+    Radn_dens_plot.set_ydata(pathz**2)
+    Mass_dens_plot.set_ydata(1 - pathx**2 - pathy**2 - pathz**2)
+    Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
+    #y1_dens_plot.set_ydata(pathy1**2)
+    #y2_dens_plot.set_ydata(pathy2**2)
+
+    
+    mr_eq_val = getRedshift(NAxis[indexMR_eq])
+    mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
+
+    m_max_val = getRedshift(NAxis[indexMPeak])
+    m_max_text.set_text(f'max$(\Omega_m):\; z={m_max_val:.3f}$')
+
+    msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
+    msf_eq_text.set_text(f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
+
+    #rsf_eq_val = 
+    #rsf_eq_text.set_text(f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
 
 
-        #Update EoS plot
-        path_gamma_phi = gamma_phi(pathx, pathy) 
-        effective_eos.set_ydata(path_gamma_phi)
-        
-        #Update redshift plot
-        d_L = (c) * (1 + z) * odeint(
-        d_L_IntegrandScalar, 0, z, args=(
-            zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
-            )).transpose()[0]
-        
-        integral_plot.set_ydata(d_L)
-        integral_plot_ax2.set_ydata(d_L)
+    #Update EoS plot
+    path_gamma_phi = gamma_phi(pathx, pathy) 
+    effective_eos.set_ydata(path_gamma_phi)
+    
+    #Update redshift plot
+    d_L = (c) * (1 + z) * odeint(
+    d_L_IntegrandScalar, 0, z, args=(
+        zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
+        )).transpose()[0]
+    
+    integral_plot.set_ydata(d_L)
+    integral_plot_ax2.set_ydata(d_L)
 
     #Show plots
     fig.canvas.draw()
@@ -366,11 +362,11 @@ NavigationToolbar2Tk(canvas, window)
 
 
 #Lambda Slider Labels. Initialise, place, and hide weird borders
-lambda1_label_ax = fig.add_axes([.435,.9525,.05,.05])
+lambda1_label_ax = fig.add_axes([.455,.9525,.05,.05])
 lambda1_label_ax.text(0,0,'$\lambda_1$ value')
 lambda1_label_ax.set_axis_off()
 
-lambda2_label_ax = fig.add_axes([.495,.9525,.05,.05])
+lambda2_label_ax = fig.add_axes([.515,.9525,.05,.05])
 lambda2_label_ax.text(0,0,'$\lambda_2$ value')
 lambda2_label_ax.set_axis_off()
 
@@ -378,13 +374,13 @@ lambda2_label_ax.set_axis_off()
 lambda1_slide = tk.Scale(window, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
 lambda1_slide.set(lam1_0)
 lambda1_slide.bind("<ButtonRelease-1>", update_plot)
-lambda1_slide.place(relx=0.43, rely=0.05, relheight=0.35, relwidth=0.05)
+lambda1_slide.place(relx=0.45, rely=0.05, relheight=0.35, relwidth=0.05)
 lambda1_slide.configure(bg = 'white', borderwidth=0)
 
 lambda2_slide = tk.Scale(window, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
 lambda2_slide.set(lam2_0)
 lambda2_slide.bind("<ButtonRelease-1>", update_plot)
-lambda2_slide.place(relx=0.49, rely=0.05, relheight=0.35, relwidth=0.05)
+lambda2_slide.place(relx=0.51, rely=0.05, relheight=0.35, relwidth=0.05)
 lambda2_slide.configure(bg = 'white', borderwidth=0)
 
 def submit():
@@ -415,7 +411,6 @@ y2_entry_label_ax = fig.add_axes([0.2025,.525,.05,.075])
 y2_entry_label_ax.text(0,0,'$y_{02}$:')
 y2_entry_label_ax.set_axis_off()
 
-
 z_entry_label_ax = fig.add_axes([0.285,.525,.05,.075])
 z_entry_label_ax.text(0,0,'$z_0$:')
 z_entry_label_ax.set_axis_off()
@@ -443,7 +438,6 @@ sub_btn=tk.Button(window, text = 'Submit', command = submit
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
 
 
-#Canvas is where figure is placed to window
 canvas2 = FigureCanvasTkAgg(fig2, window_4_report)
 canvas2.draw() #Show canvas (ie show figure)
 canvas2.get_tk_widget().place(relheight=1,relwidth=1)
@@ -515,7 +509,7 @@ cmap = cm.spring
 quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
                     normalize=True, cmap=cmap, length = 0.075,
                     color=cmap(norm(magnitude)), norm=norm,
-                    alpha = 0.5)
+                    alpha = 0.5, linewidth=1)
 
 #Plot the colourbar
 cbar = plt.colorbar(quiver, cax=cbar_ax, orientation='vertical')
@@ -567,7 +561,6 @@ def setup_luminosity_plots():
 #___________________________________Initial Plot_____________________________
 
 #Initial plot
-main_tracks = []
 fixedPoint_plots = []
 
 rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
@@ -575,12 +568,6 @@ mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 
 
 lam1 = lambda1_slide.get()
 lam2 = lambda2_slide.get()
-
-fixedPoints, fixedPoints_labels = fixedPoints_func([lam1,lam2])
-for point in fixedPoints:
-    plot, = track_ax.plot(point[0], point[1], point[2], 'or')
-    fixedPoint_plots.append(plot)
-
 
 # Solve the system of ODEs using odeint
 solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
@@ -594,7 +581,6 @@ pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
 pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
 pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
 pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
-
 pathySquared = pathy1**2 + pathy2**2
 pathy = np.sqrt(pathySquared)
 
@@ -663,16 +649,22 @@ Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b',
 
 x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
 
-track_i = track_ax.plot(
-                pathx, pathy, pathz, 'm', linewidth=2)[0]
+
 state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
+track = track_ax.plot(
+                pathx, pathy, pathz, 'b', linewidth=2)[0]
 accel_plot, = accel_ax.plot(NAxis,
                 accelerationExpression(pathx,pathy,pathz))
 effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
         label = r'$\gamma_\phi = {2x^2}/{(x^2+y^2)}$')
 
-main_tracks.append(track_i)
-track_i.set_visible(True)
+fixedPoints, fixedPoints_labels = fixedPoints_func([lam1,lam2])
+for point in fixedPoints:
+    plot, = track_ax.plot(point[0], point[1], point[2], 'or')
+    fixedPoint_plots.append(plot)
+
+
+track.set_visible(True)
 
 
 d_L = (c) * (1 + z) * odeint(
@@ -702,6 +694,7 @@ track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
              yticks = [0, 0.5, 1],
              zticks = [0, 0.5, 1])
 track_ax.set_box_aspect([2, 1, 1])
+track_ax.axis("off")
 
 accel_ax.set_ylabel("Acceleration")
 accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
@@ -717,16 +710,11 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters")
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
 
 d_lum_ax.set_ylabel("$d_L$ [Mpc]")
-d_lum_err_ax.set_xlabel("$z$")
-#d_lum_err_ax.set_xlim([0.01,1])
 d_lum_ax.set_xlim([0.01,3])
 d_lum_ax.set(ylim=[0,6])
-d_lum_ax.tick_params(axis='x', which='both', labelbottom=False) 
 #d_lum_ax.legend(loc=4)
 
 #d_lum_ax.set_xscale('log', base=10, subs=[10**x
-#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
-#d_lum_err_ax.set_xscale('log', base=10, subs=[10**x
 #                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 #d_lum_ax.set_yscale('log', base=10, subs=[10**x
 #                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')

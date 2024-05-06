@@ -30,16 +30,16 @@ window = tk.Tk()
 window.title('GUI for Arbitrary Fluid')
 window.geometry('1000x950')
 
-window_4_report = tk.Tk()
-window_4_report.title('Window to generate plots for report')
+#window_4_report = tk.Tk()
+#window_4_report.title('Window to generate plots for report')
 #for track plots
 #window_4_report.geometry('900x600')
 #fig2 = Figure(figsize=(9, 6)) #900x600 pixels
 
 #for lambda gamma plot
-window_4_report.geometry('750x500')
-fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
-fig2.set_facecolor('white')
+#window_4_report.geometry('750x500')
+#fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
+#fig2.set_facecolor('white')
 
 
 #Tracks plot figure
@@ -57,10 +57,10 @@ cbar_ax = fig.add_axes(cbar_ax_dims)
 #cbar_ax = fig2.add_axes(cbar_ax_dims2)
 
 #Hubble plot Axes
-#lam_gam_dims = [.15,.2,.55,.3] 
-#lam_gam_ax = fig.add_axes(lam_gam_dims)
-lam_gam_dims2 = [.15,.25,.7,.6] 
-lam_gam_ax = fig2.add_axes(lam_gam_dims2)
+lam_gam_dims = [.15,.2,.55,.3] 
+lam_gam_ax = fig.add_axes(lam_gam_dims)
+#lam_gam_dims2 = [.15,.25,.7,.6] 
+#lam_gam_ax = fig2.add_axes(lam_gam_dims2)
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
@@ -200,7 +200,7 @@ def update_plot(event):
 
     #Show plots
     fig.canvas.draw()
-    fig2.canvas.draw()
+    #fig2.canvas.draw()
 
 def fibonacci_semicircle(max_radius, num_points):
     points = []
@@ -303,12 +303,12 @@ gamma_slide.configure(bg = 'white', borderwidth=0)
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
 
 #Canvas is where figure is placed to window
-canvas2 = FigureCanvasTkAgg(fig2, window_4_report)
-canvas2.draw() #Show canvas (ie show figure)
-canvas2.get_tk_widget().place(relheight=1,relwidth=1)
+#canvas2 = FigureCanvasTkAgg(fig2, window_4_report)
+#canvas2.draw() #Show canvas (ie show figure)
+#canvas2.get_tk_widget().place(relheight=1,relwidth=1)
 
 #Show the navigation toolbar
-NavigationToolbar2Tk(canvas2, window_4_report)
+#NavigationToolbar2Tk(canvas2, window_4_report)
 
 #___________________________________Initial Plot____________________________________
 

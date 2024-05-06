@@ -18,14 +18,11 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
-
-plt.style.use('classic')
 plt.rcParams.update({"text.usetex": True, "font.family": "serif",
                      "font.serif": ["Computer Modern Serif"]})
-plt.rc('axes', labelsize=12, titlesize=15)
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-
+plt.rc('axes', labelsize=14, titlesize=15)
+plt.rcParams['xtick.labelsize'] = 12
+plt.rcParams['ytick.labelsize'] = 12
 
 
 #_________________________Set up main window________________________________
@@ -37,33 +34,38 @@ window.geometry('1600x950')
 window_4_report = tk.Tk()
 window_4_report.title('Window to generate plots for report')
 window_4_report.geometry('750x500')
+fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig2.set_facecolor('white')
+ax2 = fig2.add_axes([.1,.2,.8,.7,])
 
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
-track_axis_dims = [.0,.525,.45,.5]
+track_axis_dims = [-.025,.525,.45,.5]
 track_ax = fig.add_axes(track_axis_dims, projection='3d')
 track_ax.view_init(elev=24, azim=66)
 
 #Colour bar axes
-cbar_ax_dims = [.4,.6,.015,.35]
+cbar_ax_dims = [.375,.6,.015,.35]
 cbar_ax = fig.add_axes(cbar_ax_dims)
 
 #Relative Density axes
-dens_axis_dims = [.55,.1,.4,.275]
+dens_axis_dims = [.625,.125,.35,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
 
 #Acceleration axes
-accel_axis_dims = [.55,.4,.4,.275]
+accel_axis_dims = [.625,.4,.35,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
 
 #EoS Axes
-gamma_axis_dims = [.55,.7,.4,.275]
+gamma_axis_dims = [.625,.675,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
-d_lum_ax_dims = [.075,.125,.35,.35] 
+d_lum_ax_dims = [.0675,.125,.35,.3675] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
+
+
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
@@ -83,11 +85,11 @@ pathnum = 1
 lam_0 = 0.38583349
 lam_min = 0
 lam_max = 4
-Ni = -20
-NiForward = 10
+Ni = -8
+NiForward = 16
 
-N = np.linspace(0, Ni, 512)
-NForward = np.linspace(0, NiForward, 256)
+N = np.linspace(0, Ni, abs(int(Ni*1000)))
+NForward = np.linspace(0, NiForward, abs(int(NiForward*1000)))
 
 z = np.exp(-N) - 1
 c = 1 #3e5     # Given in km/s
@@ -110,9 +112,9 @@ y0Squared = Omega_phi_0 - x0Squared
 
 Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 
-state_0 = [round(np.sqrt(x0Squared),3),
-           round(np.sqrt(y0Squared),3),
-           round(np.sqrt(Omega_r0),3)]
+state_0 = [0.0000001,
+           0.00001,
+           0.975]
 
 #_________________________Initialise plots________________________________
 #Tkinter works as:
@@ -120,10 +122,6 @@ state_0 = [round(np.sqrt(x0Squared),3),
 #2) Set up canvases inside window 
 #3) Set up Figures attached to canvases 
 #4) Add axes to figures as usual
-
-track_ax.set_xlabel('$x$')
-track_ax.set_ylabel('$y$')
-track_ax.set_zlabel('$z$')
 
 
 #_____________________________Define ODE for 2 fluids_______________________
@@ -181,17 +179,26 @@ def accelerationExpression(x, y, z):
     HdotSection = 1 + x**2 - y**2 + (1/3)*z**2
     return (1/2) * (-3*x**2 + 3*y**2 - z**2 - 1)
 
+#_______________________________Find Redshift from e-foldings________________
+def getRedshift(N):
+    return np.exp(-N) - 1
+
 #_______________________________Effective Eos Parameter______________________
 def gamma_phi(x, y):
     return (2*x**2) / (x**2 + y**2)
 
 #_______________________________Integrand Forms______________________________
 
-def d_L_IntegrandConst(currentTotal, z, zaxis,
-                        Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
-    #Return 1/W(z) for constant LCDM model
-    return 1/np.sqrt((1 - Omega_Lambda)*(1+z)**3 + 
-                     (Omega_Lambda))
+def d_L_Dark_Energy(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_Lambda0, w_Lambda):
+    return 1/np.sqrt(Omega_m0*(1+z)**3 +
+                     Omega_r0*(1+z)**4 + 
+                     Omega_Lambda0*(1+z)**(3 * (1 + w_Lambda)))
+
+#def d_L_IntegrandConst(currentTotal, z, zaxis,
+#                        Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
+#    #Return 1/W(z) for constant LCDM model
+#    return 1/np.sqrt((1 - Omega_Lambda)*(1+z)**3 + 
+#                     (Omega_Lambda))
 
 def d_L_IntegrandScalar(currentTotal, z, zaxis,
                          Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
@@ -225,60 +232,87 @@ def update_plot(event):
     state0_point.set_data(x_i, y_i)
     state0_point.set_3d_properties(z_i)
     
-    #Plot all paths with updated values
-    for i in range(pathnum):
 
-        #Update the quiver vectors
-        quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam)
-                                    for pt in filtered_pts])
-        u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
-        
-        #3D Quiver doesn't have a built in update directions, so replot
-        global quiver
-        quiver.remove()
-        quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
-                    normalize=True, cmap=cmap, length = 0.075,
-                    color=cmap(norm(magnitude)), norm=norm,
-                    alpha = 0.5)
-        
-        #Solve the system of ODEs using odeint
-        solution = odeint(ODEs, state_0, N, args = (lam,))
-        pathx = solution[:, 0]
-        pathy = solution[:, 1]
-        pathz = solution[:, 2]
-        
-        #Add both ways
-        solutionForward = odeint(ODEs, state_0, NForward, args = (lam,))
-        pathx = np.append(pathx[::-1], solutionForward[:, 0])
-        pathy = np.append(pathy[::-1], solutionForward[:, 1])
-        pathz = np.append(pathz[::-1], solutionForward[:, 2])
+    #Update the quiver vectors
+    quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam)
+                                for pt in filtered_pts])
+    u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
+    
+    #3D Quiver doesn't have a built in update directions, so replot
+    global quiver
+    quiver.remove()
+    quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
+                normalize=True, cmap=cmap, length = 0.075,
+                color=cmap(norm(magnitude)), norm=norm,
+                alpha = 0.5, linewidth=1)
+    
+    #Solve the system of ODEs using odeint
+    solution = odeint(ODEs, state_0, N, args = (lam,))
+    pathx = solution[:, 0]
+    pathy = solution[:, 1]
+    pathz = solution[:, 2]
+    
+    #Add both ways
+    solutionForward = odeint(ODEs, state_0, NForward, args = (lam,))
+    pathx = np.append(pathx[::-1], solutionForward[:, 0])
+    pathy = np.append(pathy[::-1], solutionForward[:, 1])
+    pathz = np.append(pathz[::-1], solutionForward[:, 2])
 
-        #Update tracks
-        main_tracks[i].set_data(pathx, pathy)
-        main_tracks[i].set_3d_properties(pathz)
+    #Update tracks
+    track.set_data(pathx, pathy)
+    track.set_3d_properties(pathz)
 
-        #Update acceleration plot
-        accel_plot_new_data = accelerationExpression(
-                                    pathx,pathy,pathz)
-        accel_plot.set_ydata(accel_plot_new_data)
+    #Update acceleration plot
+    accel_plot_new_data = accelerationExpression(
+                                pathx,pathy,pathz)
+    accel_plot.set_ydata(accel_plot_new_data)
 
-        #Update relative density plots
-        Radn_dens_plot.set_ydata(pathz**2)
-        Mass_dens_plot.set_ydata(
-                            1 - pathx**2 - pathy**2 - pathz**2)
-        Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
-        
-        #Update EoS plot
-        path_gamma_phi = gamma_phi(pathx, pathy) 
-        effective_eos.set_ydata(path_gamma_phi)
-        
-        #Update redshift plot
-        d_L = (c/H_0) * (1 + z) * odeint(
-        d_L_IntegrandScalar, 0, z, args=(
-            zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
-            )).transpose()[0]
-        
-        integral_plot.set_xdata(d_L)
+    #Find when in N each event occured
+    NAxis = np.append(N[::-1], NForward)
+    indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
+    
+
+    indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
+    indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
+    indexMPeak = np.argmax(mass_dens)
+    rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
+    NAxis -= NAxis[indexToday]
+    #todayLine.set_ydata([0,0])
+    MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
+    MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
+    MPeakLine.set_xdata([NAxis[indexMPeak], NAxis[indexMPeak]])
+
+    #Update relative density plots
+    Radn_dens_plot.set_ydata(pathz**2)
+    Mass_dens_plot.set_ydata(
+                        1 - pathx**2 - pathy**2 - pathz**2)
+    Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
+    
+    mr_eq_val = getRedshift(NAxis[indexMR_eq])
+    mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
+
+    m_max_val = getRedshift(NAxis[indexMPeak])
+    m_max_text.set_text(f'max$(\Omega_m):\; z={m_max_val:.3f}$')
+
+    msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
+    msf_eq_text.set_text(f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
+
+    #rsf_eq_val = 
+    #rsf_eq_text.set_text(f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
+
+    #Update EoS plot
+    path_gamma_phi = gamma_phi(pathx, pathy) 
+    effective_eos.set_ydata(path_gamma_phi)
+    
+    #Update redshift plot
+    d_L = (c) * (1 + z) * odeint(
+    d_L_IntegrandScalar, 0, z, args=(
+        zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
+        )).transpose()[0]
+    
+    integral_plot.set_ydata(d_L)
 
     #Show plots
     fig.canvas.draw()
@@ -354,6 +388,13 @@ sub_btn=tk.Button(window, text = 'Submit', command = submit
 #Place Canvas
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
 
+canvas2 = FigureCanvasTkAgg(fig2, window_4_report)
+canvas2.draw() #Show canvas (ie show figure)
+canvas2.get_tk_widget().place(relheight=1,relwidth=1)
+
+#Show the navigation toolbar
+NavigationToolbar2Tk(canvas2, window_4_report)
+
 #________________________________Initialise the Quiver______________________________
 #The method for placing anchor points for the Quivers was aided with ChatGPT
 
@@ -418,88 +459,173 @@ cmap = cm.spring
 quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
                     normalize=True, cmap=cmap, length = 0.075,
                     color=cmap(norm(magnitude)), norm=norm,
-                    alpha = 0.75)
+                    alpha = 0.75, linewidth=1)
 
 #Plot the colourbar
 cbar = plt.colorbar(quiver, cax=cbar_ax, orientation='vertical')
 cbar.set_label('Magnitude of derivatives')
 
+#_______________________________Hubble Fill Regions___________________________
+w_Lam_0 = -1
+w_pos_err = 0.15
+w_neg_err = -0.15
+
+def plot_d_luminosity(ax, z, d_L, d_L_bounds, label, color, fill_alpha=0.2):
+    ax.plot(z, d_L, label=label, color=color, lw=2)
+    if d_L_bounds is not None:
+        ax.fill_between(z, d_L_bounds[0], d_L_bounds[1], alpha=fill_alpha, color=color)
+        ax.plot(z, d_L_bounds[0], color=color, lw=0.5, alpha = 0.6)
+        ax.plot(z, d_L_bounds[1], color=color, lw=0.5, alpha = 0.6)
+
+def setup_luminosity_plots():
+    d_L_for_fill = []
+    #Define colors and Omega_Lambda0 values
+    configurations = [
+        (0.68, 'cyan'),
+        (0.73, 'magenta')
+    ]
+
+    #Gather all d_L values for bounds and normal plotting
+    for Omega_Lambda0, color in configurations:
+        temp_list = []
+        for w_Lambda in [w_Lam_0 + w_neg_err,
+                         w_Lam_0,
+                         w_Lam_0 + w_pos_err]:
+            d_L = (c) * (1 + z) * odeint(
+                d_L_Dark_Energy, 0, z, args=(
+                    zAxis, 1-Omega_Lambda0-Omega_r0, Omega_r0, Omega_Lambda0, w_Lambda
+                )
+            ).transpose()[0]
+            temp_list.append(d_L)
+        d_L_for_fill.append(temp_list)  #Store d_L values for each configuration
+    
+    #Plot and fill between using stored d_L values
+    for (Omega_Lambda0, color,), d_L_values in zip(configurations, d_L_for_fill):
+        # Plot the middle value normally and fill between the bounds
+        plot_d_luminosity(d_lum_ax, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
+                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0},\; w_{{\Lambda}}={w_Lam_0}$", color)
+        plot_d_luminosity(ax2, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
+                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0},\; w_{{\Lambda}}={w_Lam_0}$", color)
+
+
 
 #___________________________________Initial Plot_____________________________
 
 #Initial plot
-main_tracks = []
 fixedPoint_plots = []
 
-gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
-gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
 
-for i in range(pathnum):
-    lam = lambda_slide.get()
+rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
+mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
 
-    fixedPoints, fixedPoints_labels = fixedPoints_func(lam_0)
-    for point in fixedPoints:
-        plot, = track_ax.plot(point[0], point[1], point[2], 'or')
-        fixedPoint_plots.append(plot)
+lam = lambda_slide.get()
 
-    # Solve the system of ODEs using odeint
-    solution = odeint(ODEs, state_0, N, args = (lam,))
-    pathx = solution[:, 0]
-    pathy = solution[:, 1]
-    pathz = solution[:, 2]
+# Solve the system of ODEs using odeint
+solution = odeint(ODEs, state_0, N, args = (lam,))
+pathx = solution[:, 0]
+pathy = solution[:, 1]
+pathz = solution[:, 2]
 
-    solutionForward = odeint(ODEs, state_0, NForward, args = (lam,))
-    pathx = np.append(pathx[::-1], solutionForward[:, 0])
-    pathy = np.append(pathy[::-1], solutionForward[:, 1])
-    pathz = np.append(pathz[::-1], solutionForward[:, 2])
-    NAxis = np.append(N[::-1], NForward)
-    zAxis = np.append(z[::-1], NForward)
+solutionForward = odeint(ODEs, state_0, NForward, args = (lam,))
+pathx = np.append(pathx[::-1], solutionForward[:, 0])
+pathy = np.append(pathy[::-1], solutionForward[:, 1])
+pathz = np.append(pathz[::-1], solutionForward[:, 2])
+NAxis = np.append(N[::-1], NForward)
+zAxis = np.append(z[::-1], NForward)
 
-    path_gamma_phi = gamma_phi(pathx, pathy)
+path_gamma_phi = gamma_phi(pathx, pathy)
 
-    dens_ax.plot([0,0], [-0.2,1.2], 'k--')
-    Radn_dens_plot, = dens_ax.plot(NAxis, pathz**2, 'r',
-            label = "$\Omega_r = z^2$")
-    Mass_dens_plot, = dens_ax.plot(NAxis,
-         1 - pathx**2 - pathy**2 - pathz**2, 'g',
-            label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
-    Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathy**2, 'b',
-            label = "$\Omega_\phi = x^2 + y^2$")
+NAxis = np.append(N[::-1], NForward)    
 
-    x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
+rad_dens = pathz**2
+mass_dens = 1 - pathx**2 - pathy**2 - pathz**2
+phi_dens = pathx**2 + pathy**2
+total_dens = rad_dens + mass_dens + phi_dens
 
+indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
 
-    track_i = track_ax.plot(
-                    pathx, pathy, pathz, 'm', linewidth=2)[0]
-    state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
-    accel_plot, = accel_ax.plot(NAxis,
-                    accelerationExpression(pathx,pathy,pathz))
-    effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
-            label = r'$\gamma_\phi = {2x^2}/{(x^2+y^2)}$')
-
-    main_tracks.append(track_i)
-    track_i.set_visible(True)
-
-    
-    d_L = (c/H_0) * (1 + z) * odeint(
-        d_L_IntegrandScalar, 0, z, args=(
-            zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
-            )).transpose()[0]
-    
-
-    integral_plot, = d_lum_ax.plot(d_L, V,
-                        label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0))
+#Find when in N each event occured
+indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
+indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
+indexMPeak = np.argmax(mass_dens)
+NAxis -= NAxis[indexToday]
+zAxis = getRedshift(NAxis)
 
 
+#rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+#mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+#gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
 
-#Plot the redshift plots for LCDM with different values of Cosm. Const.
-for Omega_Lambda in [0.65, 0.7, 0.75]:
-    d_L = (c/H_0) * (1 + z) * odeint(
-        d_L_IntegrandConst, 0, z, args=(
-            zAxis, Omega_m0, Omega_r0, Omega_Lambda, path_gamma_phi
-            )).transpose()[0]
-    
-    d_lum_ax.plot(d_L, z, label = "$\Omega_\Lambda = $" + str(Omega_Lambda))
+todayLine, = dens_ax.plot([0,0], [-0.2,1.2], 'k--')
+MR_eqLine, = dens_ax.plot([NAxis[indexMR_eq],NAxis[indexMR_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
+MPhi_eqLine, = dens_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
+MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k:', linewidth = 0.75)
+
+mr_eq_val = getRedshift(NAxis[indexMR_eq])
+mr_eq_ax = fig.add_axes([0.45,.45,.05,.075])
+mr_eq_text = mr_eq_ax.text(0,0,f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
+mr_eq_ax.set_axis_off()
+
+m_max_val = getRedshift(NAxis[indexMPeak])
+m_max_ax = fig.add_axes([0.45,.425,.05,.075])
+m_max_text = m_max_ax.text(0,0,f'max$(\Omega_m):\; z={m_max_val:.3f}$')
+m_max_ax.set_axis_off()
+
+msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
+msf_eq_ax = fig.add_axes([0.45,.4,.05,.075])
+msf_eq_text = msf_eq_ax.text(0,0,f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
+msf_eq_ax.set_axis_off()
+
+#rsf_eq_val = 
+#rsf_eq_ax = fig.add_axes([0.45,.375,.05,.075])
+#rsf_eq_text = rsf_eq_ax.text(0,0,f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
+#rsf_eq_ax.set_axis_off()
+
+dens_ax.plot([0,0], [-0.2,1.2], 'k--')
+Radn_dens_plot, = dens_ax.plot(NAxis, pathz**2, 'r',
+        label = "$\Omega_r = z^2$")
+Mass_dens_plot, = dens_ax.plot(NAxis,
+        1 - pathx**2 - pathy**2 - pathz**2, 'g',
+        label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
+Phi_dens_plot, = dens_ax.plot(NAxis, pathx**2 + pathy**2, 'b',
+        label = "$\Omega_\phi = x^2 + y^2$")
+
+x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
+
+
+
+state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
+track = track_ax.plot(
+                pathx, pathy, pathz, 'b', linewidth=2)[0]
+accel_plot, = accel_ax.plot(NAxis,
+                accelerationExpression(pathx,pathy,pathz))
+effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
+        label = r'$\gamma_\phi = {2x^2}/{(x^2+y^2)}$')
+
+fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
+for point in fixedPoints:
+    plot, = track_ax.plot(point[0], point[1], point[2], 'or')
+    fixedPoint_plots.append(plot)
+
+
+track.set_visible(True)
+
+
+d_L = (c) * (1 + z) * odeint(
+    d_L_IntegrandScalar, 0, z, args=(
+        zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
+        )).transpose()[0]
+
+#Call hubble fill function before changing plot, so it is below
+setup_luminosity_plots()
+
+integral_plot, = d_lum_ax.plot(V, d_L,
+                    label = "$\Omega_{\phi 0} = $"+ str(Omega_phi_0))
+
+gamma_ax.set(xlim=[-8,3])
+accel_ax.set(xlim=[-8,3])
+dens_ax.set(xlim=[-8,3])
+
 
 
 
@@ -511,29 +637,30 @@ track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
              yticks = [0, 0.5, 1],
              zticks = [0, 0.5, 1])
 track_ax.set_box_aspect([2, 1, 1])
+track_ax.axis("off")
 
 accel_ax.set_ylabel("Acceleration")
 accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
 
-gamma_ax.set_ylabel("$\gamma_\phi$")
+gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], 
+             yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
 gamma_ax.legend()
 
-dens_ax.set_ylabel("Density Parameters")
-dens_ax.set_xlabel("$N$")
+dens_ax.set(xlabel="$N$", ylabel="Density Parameters")
 #dens_ax.legend()
 
 #d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
 
 d_lum_ax.set_ylabel("$d_L$ [Mpc]")
-d_lum_ax.set_xlabel("$z$ [km/s]")
-d_lum_ax.set_xlim(left = 0.01)
+d_lum_ax.set_xlim([0.01,3])
+d_lum_ax.set(ylim=[0,6])
 #d_lum_ax.legend(loc=4)
-d_lum_ax.set_xscale('log', base=10, subs=[10**x
-                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
-d_lum_ax.set_yscale('log', base=10, subs=[10**x
-                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
+#d_lum_ax.set_xscale('log', base=10, subs=[10**x
+#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+#d_lum_ax.set_yscale('log', base=10, subs=[10**x
+#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 
 
 #Run the code
