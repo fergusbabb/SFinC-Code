@@ -37,35 +37,46 @@ window_4_report.title('Window to generate plots for report')
 window_4_report.geometry('750x500')
 fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
 fig2.set_facecolor('white')
-ax2 = fig2.add_axes([.1,.2,.8,.7,])
+
 
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
 track_axis_dims = [-.025,.525,.45,.5]
 track_ax = fig.add_axes(track_axis_dims, projection='3d')
+#track_axis_dims2 = [0,.075,.9,.9]
+#track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
 track_ax.view_init(elev=24, azim=66)
 
 #Colour bar axes
 cbar_ax_dims = [.375,.6,.015,.35]
 cbar_ax = fig.add_axes(cbar_ax_dims)
+#cbar_ax_dims2 = [.7,.25,.02,.6]
+#cbar_ax = fig2.add_axes(cbar_ax_dims2)
 
 #Relative Density axes
 dens_axis_dims = [.625,.125,.35,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
+#dens_axis_dims2 = [.1,.25,.8,.7]
+#dens_ax = fig2.add_axes(dens_axis_dims2)
 
 #Acceleration axes
 accel_axis_dims = [.625,.4,.35,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
+#accel_axis_dims2 = [.1,.25,.8,.7]
+#accel_ax = fig2.add_axes(accel_axis_dims2)
 
 #EoS Axes
 gamma_axis_dims = [.625,.675,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
+#gamma_axis_dims2 = [.1,.25,.8,.7]
+#gamma_ax = fig2.add_axes(gamma_axis_dims2)
 
 #Hubble plot Axes
 d_lum_ax_dims = [.0675,.125,.35,.3675] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
-
+#d_lum_ax_dims2 = [.1,.25,.8,.7]
+#d_lum_ax = fig2.add_axes(d_lum_ax_dims2)
 
 
 #Bounding Circle
@@ -83,12 +94,12 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 #__________________________Initial values_____________________________
 pathnum = 1
 
-lam1_0 = 1.4 #0.38583349
-lam1_min = -5
+lam1_0 = 0.5
+lam1_min = -10
 lam1_max = 10
 
 lam2_0 = 10
-lam2_min = -5
+lam2_min = -10
 lam2_max = 10
 
 Ni = -8
@@ -305,7 +316,7 @@ def update_plot(event):
     mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
     #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
     NAxis -= NAxis[indexToday]
-    #todayLine.set_ydata([0,0])
+
     MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
     MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
     MPeakLine.set_xdata([NAxis[indexMPeak], NAxis[indexMPeak]])
@@ -317,7 +328,7 @@ def update_plot(event):
     #y1_dens_plot.set_ydata(pathy1**2)
     #y2_dens_plot.set_ydata(pathy2**2)
 
-    
+
     mr_eq_val = getRedshift(NAxis[indexMR_eq])
     mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
 
@@ -326,7 +337,6 @@ def update_plot(event):
 
     msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
     msf_eq_text.set_text(f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
-
     #rsf_eq_val = 
     #rsf_eq_text.set_text(f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
 
@@ -342,7 +352,6 @@ def update_plot(event):
         )).transpose()[0]
     
     integral_plot.set_ydata(d_L)
-    integral_plot_ax2.set_ydata(d_L)
 
     #Show plots
     fig.canvas.draw()
@@ -554,8 +563,6 @@ def setup_luminosity_plots():
         # Plot the middle value normally and fill between the bounds
         plot_d_luminosity(d_lum_ax, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
                           f"$\Omega_{{\Lambda 0}}={Omega_Lambda0},\; w_{{\Lambda}}={w_Lam_0}$", color)
-        plot_d_luminosity(ax2, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
-                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0},\; w_{{\Lambda}}={w_Lam_0}$", color)
 
 
 #___________________________________Initial Plot_____________________________
@@ -607,10 +614,7 @@ zAxis = getRedshift(NAxis)
 #mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
 #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
 
-todayLine, = dens_ax.plot([0,0], [-0.2,1.2], 'k--')
-MR_eqLine, = dens_ax.plot([NAxis[indexMR_eq],NAxis[indexMR_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
-MPhi_eqLine, = dens_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]], [-0.2,1.2], 'k:', linewidth = 0.75)
-MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k:', linewidth = 0.75)
+
 
 mr_eq_val = getRedshift(NAxis[indexMR_eq])
 mr_eq_ax = fig.add_axes([0.45,.45,.05,.075])
@@ -632,12 +636,20 @@ msf_eq_ax.set_axis_off()
 #rsf_eq_text = rsf_eq_ax.text(0,0,f'$\Omega_\phi=\Omega_r:\; z={rsf_eq_val:.3f}$')
 #rsf_eq_ax.set_axis_off()
 
+todayLine, = dens_ax.plot([0,0], [-0.2,1.2], 'k', label='Today:\; $z = 0$')
+MR_eqLine, = dens_ax.plot([NAxis[indexMR_eq],NAxis[indexMR_eq]], [-0.2,1.2], 'k:', linewidth = 0.75,
+                          label = f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
+MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k--', linewidth = 0.75,
+                          label = f'max$(\Omega_m):\; z={m_max_val:.3f}$')
+MPhi_eqLine, = dens_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]], [-0.2,1.2], 'k-.', linewidth = 0.75,
+                          label = f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
+
 Radn_dens_plot, = dens_ax.plot(NAxis, rad_dens, 'r',
-        label = "$\Omega_r = z^2$")
+        label = "$\Omega_r$")
 Mass_dens_plot, = dens_ax.plot(NAxis, mass_dens, 'g',
-        label = "$\Omega_m = 1 - x^2 - y^2 - z^2$")
+        label = "$\Omega_m$")
 Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b',
-        label = "$\Omega_\phi = x^2 + y^2$")
+        label = "$\Omega_\phi$")
 
 #y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
 #        label = "$y_1^2$")
@@ -654,7 +666,7 @@ state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
 track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
 accel_plot, = accel_ax.plot(NAxis,
-                accelerationExpression(pathx,pathy,pathz))
+                accelerationExpression(pathx,pathy,pathz),'orange')
 effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'k',
         label = r'$\gamma_\phi = {2x^2}/{(x^2+y^2)}$')
 
@@ -678,8 +690,6 @@ setup_luminosity_plots()
 
 integral_plot, = d_lum_ax.plot(z, d_L,
                     label = f"$\Omega_{{\phi 0}} = {Omega_phi_0}$", color = 'b', linewidth=2)
-integral_plot_ax2, = ax2.plot(z, d_L,
-                    label = f"$\Omega_{{\phi 0}} = {Omega_phi_0}$", color = 'b', linewidth=2)
 
 gamma_ax.set(xlim=[-8,3])
 accel_ax.set(xlim=[-8,3])
@@ -696,7 +706,8 @@ track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
 track_ax.set_box_aspect([2, 1, 1])
 track_ax.axis("off")
 
-accel_ax.set_ylabel("Acceleration")
+accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
+             yticks=[-1,-1/2,0,1/2,1])
 accel_ax.tick_params(axis='x', which='both', labelbottom=False) 
 
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], 
@@ -704,26 +715,36 @@ gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2],
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
 gamma_ax.legend()
 
-dens_ax.set(xlabel="$N$", ylabel="Density Parameters")
-#dens_ax.legend()
 
-#d_lum_ax.plot(H_0 * d_L, d_L, "--", label = "$H_0d$")
+dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
+            ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
+            yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
 
-d_lum_ax.set_ylabel("$d_L$ [Mpc]")
-d_lum_ax.set_xlim([0.01,3])
-d_lum_ax.set(ylim=[0,6])
-#d_lum_ax.legend(loc=4)
+#Additional code for making report plots
+# legend_lines1 = []
+# legend_lines1.append([todayLine, MR_eqLine, MPeakLine, MPhi_eqLine])
+# legend_lines2 = []
+# legend_lines2.append([Radn_dens_plot, Mass_dens_plot, Phi_dens_plot])
 
-#d_lum_ax.set_xscale('log', base=10, subs=[10**x
-#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
-#d_lum_ax.set_yscale('log', base=10, subs=[10**x
-#                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+# dens_ax.text(NAxis[indexMR_eq]-0.5,1,f'$z={mr_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
+# dens_ax.text(NAxis[indexMPeak]-1,1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
+# dens_ax.text(NAxis[indexMPhi_eq]-0.5,1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
 
-ax2.legend(loc=4)
-ax2.set_ylabel("$d_L$ [Mpc]")
-ax2.set_xlabel('$z$')
-ax2.set_xlim([0.01,3])
-ax2.set(ylim=[0,6])
+
+# legend1 = dens_ax.legend(legend_lines1[0], ["Today","$\Omega_m=\Omega_r$","max$(\Omega_m)$",
+#                                             "$\Omega_m=\Omega_\phi$"], loc=2, fontsize=12)
+# legend2 = dens_ax.legend(legend_lines2[0], ['$\Omega_r$', '$\Omega_m$', '$\Omega_\phi$'],
+#                          loc=1, fontsize=12)
+# dens_ax.add_artist(legend1)
+
+
+
+d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
+              xlim=[0,3], ylim=[0,6],
+              xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
+              xticklabels = ['$0$','$1$','$2$', '$3$'],
+              yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
+
 
 
 
