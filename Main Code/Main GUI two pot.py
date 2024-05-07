@@ -100,11 +100,11 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 #__________________________Initial values_____________________________
 pathnum = 1
 
-lam1_0 = 0.5
+lam1_0 = 2
 lam1_min = -10
 lam1_max = 10
 
-lam2_0 = 10
+lam2_0 = -10
 lam2_min = -10
 lam2_max = 10
 
@@ -576,8 +576,9 @@ def setup_luminosity_plots():
 #Initial plot
 fixedPoint_plots = []
 
-rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
-mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
+rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
+
+mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
 
 lam1 = lambda1_slide.get()
 lam2 = lambda2_slide.get()
@@ -698,17 +699,54 @@ integral_plot, = d_lum_ax.plot(z, d_L,
 
 #________________Plotting combined potential for two potentials___________
 
-# comb_pot_ax_dims = [.0675,.125,.35,.3675] 
+# comb_pot_ax_dims = [.1,.2,.8,.675]
 # comb_pot_ax = fig2.add_axes(comb_pot_ax_dims)
 
-# phi_range = np.linspace(-4,10,2000)
+# phi_range = np.linspace(-1,2,2000)
 
 # V0_1 = 1
 # V0_2 = 2
+# k = 1
 
-# V1 = V0_1*np.exp(-abs(lam1_0))
+# def V(phi, k, lam, V0):
+#     return V0*np.exp(-lam*k*phi)
+
+# V1 = V(phi_range, k, lam1_0, V0_1)
+# V2 = V(phi_range, k, lam2_0, V0_2)
+
+# V_tot = V1 + V2
+
+# phi_m = np.log(abs((lam1_0*V0_1)/(lam2_0*V0_2))) / (k*(lam1_0-lam2_0))
+# V1_m = V(phi_m, k, lam1_0, V0_1)
+# V2_m = V(phi_m, k, lam2_0, V0_2)
+# V_tot_m = V1_m + V2_m
+
+# V1 /= V_tot_m
+# V2 /= V_tot_m
+# V_tot /= V_tot_m
+# V_tot_m /= V_tot_m
+# phi_range /= phi_m
+# phi_m /= phi_m
+
+# comb_pot_ax.plot([0,0],[-5,15],'k', linewidth=0.5)
+# comb_pot_ax.plot([-10,10],[0,0],'k', linewidth=0.5)
+# comb_pot_ax.plot([phi_m,phi_m],[-1,V_tot_m], 'k-.', linewidth=0.5)
+# comb_pot_ax.plot([-5,phi_m],[V_tot_m,V_tot_m], 'k-.', linewidth=0.5)
+# comb_pot_ax.plot(phi_range, V1, 'r--', label='$V_1(\phi)$')
+# comb_pot_ax.plot(phi_range, V2, 'g--',  label='$V_2(\phi)$')
+# comb_pot_ax.plot(phi_range, V_tot, 'b', label='$V_{T}(\phi)$')
+# comb_pot_ax.plot(phi_m, V_tot_m, 'k*')
 
 
+# comb_pot_ax.set(ylim=[-1/2,4], xlim=[-3,4], xticks=[0,1], xticklabels=['$0$','$\phi_m$'],
+#                 yticks=[0,1], yticklabels=['$0$',r'$\rho_c$'])
+# comb_pot_ax.set_title(r'$0<V_{01}<V_{02}, \ \ \ \ \lambda_2<0<\lambda_1,\ \ \ \ |\frac{\lambda_1}{\lambda_2}|<1$', pad=10,fontsize=12)
+# comb_pot_ax.set_ylabel(ylabel='$V(\phi)$', rotation=0, y=1, fontsize=12)
+# comb_pot_ax.text(4, -3/4, r'$\phi$', fontsize=12) # acts as x label
+# comb_pot_ax.legend(loc='upper left', fontsize=12)
+
+# comb_pot_ax.text(1.5, 3.5, r'$\phi_m=\frac{1}{\kappa(\lambda_1 - \lambda_2)}\ln\left| \frac{\lambda_1 V_{01}}{\lambda_2 V_{02}}\right|$', fontsize = 12)
+ 
 
 #_____________________Setting plot labels etc________________________________
 
