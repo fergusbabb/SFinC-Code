@@ -177,34 +177,43 @@ def ODEs(state, N, lam):
 
 #___________________________Function for fixed points________________________
 def fixedPoints_func(lam):
-    fixedPoints_labels = ['$O$', '$B$', '$A^+$', '$A^-$']
+    fixedPoints_labels = ['$O$', '$A^+$', '$A^-$']
 
     fixedPoints = np.array([
     [0, 0, 0],
-    [0, 0, 1],
     [1, 0, 0],
     [-1, 0, 0]
     ])
     
     for n, lambdaValue in enumerate(lam):
+        # B1 and B2
         if lambdaValue**2 < 6:
             fixedPoints = np.append(fixedPoints,
-                                    [[lambdaValue/np.sqrt(6),
-                                        np.sqrt(1 - (lambdaValue**2)/6), 0]], axis=0)
-            fixedPoints_labels.append('$C_' + str(n+1) + '$')
+                            [[lambdaValue/np.sqrt(6),
+                                np.sqrt(1 - (lambdaValue**2)/6), 0]], axis=0)
 
-        if lambdaValue**2 > 3:
+            fixedPoints_labels.append('$B' + str(n+1) + '$')
+
+        # C1 and C2
+        if lambdaValue**2 > 3: #Makes sure to only plot positive y points
             fixedPoints = np.append(fixedPoints,
                                     [[np.sqrt(3/2)/lambdaValue,
                                         np.sqrt(3/2)/lambdaValue, 0]], axis=0)
-            fixedPoints_labels.append('$D' + str(n+1) + '$')
+            fixedPoints_labels.append('$C' + str(n+1) + '$')
 
-        if lambdaValue**2 > 4:#8/3:
-            fixedPoints = np.append(fixedPoints,
+        # E1 and E2
+        if lambdaValue >= 0: #Makes sure to only plot positive y points
+            if lambdaValue**2 > 4:
+                fixedPoints = np.append(fixedPoints,
                                     [[2 * np.sqrt(2/3) / lambdaValue,
                                     2 / (lambdaValue * np.sqrt(3)),
                                     np.sqrt(1 - (4/lambdaValue**2))]], axis=0)
-            fixedPoints_labels.append('$E' + str(n+1) + '$')
+                fixedPoints_labels.append('$E' + str(n+1) + '$')
+
+    fixedPoints = np.append(fixedPoints, [[0, 0, 1]], axis=0)  
+    fixedPoints_labels.append('$D$')
+    fixedPoints = np.append(fixedPoints, [[0, 1, 0]], axis=0)  
+    fixedPoints_labels.append('$F$')  
     return fixedPoints, fixedPoints_labels
 
 #_______________________________Acceleration Expression______________________
@@ -757,6 +766,8 @@ track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
              zticks = [0, 0.5, 1])
 track_ax.set_box_aspect([2, 1, 1])
 track_ax.axis("off")
+fig2.savefig("Figures/One Potential/ Track_lambda2_{}.svg".format(int(lam_0)), format='svg')
+
 
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
@@ -782,11 +793,11 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
 # dens_ax.add_artist(legend1)
 
 # dens_ax.yaxis.set_ticks_position('both')
-
+# fig2.savefig("Figures/One Potential/ Density_lambda2_{}.svg".format(int(lam_0)), format='svg')
 
 accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
-            xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
+               xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
 accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 
@@ -794,8 +805,7 @@ accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 # accel_ax.yaxis.set_ticks_position('both')
 # accel_ax.set(xlabel="$N$")
 # static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
-
-
+# fig2.savefig("Figures/One Potential/ Accel_lambda2_{}.svg".format(int(lam_0)), format='svg')
 
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
@@ -806,6 +816,7 @@ gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
 # gamma_ax.yaxis.set_ticks_position('both')
 # gamma_ax.legend(fontsize=12)
 # gamma_ax.set(xlabel="$N$")
+# fig2.savefig("Figures/One Potential/ Gamma_lambda2_{}.svg".format(int(lam_0)), format='svg')
 
 
 d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
@@ -814,8 +825,8 @@ d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
               xticklabels = ['$0$','$1$','$2$', '$3$'],
               yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
 
-d_lum_ax.legend(loc='best', fontsize=12)
-
+# d_lum_ax.legend(loc=4)
+# fig2.savefig("Figures/One Potential/ Hubble_lambda2_{}.svg".format(int(lam_0)), format='svg')
 
 
 #Run the code

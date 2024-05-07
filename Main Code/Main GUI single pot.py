@@ -45,17 +45,17 @@ fig2.set_facecolor('white')
 #Tracks plot figure
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
-track_axis_dims = [-.025,.525,.45,.5]
-track_ax = fig.add_axes(track_axis_dims, projection='3d')
-#track_axis_dims2 = [0,.075,.9,.9]
-#track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
+#track_axis_dims = [-.025,.525,.45,.5]
+#track_ax = fig.add_axes(track_axis_dims, projection='3d')
+track_axis_dims2 = [0,.075,.9,.9]
+track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
 track_ax.view_init(elev=24, azim=66)
 
 #Colour bar axes
-cbar_ax_dims = [.375,.6,.015,.35]
-cbar_ax = fig.add_axes(cbar_ax_dims)
-#cbar_ax_dims2 = [.7,.25,.02,.6]
-#cbar_ax = fig2.add_axes(cbar_ax_dims2)
+#cbar_ax_dims = [.375,.6,.015,.35]
+#cbar_ax = fig.add_axes(cbar_ax_dims)
+cbar_ax_dims2 = [.7,.25,.02,.6]
+cbar_ax = fig2.add_axes(cbar_ax_dims2)
 
 #Relative Density axes
 dens_axis_dims = [.625,.125,.35,.275]
@@ -97,8 +97,9 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 
 #__________________________Initial values_____________________________
 pathnum = 1
-
-lam_0 = 0.38583349
+# So we get B, B, BC, BEC,  EC
+lam_0s = [0, 0.38583349, np.sqrt(1), np.sqrt(3), np.sqrt(5), np.sqrt(8)]
+lam_0 = lam_0s[0]
 lam_min = 0
 lam_max = 4
 Ni = -8
@@ -161,11 +162,10 @@ def ODEs(state, N, lam):
 
 #___________________________Function for fixed points________________________
 def fixedPoints_func(lam):
-    fixedPoints_labels = ['$O$', '$B$', '$A^+$', '$A^-$']
+    fixedPoints_labels = ['$O$', '$A^+$', '$A^-$']
 
     fixedPoints = np.array([
     [0, 0, 0],
-    [0, 0, 1],
     [1, 0, 0],
     [-1, 0, 0]
     ])
@@ -174,15 +174,18 @@ def fixedPoints_func(lam):
         fixedPoints = np.append(fixedPoints,
                                 [[lam/np.sqrt(6),
                                     np.sqrt(1 - (lam**2)/6), 0]], axis=0)
+        fixedPoints_labels.append('$B$')
+
+    if lam**2 >3:
+        fixedPoints = np.append(fixedPoints,
+                                [[np.sqrt(3/2)/lam, np.sqrt(3/2)/lam, 0]], axis=0)
         fixedPoints_labels.append('$C$')
 
-    if lam**2 > 3:
-        fixedPoints = np.append(fixedPoints,
-                                [[np.sqrt(3/2)/lam,
-                                    np.sqrt(3/2)/lam, 0]], axis=0)
-        fixedPoints_labels.append('$D$')
+    fixedPoints = np.append(fixedPoints,
+                            [[0, 0, 1]], axis=0)
+    fixedPoints_labels.append('$D$')
 
-    if lam**2 > 8/3:
+    if lam**2 > 4:
         fixedPoints = np.append(fixedPoints,
                                 [[2 * np.sqrt(2/3) / lam,
                                 2 / (lam * np.sqrt(3)),
@@ -529,8 +532,8 @@ def setup_luminosity_plots():
 fixedPoint_plots = []
 
 
-rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k--", linewidth = 0.5)
-mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5)
+rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
+mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
 
 lam = lambda_slide.get()
 
@@ -654,7 +657,9 @@ track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
              zticks = [0, 0.5, 1])
 track_ax.set_box_aspect([2, 1, 1])
 track_ax.axis("off")
-
+fig2.savefig("Figures/One Potential/ Track_lambda2_{}.svg".format(int(lam_0**2)), format='svg')
+if int(np.ceil(lam)) == 1:
+    fig2.savefig("Figures/One Potential/ Track_lambda0385.svg", format='svg')
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
@@ -679,6 +684,9 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
 # dens_ax.add_artist(legend1)
 
 # dens_ax.yaxis.set_ticks_position('both')
+# fig2.savefig("Figures/One Potential/ Density_lambda2_{}.svg".format(int(lam_0**2)), format='svg')
+# if int(np.ceil(lam)) == 1:
+#     fig2.savefig("Figures/One Potential/ Density_lambda0385.svg", format='svg')
 
 
 accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
@@ -691,8 +699,9 @@ accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 # accel_ax.yaxis.set_ticks_position('both')
 # accel_ax.set(xlabel="$N$")
 # static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
-
-
+# fig2.savefig("Figures/One Potential/ Accel_lambda2_{}.svg".format(int(lam_0**2)), format='svg')
+# if int(np.ceil(lam)) == 1:
+#     fig2.savefig("Figures/One Potential/ Accel_lambda2_0385.svg", format='svg')
 
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
@@ -700,9 +709,12 @@ gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False) 
 
 #Additional code, along with commenting out above line, for report figures
-#gamma_ax.yaxis.set_ticks_position('both')
-#gamma_ax.legend(fontsize=12)
-#gamma_ax.set(xlabel="$N$")
+# gamma_ax.yaxis.set_ticks_position('both')
+# gamma_ax.legend(fontsize=12)
+# gamma_ax.set(xlabel="$N$")
+# fig2.savefig("Figures/One Potential/ Gamma_lambda2_{}.svg".format(int(lam_0**2)), format='svg')
+# if int(np.ceil(lam)) == 1:
+#     fig2.savefig("Figures/One Potential/ Gamma_lambda0385.svg", format='svg')
 
 
 d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
@@ -711,9 +723,10 @@ d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
               xticklabels = ['$0$','$1$','$2$', '$3$'],
               yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
 
-#d_lum_ax.legend(loc=4)
-
-
+# d_lum_ax.legend(loc=4)
+# fig2.savefig("Figures/One Potential/ Hubble_lambda2_{}.svg".format(int(lam_0**2)), format='svg')
+# if int(np.ceil(lam)) == 1:
+#     fig2.savefig("Figures/One Potential/ Hubble_lambda0385.svg", format='svg')
 
 #Run the code
 window.mainloop()
