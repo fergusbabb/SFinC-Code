@@ -547,8 +547,9 @@ def setup_luminosity_plots():
     d_L_for_fill = []
     #Define colors and Omega_Lambda0 values
     configurations = [
-        (0.68, 'cyan'),
-        (0.73, 'magenta'),
+        (0.65, 'cyan'),
+        (0.70, 'green'),
+        (0.75, 'magenta'),
         (0, 'orange')
     ]
 

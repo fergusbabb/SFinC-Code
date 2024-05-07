@@ -617,7 +617,7 @@ def setup_luminosity_plots():
     for (Omega_Lambda0, color,), d_L_values in zip(configurations, d_L_for_fill):
         # Plot the middle value normally and fill between the bounds
         plot_d_luminosity(d_lum_ax, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
-                          f"$\Omega_{{\Lambda 0}}={Omega_Lambda0},\; w_{{\Lambda}}={w_Lam_0}$", color)
+                          f"$\Omega_{{\Lambda}}^{{(0)}}={Omega_Lambda0},\; w_{{\Lambda}}={w_Lam_0}$", color)
 
 
 #___________________________________Initial Plot_____________________________
@@ -744,7 +744,7 @@ d_L = (c) * (1 + z) * odeint(
 setup_luminosity_plots()
 
 integral_plot, = d_lum_ax.plot(z, d_L,
-                    label = f"$\Omega_{{\phi 0}} = {Omega_phi_0}$", color = 'b', linewidth=2)
+                    label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
 
 #________________Plotting combined potential for two potentials___________
 
@@ -832,7 +832,7 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
              xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
              xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
 
-d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
+d_lum_ax.set(ylabel = "$H_0d_L$ ", xlabel= '$z$',
               xlim=[0,3], ylim=[0,6],
               xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
               xticklabels = ['$0$','$1$','$2$', '$3$'],
@@ -893,7 +893,7 @@ d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
 
 
 
-# d_lum_ax.set(ylabel = "$H_0d_L$ [Mpc]", xlabel= '$z$',
+# d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
 #               xlim=[0,3], ylim=[0,6],
 #               xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
 #               xticklabels = ['$0$','$1$','$2$', '$3$'],
