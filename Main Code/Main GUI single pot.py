@@ -719,6 +719,7 @@ static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
              yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
              xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
 gamma_ax.yaxis.set_ticks_position('both')
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
@@ -788,7 +789,7 @@ d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
 
 
 
-# d_lum_ax.set(ylabel = "$d_L$ [Mpc]", xlabel= '$z$',
+# d_lum_ax.set(ylabel = "$H_0d_L$ [Mpc]", xlabel= '$z$',
 #               xlim=[0,3], ylim=[0,6],
 #               xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
 #               xticklabels = ['$0$','$1$','$2$', '$3$'],
