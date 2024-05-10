@@ -68,6 +68,10 @@ track_ax.plot(np.cos(theta), np.sin(theta),
          'k', linewidth=1)
 track_ax.plot([-1,1], [0,0], 'k', linewidth=1)
 
+canvas = FigureCanvasTkAgg(fig, window) 
+#Canvas is where figure is placed to window
+canvas.draw() #Show canvas (ie show figure)
+
 
 #Initial values
 gam_0 = 1
@@ -76,17 +80,6 @@ pathnum = 50
 N = np.linspace(0, 8, 1000) 
 xinit = np.linspace(-0.99, 0.99, pathnum)
 
-
-#_________________________Initialise plots___________________________________
-#Tkinter works as:
-#1) Main Window 
-#2) Set up canvases inside window 
-#3) Set up Figures attached to canvases 
-#4) Add axes to figures as usual
-
-canvas = FigureCanvasTkAgg(fig, window) 
-#Canvas is where figure is placed to window
-canvas.draw() #Show canvas (ie show figure)
 
 #_____________________________Define ODE for 1 fluid_____________________
 def ODEs(coords, t, lam, gam):
