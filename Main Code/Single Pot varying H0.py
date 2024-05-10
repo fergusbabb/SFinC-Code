@@ -162,11 +162,9 @@ z = np.exp(-N) - 1
 c = 1 #3e5     # Given in km/s
 V = z * c   # ""
 
-h_Betoule=0.685
-h_Reiss=0.738
+h = 0.685
 
-H_0_Betoule = 100*h_Betoule # km/(s Mpc)
-H_0_Reiss = 100*h_Reiss # km/(s Mpc)
+H_0 = 100*h # km/(s Mpc)
 
 xinit = np.linspace(-0.99, 0.99, pathnum)
 
@@ -382,8 +380,7 @@ def update_plot(event):
         zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
         )).transpose()[0]
     
-    integral_plot_Betoule.set_ydata(d_L*H_0_Betoule)
-    integral_plot_Reiss.set_ydata(d_L*H_0_Reiss)
+    integral_plot.set_ydata(d_L)
     #Show plots
     fig.canvas.draw()
 
@@ -549,8 +546,7 @@ def setup_luminosity_plots():
     d_L_for_fill = []
     #Define colors and h values
     configurations = [
-        (H_0_Betoule, 'cyan'),
-        (H_0_Reiss, 'magenta')
+        (1, 'cyan')
     ]
 
     Omega_Lambda0 = 0.73
@@ -693,9 +689,7 @@ setup_luminosity_plots()
 
 
 
-integral_plot_Betoule, = d_lum_ax.plot(V, d_L*H_0_Betoule,
-                    label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
-integral_plot_Reiss, = d_lum_ax.plot(V, d_L*H_0_Reiss,
+integral_plot, = d_lum_ax.plot(V, d_L,
                     label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
 
 
