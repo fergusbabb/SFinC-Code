@@ -539,6 +539,7 @@ w_neg_err = -0.1
 
 
 def plot_d_luminosity(ax, z, d_L, d_L_bounds, label, color, fill_alpha, h):
+    h=1
     ax.plot(z, h*d_L, label=label, color=color, lw=1)
     if d_L_bounds is not None:
         ax.fill_between(z, h*d_L_bounds[0], h*d_L_bounds[1], alpha=fill_alpha, color=color)
