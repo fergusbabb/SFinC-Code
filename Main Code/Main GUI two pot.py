@@ -185,9 +185,9 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 #           round(np.sqrt(y0Squared) * 1e-1,3),
 #           round(np.sqrt(Omega_r0),3)]
 
-state_0 = [0.0000001,
-           0.00001,
-           0.00001,
+state_0 = [0.001,
+           0.001,
+           0.001,
            0.975]
 
 
