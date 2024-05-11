@@ -18,8 +18,8 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
-##plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-##                     "font.serif": ["Computer Modern Serif"]})
+plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+                     "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=14, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 12
 plt.rcParams['ytick.labelsize'] = 12
@@ -404,7 +404,8 @@ def update_plot(event):
         zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
         )).transpose()[0]
     
-##    integral_plot.set_ydata(d_L)
+    integral_plot.set_ydata(d_L)
+    integral_plot.set_xdata(z)
 
     #Show plots
     fig.canvas.draw()
