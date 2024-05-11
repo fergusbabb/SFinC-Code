@@ -157,13 +157,12 @@ lam2_max = 10
 
 Ni = 0
 NiForward = 16
+Ni = 16
 
-N = np.linspace(0, Ni, 1)
-NForward = np.linspace(0, NiForward, abs(int(NiForward*1000)))
+N = np.linspace(0, Ni, abs(int(Ni*1000)))
 
-z = np.exp(-N) - 1
 c = 1 #3e5     # Given in km/s
-V = z * c   # ""
+##V = z * c   # ""
 h = 0.738
 H_0 = 100*h # km/(s Mpc)
 xinit = np.linspace(-0.99, 0.99, pathnum)
@@ -330,42 +329,37 @@ def update_plot(event):
                 alpha = 0.75, linewidth=1)
     
     #Solve the system of ODEs using odeint
+    # Solve the system of ODEs using odeint
     solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
     pathx  = solution[:, 0]
     pathy1 = solution[:, 1]
     pathy2 = solution[:, 2]
     pathz  = solution[:, 3]
-    
-    #Add both ways
-    solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
-    pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
-    pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
-    pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
-    pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
+
     pathy = np.sqrt(pathy1**2 + pathy2**2)
+
+    path_gamma_phi = gamma_phi(pathx, pathy)
 
     #Update tracks
     track.set_data(pathx, pathy)
     track.set_3d_properties(pathz)
-
-    #Update acceleration plot
-    accel_plot_new_data = accelerationExpression(
-                                pathx,pathy,pathz)
-    accel_plot.set_ydata(accel_plot_new_data)
-
     
     #Find when in N each event occured
-    NAxis = np.append(N[::-1], NForward)
-    indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
+    NAxis = N
     
+    rad_dens = pathz**2
+    mass_dens = 1 - pathx**2 - pathy**2 - pathz**2
+    phi_dens = pathx**2 + pathy**2
+    total_dens = rad_dens + mass_dens + phi_dens
 
+    indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))  
     indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
     indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
     indexMPeak = np.argmax(mass_dens)
-    rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-    mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-    #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
+    
     NAxis -= NAxis[indexToday]
+    zAxis = getRedshift(NAxis[:indexToday + 1])
+    z = zAxis[::-1]
 
     MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
     MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
@@ -373,8 +367,13 @@ def update_plot(event):
 
     #Update relative density plots
     Radn_dens_plot.set_ydata(pathz**2)
+    Radn_dens_plot.set_xdata(NAxis)
+    
     Mass_dens_plot.set_ydata(1 - pathx**2 - pathy**2 - pathz**2)
+    Mass_dens_plot.set_xdata(NAxis)
+    
     Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
+    Phi_dens_plot.set_xdata(NAxis)
     #y1_dens_plot.set_ydata(pathy1**2)
     #y2_dens_plot.set_ydata(pathy2**2)
 
@@ -394,6 +393,12 @@ def update_plot(event):
     #Update EoS plot
     path_gamma_phi = gamma_phi(pathx, pathy) 
     effective_eos.set_ydata(path_gamma_phi)
+    effective_eos.set_xdata(NAxis)
+
+    #Update acceleration plot
+    accel_plot_new_data = accelerationExpression(pathx, pathy, pathz)
+    accel_plot.set_ydata(accel_plot_new_data)
+    accel_plot.set_xdata(NAxis)
     
     #Update redshift plot
     d_L = (c) * (1 + z) * odeint(
@@ -402,6 +407,7 @@ def update_plot(event):
         )).transpose()[0]
     
     integral_plot.set_ydata(d_L)
+    integral_plot.set_xdata(z)
 
     #Show plots
     fig.canvas.draw()
@@ -612,9 +618,7 @@ def setup_luminosity_plots():
 #Initial plot
 fixedPoint_plots = []
 
-rScalingLine = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
 
-mScalingLine = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
 
 lam1 = lambda1_slide.get()
 lam2 = lambda2_slide.get()
@@ -626,38 +630,33 @@ pathy1 = solution[:, 1]
 pathy2 = solution[:, 2]
 pathz  = solution[:, 3]
 
-solutionForward = odeint(ODEs, state_0, NForward, args = (np.array([lam1, lam2]),))
-pathx  = np.append(pathx[::-1],  solutionForward[:, 0])
-pathy1 = np.append(pathy1[::-1], solutionForward[:, 1])
-pathy2 = np.append(pathy2[::-1], solutionForward[:, 2])
-pathz  = np.append(pathz[::-1],  solutionForward[:, 3])
-pathySquared = pathy1**2 + pathy2**2
-pathy = np.sqrt(pathySquared)
+pathy = np.sqrt(pathy1**2 + pathy2**2)
 
 path_gamma_phi = gamma_phi(pathx, pathy)
 
-
-NAxis = np.append(N[::-1], NForward)    
+NAxis = N
 
 rad_dens = pathz**2
-mass_dens = 1 - pathx**2 - pathySquared - pathz**2
-phi_dens = pathx**2 + pathySquared
+mass_dens = 1 - pathx**2 - pathy**2 - pathz**2
+phi_dens = pathx**2 + pathy**2
 total_dens = rad_dens + mass_dens + phi_dens
 
 indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))
+
 
 #Find when in N each event occured
 indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
 indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
 indexMPeak = np.argmax(mass_dens)
+
 NAxis -= NAxis[indexToday]
-zAxis = getRedshift(NAxis)
+zAxis = getRedshift(NAxis[:indexToday + 1])
+z = zAxis[::-1]
 
+rScalingLine, = gamma_ax.plot([-50, 50], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
+mScalingLine, = gamma_ax.plot([-50, 50], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
 
-#rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
-#mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
 #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
-
 
 
 mr_eq_val = getRedshift(NAxis[indexMR_eq])
@@ -722,7 +721,7 @@ for point in fixedPoints:
 track.set_visible(True)
 
 
-d_L = (c) * (1 + z) * odeint(
+d_L = (1 + z) * odeint(
     d_L_IntegrandScalar, 0, z, args=(
         zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
         )).transpose()[0]
@@ -752,24 +751,25 @@ track_ax.axis("off")
 
 accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
-             xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
-             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
+             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
 accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 accel_ax.yaxis.set_ticks_position('both')
 static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
 
 
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
-             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
-             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], 
+             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
+             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
 gamma_ax.yaxis.set_ticks_position('both')
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
              ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
              yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
-             xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
-             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2, 3],
+             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$', '$3$'])
 
 d_lum_ax.set(ylabel = "$H_0d_L$ ", xlabel= '$z$',
               xlim=[0,3], ylim=[0,6],
