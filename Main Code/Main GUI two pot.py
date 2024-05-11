@@ -155,10 +155,10 @@ lam2_0 = -10
 lam2_min = -10
 lam2_max = 10
 
-Ni = -8
+Ni = 0
 NiForward = 16
 
-N = np.linspace(0, Ni, 8000)
+N = np.linspace(0, Ni, 1)
 NForward = np.linspace(0, NiForward, abs(int(NiForward*1000)))
 
 z = np.exp(-N) - 1
@@ -185,10 +185,10 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 #           round(np.sqrt(y0Squared) * 1e-1,3),
 #           round(np.sqrt(Omega_r0),3)]
 
-state_0 = [0.001,
+state_0 = [0.002,
            0.001,
            0.001,
-           0.975]
+           0.9999]
 
 
 #_____________________________Define ODE for 2 fluids_______________________
@@ -612,9 +612,9 @@ def setup_luminosity_plots():
 #Initial plot
 fixedPoint_plots = []
 
-rScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
+rScalingLine = gamma_ax.plot([N[-1], NForward[-1]], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
 
-mScalingLine, = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
+mScalingLine = gamma_ax.plot([N[-1], NForward[-1]], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
 
 lam1 = lambda1_slide.get()
 lam2 = lambda2_slide.get()
@@ -635,6 +635,7 @@ pathySquared = pathy1**2 + pathy2**2
 pathy = np.sqrt(pathySquared)
 
 path_gamma_phi = gamma_phi(pathx, pathy)
+
 
 NAxis = np.append(N[::-1], NForward)    
 
