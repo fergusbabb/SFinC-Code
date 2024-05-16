@@ -47,19 +47,22 @@ cbar_ax = fig.add_axes(cbar_ax_dims)
 #Relative Density axes
 dens_axis_dims = [.625,.125,.35,.275]
 dens_ax = fig.add_axes(dens_axis_dims)
+dens_ax.autoscale(enable=True, axis="x", tight = True)
 
 #Acceleration axes
 accel_axis_dims = [.625,.4,.35,.275]
 accel_ax = fig.add_axes(accel_axis_dims)
+accel_ax.autoscale(enable=True, axis="x", tight = True)
+
 
 #EoS Axes
 gamma_axis_dims = [.625,.675,.35,.275]
 gamma_ax = fig.add_axes(gamma_axis_dims)
+gamma_ax.autoscale(enable=True, axis="x", tight = True)
 
 #Hubble plot Axes
 d_lum_ax_dims = [.0675,.125,.35,.3675] 
 d_lum_ax = fig.add_axes(d_lum_ax_dims)
-
 
 '''
 To produce report figures comment above axes, uncomment below
@@ -361,6 +364,10 @@ def update_plot(event):
     zAxis = getRedshift(NAxis[:indexToday + 1])
     z = zAxis[::-1]
 
+    mScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    rScalingLine.set_xdata([NAxis[0], NAxis[-1]])
+    static_line.set_xdata([NAxis[0], NAxis[-1]])
+
     MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
     MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
     MPeakLine.set_xdata([NAxis[indexMPeak], NAxis[indexMPeak]])
@@ -377,6 +384,7 @@ def update_plot(event):
     #y1_dens_plot.set_ydata(pathy1**2)
     #y2_dens_plot.set_ydata(pathy2**2)
 
+    dens_ax.set_xlim([NAxis[0], NAxis[-1]])
 
     mr_eq_val = getRedshift(NAxis[indexMR_eq])
     mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
@@ -395,10 +403,16 @@ def update_plot(event):
     effective_eos.set_ydata(path_gamma_phi)
     effective_eos.set_xdata(NAxis)
 
+    gamma_ax.set_xlim([NAxis[0], NAxis[-1]])
+
     #Update acceleration plot
     accel_plot_new_data = accelerationExpression(pathx, pathy, pathz)
     accel_plot.set_ydata(accel_plot_new_data)
     accel_plot.set_xdata(NAxis)
+    
+    accel_ax.set_xlim([NAxis[0], NAxis[-1]])
+
+
     
     #Update redshift plot
     d_L = (c) * (1 + z) * odeint(
@@ -653,8 +667,8 @@ NAxis -= NAxis[indexToday]
 zAxis = getRedshift(NAxis[:indexToday + 1])
 z = zAxis[::-1]
 
-rScalingLine, = gamma_ax.plot([-50, 50], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
-mScalingLine, = gamma_ax.plot([-50, 50], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
+rScalingLine, = gamma_ax.plot([NAxis[0], NAxis[-1]], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
+mScalingLine, = gamma_ax.plot([NAxis[0], NAxis[-1]], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
 
 #gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
 
@@ -751,25 +765,28 @@ track_ax.axis("off")
 
 accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
-             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
-             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
+##             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
+##             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$']
+             )
 accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 accel_ax.yaxis.set_ticks_position('both')
-static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
+static_line, = accel_ax.plot([NAxis[0], NAxis[-1]],[0,0], "k--", linewidth = 0.5)
 
 
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
              yticklabels = ['$0$','$1$', '$4/3$', '$2$'], 
-             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
-             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
+##             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
+##             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$']
+             )
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
 gamma_ax.yaxis.set_ticks_position('both')
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
              ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
              yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
-             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2, 3],
-             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$', '$3$'])
+##             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2, 3],
+##             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$', '$3$']
+            )
 
 d_lum_ax.set(ylabel = "$H_0d_L$ ", xlabel= '$z$',
               xlim=[0,3], ylim=[0,6],
