@@ -30,16 +30,16 @@ window = tk.Tk()
 window.title('GUI for Arbitrary Fluid')
 window.geometry('1000x950')
 
-#window_4_report = tk.Tk()
-#window_4_report.title('Window to generate plots for report')
+window_4_report = tk.Tk()
+window_4_report.title('Window to generate plots for report')
 #for track plots
-#window_4_report.geometry('900x600')
-#fig2 = Figure(figsize=(9, 6)) #900x600 pixels
+window_4_report.geometry('900x600')
+fig2 = Figure(figsize=(9, 6)) #900x600 pixels
 
 #for lambda gamma plot
-#window_4_report.geometry('750x500')
-#fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
-#fig2.set_facecolor('white')
+window_4_report.geometry('750x500')
+fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig2.set_facecolor('white')
 
 
 #Tracks plot figure
@@ -137,7 +137,10 @@ def compute_fill(gam):
     xWhere = np.where(boundary < np.sqrt(1-x**2), True, False)
     return track_ax.fill_between(x, boundary, np.sqrt(1-x**2),
                                  where = xWhere, alpha=0.2, color = 'orange', label = 'Accelerating region')
-    
+
+#_______________________________Effective Eos Parameter______________________
+def gamma_phi(x, y):
+    return (2*x**2) / (x**2 + y**2)
     
 #_______________________________Update track plots___________________________
 def update_plot(event):

@@ -28,32 +28,39 @@ plt.rcParams['ytick.labelsize'] = 12
 #Standard tkinter window set up
 window = tk.Tk()
 window.title('GUI for Arbitrary Fluid')
-window.geometry('1000x950')
+window.geometry('850x500')
 
 window_4_report = tk.Tk()
 window_4_report.title('Window to generate plots for report')
 window_4_report.geometry('750x500')
 fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
 fig2.set_facecolor('white')
+
 gamma_ax_dims = [.1,.2,.8,.7]
 gamma_ax = fig2.add_axes(gamma_ax_dims)
 
+window_4_report_2 = tk.Tk()
+window_4_report_2.title('Window to generate plots for report 2')
+window_4_report_2.geometry('750x500')
+fig3 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig3.set_facecolor('white')
+
 #Tracks plot figure
-fig = Figure(figsize=(10, 9.5)) #1000x950 pixels
+fig = Figure(figsize=(8.5, 500)) #1000x950 pixels
 fig.set_facecolor('white')
-track_axis_dims = [.05,.6,.75,.3]
-track_ax = fig.add_axes(track_axis_dims, aspect='equal')
-#track_axis_dims2 = [.1,.15,.75,.8]
-#track_ax = fig2.add_axes(track_axis_dims2, aspect='equal')
+#track_axis_dims = [.05,.6,.75,.3]
+#track_ax = fig.add_axes(track_axis_dims, aspect='equal')
+track_axis_dims2 = [.1,.15,.75,.8]
+track_ax = fig3.add_axes(track_axis_dims2, aspect='equal')
 
 #Colour bar axes
-cbar_ax_dims = [.8,.6,.015,.3]
-cbar_ax = fig.add_axes(cbar_ax_dims)
-#cbar_ax_dims2 = [.875,.25,.015,.6]
-#cbar_ax = fig2.add_axes(cbar_ax_dims2)
+#cbar_ax_dims = [.8,.6,.015,.3]
+#cbar_ax = fig.add_axes(cbar_ax_dims)
+cbar_ax_dims2 = [.875,.25,.015,.6]
+cbar_ax = fig3.add_axes(cbar_ax_dims2)
 
 #Hubble plot Axes
-lam_gam_dims = [.15,.2,.55,.3] 
+lam_gam_dims = [.1,.225,.675,.7] 
 lam_gam_ax = fig.add_axes(lam_gam_dims)
 #lam_gam_dims2 = [.15,.25,.7,.6] 
 #lam_gam_ax = fig2.add_axes(lam_gam_dims2)
@@ -65,18 +72,23 @@ track_ax.plot(np.cos(theta), np.sin(theta),
 track_ax.plot([-1,1], [0,0], 'k', linewidth=1)
 
 canvas = FigureCanvasTkAgg(fig, window) 
-#Canvas is where figure is placed to window
-canvas.draw() #Show canvas (ie show figure)
-
+canvas.draw() 
 canvas2 = FigureCanvasTkAgg(fig2, window_4_report) 
-#Canvas is where figure is placed to window
-canvas2.draw() #Show canvas (ie show figure)
+canvas2.draw() 
+canvas3 = FigureCanvasTkAgg(fig3, window_4_report_2) 
+canvas3.draw() 
+
+#Place Canvas
+canvas.get_tk_widget().place(relheight=1,relwidth=1)
+canvas2.get_tk_widget().place(relheight=1,relwidth=1)
+canvas3.get_tk_widget().place(relheight=1,relwidth=1)
+
 
 #Initial values
 gam_0 = 1
 lam_0 = 3
 pathnum = 50
-N = np.linspace(0, 4, 1000) 
+N = np.linspace(0, 15, 10000) 
 xinit = np.linspace(-0.99, 0.99, pathnum)
 
 
@@ -137,7 +149,11 @@ def compute_fill(gam):
     return track_ax.fill_between(x, boundary, np.sqrt(1-x**2),
                                  where = xWhere, alpha=0.2, color = 'orange', label = 'Accelerating region')
     
-    
+
+#_______________________________Effective Eos Parameter______________________
+def gamma_phi(x, y):
+    return (2*x**2) / (x**2 + y**2)
+ 
 #_______________________________Update track plots___________________________
 def update_plot(event):
     #Before update_plot is called lam and gam sliders are updated
@@ -161,9 +177,9 @@ def update_plot(event):
     
     #Update cursor star point
     clickpoint.set_data(lam**2, gam)
-
+    
     #Plot all paths with updated values
-    for i in range(pathnum):
+    for i in range(0, pathnum):
         initial_conditions = [xinit[i], yinit[i]]  #Initial values for x and y
         
         #Solve the system of ODEs using odeint
@@ -173,6 +189,10 @@ def update_plot(event):
         solution_y = solution[:, 1]
 
         main_tracks[i].set_data(solution_x, solution_y)
+        if i == 1:
+            eos_plots[i].set_ydata(gamma_phi(solution_x, solution_y))
+        if i % 1 == 0:
+            eos_plots[i].set_ydata(gamma_phi(solution_x, solution_y))
 
         #Update the quiver vectors
         quiver_vectors = np.array([ODEs([pt[0], pt[1]], N, lam, gam)
@@ -187,12 +207,17 @@ def update_plot(event):
         quiver = track_ax.quiver(x_ins, y_ins, u, v,
                     color=cmap(norm(magnitude)), norm=norm,
                     cmap=cmap)
+
+
     track_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda = {lambda_slide.get():.2f}$')
+    gamma_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda = {lambda_slide.get():.2f}$')
 
-
+    gam_ScaleLine.set_ydata([gam,gam])
+    
     #Show plots
     fig.canvas.draw()
     fig2.canvas.draw()
+    fig3.canvas.draw()
 
 def fibonacci_semicircle(max_radius, num_points):
     points = []
@@ -219,6 +244,7 @@ num_points = 400  # Number of points on the semicircle
 # Generate points on a semicircle using Fibonacci-like spacing
 points = fibonacci_semicircle(radius, num_points)
 points = np.vstack((points,[0,0.01]))
+
 
 # Compute vectors at each point using the example vector field function
 quiver_vectors = np.array([ODEs([pt[0], pt[1]], N, lam_0, gam_0)
@@ -268,7 +294,7 @@ cid = fig.canvas.mpl_connect('button_press_event', regions_plot)
 
 #Lambda Slider. Initialise, add interaction, place, hide borders
 
-lambda_label_ax = fig.add_axes([.765,.505,.05,.05])
+lambda_label_ax = fig.add_axes([.8,.925,.05,.05])
 lambda_label_ax.text(0,0,'$\lambda$ value')
 lambda_label_ax.set_axis_off()
 
@@ -276,11 +302,11 @@ lambda_slide = tk.Scale(window, from_ = 0.01, to = np.sqrt(12),
                        width = 20, length = 250, resolution=0.001)
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
-lambda_slide.place(relx=0.75, rely=0.5, relheight=0.3, relwidth=0.075)
+lambda_slide.place(relx=0.8, rely=0.0975, relheight=0.7, relwidth=0.075)
 lambda_slide.configure(bg = 'white', borderwidth=0)
 
 #Gamma slider. Initialise, add interaction, place, hide borders
-gamma_label_ax = fig.add_axes([.865,.505,.05,.05])
+gamma_label_ax = fig.add_axes([.9,.925,.05,.05])
 gamma_label_ax.text(0,0,'$\gamma$ value')
 gamma_label_ax.set_axis_off()
 
@@ -288,19 +314,8 @@ gamma_slide = tk.Scale(window, from_ = 0.01, to = 2,
                        width = 20, length = 250, resolution=0.001)
 gamma_slide.set(gam_0)
 gamma_slide.bind("<ButtonRelease-1>", update_plot)
-gamma_slide.place(relx=0.85, rely=0.5, relheight=0.3, relwidth=0.075)
+gamma_slide.place(relx=0.9, rely=0.0975, relheight=0.7, relwidth=0.075)
 gamma_slide.configure(bg = 'white', borderwidth=0)
-
-#Place Canvas
-canvas.get_tk_widget().place(relheight=1,relwidth=1)
-
-#Canvas is where figure is placed to window
-#canvas2 = FigureCanvasTkAgg(fig2, window_4_report)
-#canvas2.draw() #Show canvas (ie show figure)
-canvas2.get_tk_widget().place(relheight=1,relwidth=1)
-
-#Show the navigation toolbar
-#NavigationToolbar2Tk(canvas2, window_4_report)
 
 #___________________________________Initial Plot____________________________________
 
@@ -329,7 +344,7 @@ def initial_points(radius, semicirc_num, diam_num):
     return initial_points
 
 
-points_init = initial_points(0.975, 30, pathnum-30)
+points_init = initial_points(0.975, 20, pathnum-20)
 xinit = points_init[:,0]
 yinit = points_init[:,1]
 
@@ -341,41 +356,52 @@ y_tracks = []
 
 fill = compute_fill(gam_0)
 
-rScalingLine = gamma_ax.plot([N[-1], N[0]], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
-mScalingLine = gamma_ax.plot([N[-1], N[0]], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
 
-j=38
 fixedPoint_plots = []
-for i in range(pathnum):
-    if i == j:
-        initial_conditions = [xinit[i], yinit[i]]  #Initial values for x and y
-        
-        lam = lambda_slide.get()
-        gam = gamma_slide.get()
+eos_plots = []
+for i in range(0, pathnum):
+    initial_conditions = [xinit[i], yinit[i]]  #Initial values for x and y
+    
 
-        # Solve the system of ODEs using odeint
-        solution = odeint(ODEs, initial_conditions, N, args = (lam, gam))
+    lam = lambda_slide.get()
+    gam = gamma_slide.get()
 
-        solution_x = solution[:, 0]
-        solution_y = solution[:, 1]
-        
-        track_i = track_ax.plot(solution_x, solution_y, 'k', linewidth=.5, alpha=0.4)[0]
-        main_tracks.append(track_i)
-        track_i.set_visible(True)
+    # Solve the system of ODEs using odeint
+    solution = odeint(ODEs, initial_conditions, N, args = (lam, gam))
 
-        eos_plot, = gamma_ax.plot(N, 2*solution_x**2/(solution_x**2 + solution_y**2), 'r-', label = r'$\gamma_\phi = 2x^2/(x^2+y^2)$')
+    solution_x = solution[:, 0]
+    solution_y = solution[:, 1]
+    
+    track_i = track_ax.plot(solution_x, solution_y, 'k', linewidth=.5, alpha=0.4)[0]
+    main_tracks.append(track_i)
+    track_i.set_visible(True)
 
-        fixedPoints, fixedPoints_labels = fixedPoints_func(lam_0, gam_0)
-        for point in fixedPoints:
-            plot, = track_ax.plot(point[0], point[1], 'or')
-            fixedPoint_plots.append(plot)
+    if i == 1:
+        eos_plot_i, = gamma_ax.plot(N, gamma_phi(solution_x,solution_y), 'b-', linewidth=.5, alpha=0.4, label = r'$\gamma_\phi$')
+    elif i % 1 == 0:
+        eos_plot_i, = gamma_ax.plot(N, gamma_phi(solution_x,solution_y), 'b-', linewidth=.5, alpha=0.4)
+
+    eos_plots.append(eos_plot_i)
+
+    fixedPoints, fixedPoints_labels = fixedPoints_func(lam_0, gam_0)
+    for point in fixedPoints:
+        plot, = track_ax.plot(point[0], point[1], 'or')
+        fixedPoint_plots.append(plot)
+
+
+rScalingLine  = gamma_ax.plot([N[-1], N[0]], [4/3, 4/3], "r:", linewidth = .75, label='$\gamma_r=4/3$')
+mScalingLine  = gamma_ax.plot([N[-1], N[0]], [1, 1], "g--", linewidth = .75, label='$\gamma_m=1$')
+CCScalingLine = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, label='$\gamma_\Lambda=0$')
+gam = gamma_slide.get()
+gam_ScaleLine, = gamma_ax.plot([N[-1], N[0]], [gam, gam], "m-", linewidth = .75, label=r'$\gamma$')
+
 
 #_____________________Setting plot labels etc________________________________
 
 track_ax.set_xlabel('$x$', x=1)
 track_ax.set_ylabel('$y$', rotation = 0, y=1)
 track_ax.set(xticks=[-1,-.5,0,.5,1], yticks=[0,.5,1],
-             xlim = [-1.1,1.1], ylim=[-0.1,1.1],
+             xlim = [-1.2,1.2], ylim=[-0.2,1.15],
              xticklabels = ['$-1$','$-1/2$','$0$','$1/2$','$1$'],
              yticklabels = ['$0$','$1/2$','$1$'],
              title = f'$\gamma={gamma_slide.get():.0f},\; \lambda = {lambda_slide.get():.0f}$')
@@ -400,15 +426,16 @@ lam_gam_ax.plot([0,6],[0,2],'k')
 lam_gam_ax.plot([2,2],[0,2],'k', linestyle = ':')
 #lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
 
-gamma_ax.set_title(f'$x_0={xinit[j]:.2f}, y_0={yinit[j]:.2f}, \ \ \ \lambda = {lam_0}, \gamma = {gam_0}$')
-gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1], xlabel="$N$",
-            yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[0,4], xticks = [0,1,2,3,4],
-            xticklabels = ['$0$', '$1$', '$2$', '$3$','$4$'])
+gamma_ax.set_title(f'$\gamma={gamma_slide.get():.0f},\; \lambda = {lambda_slide.get():.0f}$')
+gamma_ax.set(yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
+            yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[0,12])
+gamma_ax.set_xlabel('$N$', x=1.02)
+gamma_ax.set_ylabel('$\gamma_\phi$', rotation = 0, y=1.02)
 gamma_ax.yaxis.set_ticks_position('both')
-gamma_ax.legend(fontsize=12, loc='best')
+gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
 gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
 
-NavigationToolbar2Tk(canvas, window)
+NavigationToolbar2Tk(canvas3, window_4_report_2)
 window.mainloop()
 #End
 
