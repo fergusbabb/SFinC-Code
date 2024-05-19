@@ -172,7 +172,7 @@ def update_plot(event):
     # Get new fixed points and plot them
     fixedPoints, fixedPoints_labels = fixedPoints_func(lam, gam)
     for i, point in enumerate(fixedPoints):
-        plot, = track_ax.plot(point[0], point[1], 'or')
+        plot, = track_ax.plot(point[0], point[1], 'or', markeredgewidth=0.5, markeredgecolor='black')
         fixedPoint_plots.append(plot)
     
     #Update cursor star point
@@ -209,8 +209,8 @@ def update_plot(event):
                     cmap=cmap)
 
 
-    track_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda = {lambda_slide.get():.2f}$')
-    gamma_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda = {lambda_slide.get():.2f}$')
+    track_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda^2 = {lambda_slide.get()**2:.2f}$')
+    gamma_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda^2 = {lambda_slide.get()**2:.2f}$')
 
     gam_ScaleLine.set_ydata([gam,gam])
     
@@ -385,7 +385,7 @@ for i in range(0, pathnum):
 
     fixedPoints, fixedPoints_labels = fixedPoints_func(lam_0, gam_0)
     for point in fixedPoints:
-        plot, = track_ax.plot(point[0], point[1], 'or')
+        plot, = track_ax.plot(point[0], point[1], 'or', markeredgewidth=0.5, markeredgecolor='black')
         fixedPoint_plots.append(plot)
 
 
@@ -404,7 +404,7 @@ track_ax.set(xticks=[-1,-.5,0,.5,1], yticks=[0,.5,1],
              xlim = [-1.2,1.2], ylim=[-0.2,1.15],
              xticklabels = ['$-1$','$-1/2$','$0$','$1/2$','$1$'],
              yticklabels = ['$0$','$1/2$','$1$'],
-             title = f'$\gamma={gamma_slide.get():.0f},\; \lambda = {lambda_slide.get():.0f}$')
+             title = f'$\gamma={gamma_slide.get():.0f},\; \lambda^2 = {lambda_slide.get()**2:.0f}$')
 track_ax.legend()
 
 #Interactive plot, plot lines as in P40
@@ -426,7 +426,7 @@ lam_gam_ax.plot([0,6],[0,2],'k')
 lam_gam_ax.plot([2,2],[0,2],'k', linestyle = ':')
 #lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
 
-gamma_ax.set_title(f'$\gamma={gamma_slide.get():.0f},\; \lambda = {lambda_slide.get():.0f}$')
+gamma_ax.set_title(f'$\gamma={gamma_slide.get():.0f},\; \lambda^2 = {lambda_slide.get()**2:.0f}$')
 gamma_ax.set(yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[0,12])
 gamma_ax.set_xlabel('$N$', x=1.02)
@@ -435,7 +435,14 @@ gamma_ax.yaxis.set_ticks_position('both')
 gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
 gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
 
+#fig2.savefig("Figures/Arbitrary Fluid/EoS_lambda2_{}_gamma_{}.svg".format(round(lam_0**2),round(gam_0)), format='svg')
+#fig3.savefig("Figures/Arbitrary Fluid/Track_lambda2_{}_gamma_{}.svg".format(round(lam_0**2),round(gam_0)), format='svg')
+
+
 NavigationToolbar2Tk(canvas3, window_4_report_2)
 window.mainloop()
 #End
+
+
+
 
