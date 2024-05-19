@@ -147,17 +147,17 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 #__________________________Initial values_____________________________
 pathnum = 1
 
-lam1_0 = 2
-lam1_min = -10
-lam1_max = 10
+lam1_0 = -0.4
+lam1_min = -30
+lam1_max = 30
 
-lam2_0 = -10
-lam2_min = -10
-lam2_max = 10
+lam2_0 = 30
+lam2_min = -30
+lam2_max = 30
 
 Ni = 0
 NiForward = 16
-Ni = 16
+Ni = 25
 
 N = np.linspace(0, Ni, abs(int(Ni*1000)))
 
@@ -184,10 +184,10 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 #           round(np.sqrt(y0Squared) * 1e-1,3),
 #           round(np.sqrt(Omega_r0),3)]
 
-state_0 = [0.002,
-           0.001,
-           0.001,
-           0.9999]
+state_0 = [0.0000002,
+           0.0000001,
+           0.0000001,
+           0.99]
 
 
 #_____________________________Define ODE for 2 fluids_______________________
@@ -694,9 +694,9 @@ Mass_dens_plot, = dens_ax.plot(NAxis, mass_dens, 'g',
 Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b',
         label = "$\Omega_\phi$")
 
-#y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
+# y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
 #        label = "$y_1^2$")
-#y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
+# y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
 #        label = "$y_2^2$")
 
 
@@ -751,7 +751,7 @@ track_ax.axis("off")
 
 accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
-             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
+             xlim=[-10,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
              xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
 accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 accel_ax.yaxis.set_ticks_position('both')
@@ -760,7 +760,7 @@ static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
 
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
              yticklabels = ['$0$','$1$', '$4/3$', '$2$'], 
-             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
+             xlim=[-10,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
              xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
 gamma_ax.yaxis.set_ticks_position('both')
@@ -768,7 +768,7 @@ gamma_ax.yaxis.set_ticks_position('both')
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
              ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
              yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
-             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2, 3],
+             xlim=[-10,3], xticks = [-4,-3,-2,-1, 0, 1, 2, 3],
              xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$', '$3$'])
 
 d_lum_ax.set(ylabel = "$H_0d_L$ ", xlabel= '$z$',
