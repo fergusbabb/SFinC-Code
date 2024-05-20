@@ -156,9 +156,8 @@ lam2_0 = 30
 lam2_min = -30
 lam2_max = 30
 
-lam1_0, lam2_0 = lam_0s[1]
+lam1_0, lam2_0 = lam_0s[2]
 
-print(lam1_0)
 
 Ni = 25
 
@@ -187,13 +186,19 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 #           round(np.sqrt(y0Squared) * 1e-1,3),
 #           round(np.sqrt(Omega_r0),3)]
 
+#For lam1,lam2 = 1,-1 use Nplotmax = 4, x=2e-8, y1,y2 = 1e-10, z=0.995
+#For lam1=10, lam2 = 0.1, use Nplotmax = 4, x=2e-5, y1=1e-5 y2=1e-10 z=0.99
+N_plot_max = 4
 
-N_plot_max = 6
-state_0 = [0.0000002,
-           0.0000001,
-           0.0000001,
+# state_0 = [0.163,
+#           0.115,
+#           0.0000000001,
+#           0.979]
+
+state_0 = [0.00002,
+           0.00001,
+           0.0000000001,
            0.99]
-
 
 #_____________________________Define ODE for 2 fluids_______________________
 
@@ -833,12 +838,12 @@ gam2_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
 
 
 dens_ax.text(NAxis[indexMR_eq]-1,.1,f'$z={mr_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
-dens_ax.text(NAxis[indexMPeak]-1,1.1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
-dens_ax.text(NAxis[indexMPhi_eq]-1,1.1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
+dens_ax.text(NAxis[indexMPeak]-1.2,1.1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
+dens_ax.text(NAxis[indexMPhi_eq]-1.3,1.1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             ylim=[-0.1,1.2],yticks=[0,1/4,1/2,3/4,1],
-            yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
+            yticklabels = ['$0$','$1/4$','$1/2$','$3/4$','$1$'],
             xlim = [NAxis[0],N_plot_max])
 
 #Additional code for making paper plots
@@ -866,13 +871,13 @@ d_lum_ax.legend(loc=4)
 
 
 
-# fig2.savefig("Figures/One Potential/ Track_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# fig3.savefig("Figures/One Potential/ Density_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# # fig4.savefig("Figures/One Potential/ Accel_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# fig5.savefig("Figures/One Potential/ Gamma_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# fig6.savefig("Figures/One Potential/ Hubble_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
+fig2.savefig("Figures/Two Potentials/UnlabeledTrack_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
+fig3.savefig("Figures/Two Potentials/Density_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
+# fig4.savefig("Figures/Two Potentials/Accel_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
+fig5.savefig("Figures/Two Potentials/Gamma_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
+# fig6.savefig("Figures/Two Potentials/Hubble_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg') 
 
 
-
+ 
 #Run the code
 window_gui.mainloop()
