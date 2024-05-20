@@ -78,11 +78,11 @@ window_dens.geometry('1000x700')
 fig3 = Figure(figsize=(10, 7)) #750x500 pixels
 fig3.set_facecolor('white')
 
-window_accel= tk.Tk()
-window_accel.title('Acceleration Window')
-window_accel.geometry('750x500')
-fig4 = Figure(figsize=(7.5, 5)) #750x500 pixels
-fig4.set_facecolor('white')
+# window_accel= tk.Tk()
+# window_accel.title('Acceleration Window')
+# window_accel.geometry('750x500')
+# fig4 = Figure(figsize=(7.5, 5)) #750x500 pixels
+# fig4.set_facecolor('white')
 
 window_eos = tk.Tk()
 window_eos.title('EoS Window')
@@ -107,17 +107,17 @@ cbar_ax = fig2.add_axes(cbar_ax_dims2)
 dens_axis_dims2 = [.1,.175,.825,.75]
 dens_ax = fig3.add_axes(dens_axis_dims2)
 
-accel_axis_dims2 = [.15,.25,.8,.7]
-accel_ax = fig4.add_axes(accel_axis_dims2)
+#accel_axis_dims2 = [.15,.25,.8,.7]
+#accel_ax = fig4.add_axes(accel_axis_dims2)
 
-gamma_axis_dims2 = [.15,.25,.8,.7]
+gamma_axis_dims2 = [.1,.25,.8,.7]
 gamma_ax = fig5.add_axes(gamma_axis_dims2)
 
 d_lum_ax_dims2 = [.15,.25,.8,.7]
 d_lum_ax = fig6.add_axes(d_lum_ax_dims2)
 
-windows = [window_tracking, window_dens, window_accel, window_eos, window_hubble]
-figures = [fig2, fig3, fig4, fig5, fig6]
+windows = [window_tracking, window_dens, window_eos, window_hubble]
+figures = [fig2, fig3, fig5, fig6]
 
 def setup_canvas_and_toolbar(figval, parent_window, toolbar_parent=None):
     if toolbar_parent is None:
@@ -415,7 +415,6 @@ def update_plot(event):
     fig.canvas.draw()
     fig2.canvas.draw()
     fig3.canvas.draw()
-    fig4.canvas.draw()
     fig5.canvas.draw()
     fig6.canvas.draw()
 
@@ -716,7 +715,7 @@ x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
 # state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
 track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
-accel_plot, = accel_ax.plot(NAxis,
+accel_plot, = gamma_ax.plot(NAxis,
                 accelerationExpression(pathx,pathy,pathz),'orange')
 effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'b-', linewidth=1, label = r'$\gamma_\phi$')
 
@@ -798,21 +797,29 @@ track_ax.axis("off")
 
 
 
-static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
-accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
-             yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
-               xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2], xlabel="$N$",
-            xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
-accel_ax.yaxis.set_ticks_position('both')
-accel_ax.tick_params(axis='x', which='both', labelbottom=True)
+# static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
+# accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
+#              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
+#                xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2], xlabel="$N$",
+#             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+# accel_ax.yaxis.set_ticks_position('both')
+# accel_ax.tick_params(axis='x', which='both', labelbottom=True)
 
 
-gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1], xlabel="$N$",
-            yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
-            xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+gamma_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
+            yticklabels = ['$-1$', '$0$','$1$', '$4/3$', '$2$'])
 gamma_ax.yaxis.set_ticks_position('both')
 gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
 gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
+gamma_ax.set_xlabel('$N$')
+gamma_ax.set_ylabel('$\gamma$', rotation = 0)
+
+gam2_ax = gamma_ax.twinx()
+gam2_ax.set_ylabel('Acceleration')
+gam2_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
+            yticklabels = ['','','','',''])
+
+fig3.tight_layout()
 
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",

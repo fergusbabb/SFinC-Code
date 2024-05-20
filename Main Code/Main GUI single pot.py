@@ -78,16 +78,16 @@ window_dens.geometry('1000x700')
 fig3 = Figure(figsize=(10, 7)) #750x500 pixels
 fig3.set_facecolor('white')
 
-window_accel= tk.Tk()
-window_accel.title('Acceleration Window')
-window_accel.geometry('750x500')
-fig4 = Figure(figsize=(7.5, 5)) #750x500 pixels
-fig4.set_facecolor('white')
+#window_accel= tk.Tk()
+#window_accel.title('Acceleration Window')
+#window_accel.geometry('750x500')
+#fig4 = Figure(figsize=(7.5, 5)) #750x500 pixels
+#fig4.set_facecolor('white')
 
 window_eos = tk.Tk()
 window_eos.title('EoS Window')
-window_eos.geometry('750x500')
-fig5 = Figure(figsize=(7.5, 5)) #750x500 pixels
+window_eos.geometry('750x600')
+fig5 = Figure(figsize=(7.5, 6)) #750x500 pixels
 fig5.set_facecolor('white')
 
 window_hubble = tk.Tk()
@@ -107,17 +107,17 @@ cbar_ax = fig2.add_axes(cbar_ax_dims2)
 dens_axis_dims2 = [.1,.175,.825,.75]
 dens_ax = fig3.add_axes(dens_axis_dims2)
 
-accel_axis_dims2 = [.15,.25,.8,.7]
-accel_ax = fig4.add_axes(accel_axis_dims2)
+#accel_axis_dims2 = [.15,.25,.8,.7]
+#accel_ax = fig4.add_axes(accel_axis_dims2)
 
-gamma_axis_dims2 = [.15,.25,.8,.7]
+gamma_axis_dims2 = [.1,.25,.8,.7]
 gamma_ax = fig5.add_axes(gamma_axis_dims2)
 
 d_lum_ax_dims2 = [.15,.25,.8,.7]
 d_lum_ax = fig6.add_axes(d_lum_ax_dims2)
 
-windows = [window_tracking, window_dens, window_accel, window_eos, window_hubble]
-figures = [fig2, fig3, fig4, fig5, fig6]
+windows = [window_tracking, window_dens, window_eos, window_hubble]
+figures = [fig2, fig3, fig5, fig6]
 
 def setup_canvas_and_toolbar(figval, parent_window, toolbar_parent=None):
     if toolbar_parent is None:
@@ -649,9 +649,7 @@ Radn_dens_plot, = dens_ax.plot(NAxis, rad_dens, 'r')
 Mass_dens_plot, = dens_ax.plot(NAxis, mass_dens, 'g')
 Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b')
 
-rScalingLine  = gamma_ax.plot([N[-1], N[0]], [4/3, 4/3], "r:", linewidth = .75, label='$\gamma_r=4/3$')
-mScalingLine  = gamma_ax.plot([N[-1], N[0]], [1, 1], "g--", linewidth = .75, label='$\gamma_m=1$')
-CCScalingLine = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, label='$\gamma_\Lambda=0$')
+
 
 #bcgd_gam = (mass_dens + rad_dens*4/3)/2
 #backgrd_scaling, = gamma_ax.plot(NAxis, bcgd_gam, "m-", linewidth = .75, label=r'$(\gamma_r\Omega_r+\gamma_m\Omega_m)/2$')
@@ -669,9 +667,14 @@ x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
 # state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
 track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
-accel_plot, = accel_ax.plot(NAxis,
-                accelerationExpression(pathx,pathy,pathz),'darkorange')
+
+rScalingLine  = gamma_ax.plot([N[-1], N[0]], [4/3, 4/3], "r:", linewidth = .75, label='$\gamma_r=4/3$')
+mScalingLine  = gamma_ax.plot([N[-1], N[0]], [1, 1], "g--", linewidth = .75, label='$\gamma_m=1$')
+accel_plot, = gamma_ax.plot(NAxis,
+                accelerationExpression(pathx,pathy,pathz),'darkorange', label='Acceleration')
 effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'b-', linewidth=1, label = r'$\gamma_\phi$')
+CCScalingLine = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, label='$\gamma_\Lambda=0$')
+
 
 fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
 for point in fixedPoints:
@@ -748,20 +751,27 @@ track_ax.axis("off")
 
 
 
-static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
-accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
-             yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'])
-accel_ax.yaxis.set_ticks_position('both')
-accel_ax.tick_params(axis='x', which='both', labelbottom=True)
+#static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
+#accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1], xlabel='$N$',
+#             yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'])
+#accel_ax.yaxis.set_ticks_position('both')
+#accel_ax.tick_params(axis='x', which='both', labelbottom=True)
 
 
-gamma_ax.set(yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
-            yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
+gamma_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
+            yticklabels = ['$-1$', '$0$','$1$', '$4/3$', '$2$'])
 gamma_ax.yaxis.set_ticks_position('both')
 gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
 gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
-gamma_ax.set_xlabel('$N$', x=1.02)
-gamma_ax.set_ylabel('$\gamma_\phi$', rotation = 0, y=1.02)
+gamma_ax.set_xlabel('$N$')
+gamma_ax.set_ylabel('$\gamma$', rotation = 0)
+
+gam2_ax = gamma_ax.twinx()
+gam2_ax.set_ylabel('Acceleration')
+gam2_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
+            yticklabels = ['','','','',''])
+
+fig3.tight_layout()
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             ylim=[-0.1,1.2],yticks=[0,1/4,1/2,3/4,1],
@@ -797,7 +807,7 @@ d_lum_ax.legend(loc=4)
 
 # fig2.savefig("Figures/One Potential/ Track_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
 # fig3.savefig("Figures/One Potential/ Density_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# fig4.savefig("Figures/One Potential/ Accel_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
+# #fig4.savefig("Figures/One Potential/ Accel_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
 # fig5.savefig("Figures/One Potential/ Gamma_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
 # fig6.savefig("Figures/One Potential/ Hubble_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
 
