@@ -392,7 +392,6 @@ def update_plot(event):
     fig.canvas.draw()
     fig2.canvas.draw()
     fig3.canvas.draw()
-    fig4.canvas.draw()
     fig5.canvas.draw()
     fig6.canvas.draw()
 
