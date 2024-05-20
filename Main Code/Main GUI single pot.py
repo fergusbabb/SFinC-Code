@@ -33,31 +33,31 @@ window_gui.geometry('1600x950')
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
 
-#Define Axes
-#Tracks plot figure
-track_axis_dims = [-.025,.525,.45,.5]
-track_ax = fig.add_axes(track_axis_dims, projection='3d')
-track_ax.view_init(elev=24, azim=66)
+# #Define Axes
+# #Tracks plot figure
+# track_axis_dims = [-.025,.525,.45,.5]
+# track_ax = fig.add_axes(track_axis_dims, projection='3d')
+# track_ax.view_init(elev=24, azim=66)
 
-#Colour bar axes
-cbar_ax_dims = [.375,.6,.015,.35]
-cbar_ax = fig.add_axes(cbar_ax_dims)
+# #Colour bar axes
+# cbar_ax_dims = [.375,.6,.015,.35]
+# cbar_ax = fig.add_axes(cbar_ax_dims)
 
-#Relative Density axes
-dens_axis_dims = [.625,.125,.35,.275]
-dens_ax = fig.add_axes(dens_axis_dims)
+# #Relative Density axes
+# dens_axis_dims = [.625,.125,.35,.275]
+# dens_ax = fig.add_axes(dens_axis_dims)
 
-#Acceleration axes
-accel_axis_dims = [.625,.4,.35,.275]
-accel_ax = fig.add_axes(accel_axis_dims)
+# #Acceleration axes
+# accel_axis_dims = [.625,.4,.35,.275]
+# accel_ax = fig.add_axes(accel_axis_dims)
 
-#EoS Axes
-gamma_axis_dims = [.625,.675,.35,.275]
-gamma_ax = fig.add_axes(gamma_axis_dims)
+# #EoS Axes
+# gamma_axis_dims = [.625,.675,.35,.275]
+# gamma_ax = fig.add_axes(gamma_axis_dims)
 
-#Hubble plot Axes
-d_lum_ax_dims = [.0675,.125,.35,.3675] 
-d_lum_ax = fig.add_axes(d_lum_ax_dims)
+# #Hubble plot Axes
+# d_lum_ax_dims = [.0675,.125,.35,.3675] 
+# d_lum_ax = fig.add_axes(d_lum_ax_dims)
 
 
 '''
@@ -66,70 +66,70 @@ To produce report figures comment above axes, uncomment below
 
 ''' You cant loop this for some reason....'''
 
-# window_tracking = tk.Tk()
-# window_tracking.title('Tracking Window')
-# window_tracking.geometry('750x500')
-# fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
-# fig2.set_facecolor('white')
+window_tracking = tk.Tk()
+window_tracking.title('Tracking Window')
+window_tracking.geometry('750x500')
+fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig2.set_facecolor('white')
 
-# window_dens = tk.Tk()
-# window_dens.title('Relative Density Window')
-# window_dens.geometry('1000x700')
-# fig3 = Figure(figsize=(10, 7)) #750x500 pixels
-# fig3.set_facecolor('white')
+window_dens = tk.Tk()
+window_dens.title('Relative Density Window')
+window_dens.geometry('1000x700')
+fig3 = Figure(figsize=(10, 7)) #750x500 pixels
+fig3.set_facecolor('white')
 
-# window_accel= tk.Tk()
-# window_accel.title('Acceleration Window')
-# window_accel.geometry('750x500')
-# fig4 = Figure(figsize=(7.5, 5)) #750x500 pixels
-# fig4.set_facecolor('white')
+window_accel= tk.Tk()
+window_accel.title('Acceleration Window')
+window_accel.geometry('750x500')
+fig4 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig4.set_facecolor('white')
 
-# window_eos = tk.Tk()
-# window_eos.title('EoS Window')
-# window_eos.geometry('750x500')
-# fig5 = Figure(figsize=(7.5, 5)) #750x500 pixels
-# fig5.set_facecolor('white')
+window_eos = tk.Tk()
+window_eos.title('EoS Window')
+window_eos.geometry('750x500')
+fig5 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig5.set_facecolor('white')
 
-# window_hubble = tk.Tk()
-# window_hubble.title('Hubble Plot Window')
-# window_hubble.geometry('750x500')
-# fig6 = Figure(figsize=(7.5, 5)) #750x500 pixels
-# fig6.set_facecolor('white')
+window_hubble = tk.Tk()
+window_hubble.title('Hubble Plot Window')
+window_hubble.geometry('750x500')
+fig6 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig6.set_facecolor('white')
 
 
-# track_axis_dims2 = [0,.075,.9,.9]
-# track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
-# track_ax.view_init(elev=24, azim=66)
+track_axis_dims2 = [0,.075,.9,.9]
+track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
+track_ax.view_init(elev=24, azim=66)
 
-# cbar_ax_dims2 = [.7,.25,.02,.6]
-# cbar_ax = fig2.add_axes(cbar_ax_dims2)
+cbar_ax_dims2 = [.7,.25,.02,.6]
+cbar_ax = fig2.add_axes(cbar_ax_dims2)
 
-# dens_axis_dims2 = [.15,.25,.8,.7]
-# dens_ax = fig3.add_axes(dens_axis_dims2)
+dens_axis_dims2 = [.1,.175,.825,.75]
+dens_ax = fig3.add_axes(dens_axis_dims2)
 
-# accel_axis_dims2 = [.15,.25,.8,.7]
-# accel_ax = fig4.add_axes(accel_axis_dims2)
+accel_axis_dims2 = [.15,.25,.8,.7]
+accel_ax = fig4.add_axes(accel_axis_dims2)
 
-# gamma_axis_dims2 = [.15,.25,.8,.7]
-# gamma_ax = fig5.add_axes(gamma_axis_dims2)
+gamma_axis_dims2 = [.15,.25,.8,.7]
+gamma_ax = fig5.add_axes(gamma_axis_dims2)
 
-# d_lum_ax_dims2 = [.15,.25,.8,.7]
-# d_lum_ax = fig6.add_axes(d_lum_ax_dims2)
+d_lum_ax_dims2 = [.15,.25,.8,.7]
+d_lum_ax = fig6.add_axes(d_lum_ax_dims2)
 
-# windows = [window_tracking, window_dens, window_accel, window_eos, window_hubble]
-# figures = [fig2, fig3, fig4, fig5, fig6]
+windows = [window_tracking, window_dens, window_accel, window_eos, window_hubble]
+figures = [fig2, fig3, fig4, fig5, fig6]
 
-# def setup_canvas_and_toolbar(figval, parent_window, toolbar_parent=None):
-#     if toolbar_parent is None:
-#         toolbar_parent = parent_window
-#     canvas = FigureCanvasTkAgg(figval, parent_window)
-#     canvas.draw()
-#     canvas.get_tk_widget().place(relheight=1, relwidth=1)
-#     NavigationToolbar2Tk(canvas, toolbar_parent)
+def setup_canvas_and_toolbar(figval, parent_window, toolbar_parent=None):
+    if toolbar_parent is None:
+        toolbar_parent = parent_window
+    canvas = FigureCanvasTkAgg(figval, parent_window)
+    canvas.draw()
+    canvas.get_tk_widget().place(relheight=1, relwidth=1)
+    NavigationToolbar2Tk(canvas, toolbar_parent)
 
-# # Apply the setup to each figure and window pair
-# for figval, win in zip(figures, windows):
-#     setup_canvas_and_toolbar(figval, win)
+# Apply the setup to each figure and window pair
+for figval, win in zip(figures, windows):
+    setup_canvas_and_toolbar(figval, win)
 
 
 #Bounding Circle
@@ -376,8 +376,8 @@ def update_plot(event):
     effective_eos.set_ydata(path_gamma_phi)
     effective_eos.set_xdata(NAxis)
 
-    bcgd_gam = (mass_dens + rad_dens*4/3)/2
-    backgrd_scaling.set_ydata(bcgd_gam)
+    #bcgd_gam = (mass_dens + rad_dens*4/3)/2
+    #backgrd_scaling.set_ydata(bcgd_gam)
     
     #Update redshift plot
     d_L = (c) * (1 + z) * odeint(
@@ -390,11 +390,11 @@ def update_plot(event):
 
     #Show plots
     fig.canvas.draw()
-    # fig2.canvas.draw()
-    # fig3.canvas.draw()
-    # fig4.canvas.draw()
-    # fig5.canvas.draw()
-    # fig6.canvas.draw()
+    fig2.canvas.draw()
+    fig3.canvas.draw()
+    fig4.canvas.draw()
+    fig5.canvas.draw()
+    fig6.canvas.draw()
 
 
 
@@ -654,8 +654,8 @@ rScalingLine  = gamma_ax.plot([N[-1], N[0]], [4/3, 4/3], "r:", linewidth = .75, 
 mScalingLine  = gamma_ax.plot([N[-1], N[0]], [1, 1], "g--", linewidth = .75, label='$\gamma_m=1$')
 CCScalingLine = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, label='$\gamma_\Lambda=0$')
 
-bcgd_gam = (mass_dens + rad_dens*4/3)/2
-backgrd_scaling, = gamma_ax.plot(NAxis, bcgd_gam, "m-", linewidth = .75, label=r'$(\gamma_r\Omega_r+\gamma_m\Omega_m)/2$')
+#bcgd_gam = (mass_dens + rad_dens*4/3)/2
+#backgrd_scaling, = gamma_ax.plot(NAxis, bcgd_gam, "m-", linewidth = .75, label=r'$(\gamma_r\Omega_r+\gamma_m\Omega_m)/2$')
 
 #y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
 #        label = "$y_1^2$")
@@ -672,7 +672,7 @@ track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
 accel_plot, = accel_ax.plot(NAxis,
                 accelerationExpression(pathx,pathy,pathz),'darkorange')
-effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'b-', linewidth=1, alpha=0.4, label = r'$\gamma_\phi$')
+effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'b-', linewidth=1, label = r'$\gamma_\phi$')
 
 fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
 for point in fixedPoints:
@@ -705,40 +705,6 @@ integral_plot, = d_lum_ax.plot(z, d_L,
 '''GUI Settings'''
 
 
-track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
-             xlim = [-1,1], ylim = [0,1], zlim = [0,1],
-             xticks = [-1, -0.5, 0, 0.5, 1],
-             yticks = [0, 0.5, 1],
-             zticks = [0, 0.5, 1])
-track_ax.set_box_aspect([2, 1, 1])
-track_ax.axis("off")
-
-
-accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
-             yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'])
-accel_ax.tick_params(axis='x', which='both', labelbottom=False)
-accel_ax.yaxis.set_ticks_position('both')
-static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
-
-
-gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
-             yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
-gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
-gamma_ax.yaxis.set_ticks_position('both')
-
-dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
-             ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
-             yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
-
-d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
-              xlim=[0,3], ylim=[0,6],
-              xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
-              xticklabels = ['$0$','$1$','$2$', '$3$'],
-              yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
-
-
-
-'''Figure Production Settings'''
 # track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
 #              xlim = [-1,1], ylim = [0,1], zlim = [0,1],
 #              xticks = [-1, -0.5, 0, 0.5, 1],
@@ -748,51 +714,85 @@ d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
 # track_ax.axis("off")
 
 
-
-# static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
 # accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
 #              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'])
+# accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 # accel_ax.yaxis.set_ticks_position('both')
-# accel_ax.tick_params(axis='x', which='both', labelbottom=True)
+# static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
 
 
-# gamma_ax.set(yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
-#             yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
+# gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
+#              yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
+# gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
 # gamma_ax.yaxis.set_ticks_position('both')
-# gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
-# gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
-# gamma_ax.set_xlabel('$N$', x=1.02)
-# gamma_ax.set_ylabel('$\gamma_\phi$', rotation = 0, y=1.02)
 
 # dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
-#             ylim=[-0.1,1.2],yticks=[0,1/4,1/2,3/4,1],
-#             yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
-
-# #Additional code for making paper plots
-# legend_lines1 = []
-# legend_lines1.append([todayLine, MR_eqLine, MPeakLine, MPhi_eqLine])
-# legend_lines2 = []
-# legend_lines2.append([Radn_dens_plot, Mass_dens_plot, Phi_dens_plot])
-
-# dens_ax.text(NAxis[indexMR_eq]-0.5,.1,f'$z={mr_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
-# dens_ax.text(NAxis[indexMPeak]-1,1.1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
-# dens_ax.text(NAxis[indexMPhi_eq]-0.5,1.1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
-
-# legend1 = dens_ax.legend(legend_lines1[0], ["Today","$\Omega_m=\Omega_r$","max$(\Omega_m)$",
-#                                             "$\Omega_m=\Omega_\phi$"], loc='upper left', fontsize=12)
-# legend2 = dens_ax.legend(legend_lines2[0], ['$\Omega_r$', '$\Omega_m$', '$\Omega_\phi$'],
-#                          loc='center left', bbox_to_anchor=(0, .45), fontsize=12)
-# dens_ax.add_artist(legend1)
-# dens_ax.yaxis.set_ticks_position('both')
-
-
+#              ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
+#              yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
 
 # d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
 #               xlim=[0,3], ylim=[0,6],
 #               xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
 #               xticklabels = ['$0$','$1$','$2$', '$3$'],
 #               yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
-# d_lum_ax.legend(loc=4)
+
+
+
+'''Figure Production Settings'''
+track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
+             xlim = [-1,1], ylim = [0,1], zlim = [0,1],
+             xticks = [-1, -0.5, 0, 0.5, 1],
+             yticks = [0, 0.5, 1],
+             zticks = [0, 0.5, 1])
+track_ax.set_box_aspect([2, 1, 1])
+track_ax.axis("off")
+
+
+
+static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
+accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
+             yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'])
+accel_ax.yaxis.set_ticks_position('both')
+accel_ax.tick_params(axis='x', which='both', labelbottom=True)
+
+
+gamma_ax.set(yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
+            yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
+gamma_ax.yaxis.set_ticks_position('both')
+gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
+gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
+gamma_ax.set_xlabel('$N$', x=1.02)
+gamma_ax.set_ylabel('$\gamma_\phi$', rotation = 0, y=1.02)
+
+dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
+            ylim=[-0.1,1.2],yticks=[0,1/4,1/2,3/4,1],
+            yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
+
+#Additional code for making paper plots
+legend_lines1 = []
+legend_lines1.append([todayLine, MR_eqLine, MPeakLine, MPhi_eqLine])
+legend_lines2 = []
+legend_lines2.append([Radn_dens_plot, Mass_dens_plot, Phi_dens_plot])
+
+dens_ax.text(NAxis[indexMR_eq]-0.75,.1,f'$z={mr_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
+dens_ax.text(NAxis[indexMPeak]-1,1.1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
+dens_ax.text(NAxis[indexMPhi_eq]-0.5,1.1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
+
+legend1 = dens_ax.legend(legend_lines1[0], ["Today","$\Omega_m=\Omega_r$","max$(\Omega_m)$",
+                                            "$\Omega_m=\Omega_\phi$"], loc='upper left', fontsize=12)
+legend2 = dens_ax.legend(legend_lines2[0], ['$\Omega_r$', '$\Omega_m$', '$\Omega_\phi$'],
+                         loc='center left', bbox_to_anchor=(0, .45), fontsize=12)
+dens_ax.add_artist(legend1)
+dens_ax.yaxis.set_ticks_position('both')
+
+
+
+d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
+              xlim=[0,3], ylim=[0,6],
+              xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
+              xticklabels = ['$0$','$1$','$2$', '$3$'],
+              yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
+d_lum_ax.legend(loc=4)
 
 
 
