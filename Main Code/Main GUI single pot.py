@@ -27,9 +27,9 @@ plt.rcParams['ytick.labelsize'] = 12
 
 #_________________________Set up main window________________________________
 #Main GUI figure
-window = tk.Tk()
-window.title('GUI for Matter and Radiation')
-window.geometry('1600x950')
+window_gui = tk.Tk()
+window_gui.title('GUI for Matter and Radiation')
+window_gui.geometry('1600x950')
 fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
 fig.set_facecolor('white')
 
@@ -66,33 +66,33 @@ To produce report figures comment above axes, uncomment below
 
 ''' You cant loop this for some reason....'''
 
-# window_4_report = tk.Tk()
-# window_4_report.title('Window to generate plots for report 1')
-# window_4_report.geometry('750x500')
+# window_tracking = tk.Tk()
+# window_tracking.title('Tracking Window')
+# window_tracking.geometry('750x500')
 # fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
 # fig2.set_facecolor('white')
 
-# window_4_report2 = tk.Tk()
-# window_4_report2.title('Window to generate plots for report 2')
-# window_4_report2.geometry('750x500')
-# fig3 = Figure(figsize=(7.5, 5)) #750x500 pixels
+# window_dens = tk.Tk()
+# window_dens.title('Relative Density Window')
+# window_dens.geometry('1000x700')
+# fig3 = Figure(figsize=(10, 7)) #750x500 pixels
 # fig3.set_facecolor('white')
 
-# window_4_report3 = tk.Tk()
-# window_4_report3.title('Window to generate plots for report 3')
-# window_4_report3.geometry('750x500')
+# window_accel= tk.Tk()
+# window_accel.title('Acceleration Window')
+# window_accel.geometry('750x500')
 # fig4 = Figure(figsize=(7.5, 5)) #750x500 pixels
 # fig4.set_facecolor('white')
 
-# window_4_report4 = tk.Tk()
-# window_4_report4.title('Window to generate plots for report 4')
-# window_4_report4.geometry('750x500')
+# window_eos = tk.Tk()
+# window_eos.title('EoS Window')
+# window_eos.geometry('750x500')
 # fig5 = Figure(figsize=(7.5, 5)) #750x500 pixels
 # fig5.set_facecolor('white')
 
-# window_4_report5 = tk.Tk()
-# window_4_report5.title('Window to generate plots for report 5')
-# window_4_report5.geometry('750x500')
+# window_hubble = tk.Tk()
+# window_hubble.title('Hubble Plot Window')
+# window_hubble.geometry('750x500')
 # fig6 = Figure(figsize=(7.5, 5)) #750x500 pixels
 # fig6.set_facecolor('white')
 
@@ -116,7 +116,7 @@ To produce report figures comment above axes, uncomment below
 # d_lum_ax_dims2 = [.15,.25,.8,.7]
 # d_lum_ax = fig6.add_axes(d_lum_ax_dims2)
 
-# windows = [window_4_report, window_4_report2, window_4_report3, window_4_report4, window_4_report5]
+# windows = [window_tracking, window_dens, window_accel, window_eos, window_hubble]
 # figures = [fig2, fig3, fig4, fig5, fig6]
 
 # def setup_canvas_and_toolbar(figval, parent_window, toolbar_parent=None):
@@ -294,6 +294,7 @@ def update_plot(event):
         plot, = track_ax.plot(point[0], point[1], point[2], 'or')
         fixedPoint_plots.append(plot)
 
+    
     x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
     #state0_point.set_data(x_i, y_i)
     #state0_point.set_3d_properties(z_i)
@@ -374,6 +375,9 @@ def update_plot(event):
     path_gamma_phi = gamma_phi(pathx, pathy) 
     effective_eos.set_ydata(path_gamma_phi)
     effective_eos.set_xdata(NAxis)
+
+    bcgd_gam = (mass_dens + rad_dens*4/3)/2
+    backgrd_scaling.set_ydata(bcgd_gam)
     
     #Update redshift plot
     d_L = (c) * (1 + z) * odeint(
@@ -386,6 +390,11 @@ def update_plot(event):
 
     #Show plots
     fig.canvas.draw()
+    # fig2.canvas.draw()
+    # fig3.canvas.draw()
+    # fig4.canvas.draw()
+    # fig5.canvas.draw()
+    # fig6.canvas.draw()
 
 
 
@@ -393,11 +402,11 @@ def update_plot(event):
 #When cursor clicks on region plot update to clicked value
 
 #Canvas is where figure is placed to window
-canvas = FigureCanvasTkAgg(fig, window)
+canvas = FigureCanvasTkAgg(fig, window_gui)
 canvas.draw() #Show canvas (ie show figure)
 
 #Show the navigation toolbar
-NavigationToolbar2Tk(canvas, window)
+NavigationToolbar2Tk(canvas, window_gui)
 
 
 #Lambda Slider Label. Initialise, place, and hide weird borders
@@ -406,7 +415,7 @@ lambda_label_ax.text(0,0,'$\lambda$ value')
 lambda_label_ax.set_axis_off()
 
 #Lambda Slider. Initialise, add interaction, place, hide borders
-lambda_slide = tk.Scale(window, from_ = lam_min, to = lam_max,
+lambda_slide = tk.Scale(window_gui, from_ = lam_min, to = lam_max,
                        width = 20, length = 250, resolution=0.001)
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
@@ -441,18 +450,18 @@ z_entry_label_ax.text(0,0,'$z_0$:')
 z_entry_label_ax.set_axis_off()
 
 
-x_entry = tk.Entry(window, textvariable = x_entry_val, relief='solid'
+x_entry = tk.Entry(window_gui, textvariable = x_entry_val, relief='solid'
             ).place(relx=0.1, rely=0.457, relheight=0.03, relwidth=0.05)
-y_entry = tk.Entry(window, textvariable = y_entry_val, relief='solid'
+y_entry = tk.Entry(window_gui, textvariable = y_entry_val, relief='solid'
             ).place(relx=0.2, rely=0.457, relheight=0.03, relwidth=0.05)
-z_entry = tk.Entry(window, textvariable = z_entry_val, relief='solid'
+z_entry = tk.Entry(window_gui, textvariable = z_entry_val, relief='solid'
             ).place(relx=0.3, rely=0.457, relheight=0.03, relwidth=0.05)
 
 x_entry_val.set(state_0[0])    
 y_entry_val.set(state_0[1])
 z_entry_val.set(state_0[2])
 
-sub_btn=tk.Button(window, text = 'Submit', command = submit
+sub_btn=tk.Button(window_gui, text = 'Submit', command = submit
             ).place(relx=0.375, rely=0.45, relheight=0.05, relwidth=0.05)
 
 #Place Canvas
@@ -549,10 +558,8 @@ def setup_luminosity_plots():
     d_L_for_fill = []
     #Define colors and Omega_Lambda0 values
     configurations = [
-        (0.65, 'cyan'),
-        (0.70, 'green'),
+        (0.68, 'cyan'),
         (0.75, 'magenta'),
-        (0, 'orange')
     ]
 
     #Gather all d_L values for bounds and normal plotting
@@ -611,10 +618,6 @@ NAxis -= NAxis[indexToday]
 zAxis = getRedshift(NAxis[:indexToday + 1])
 z = zAxis[::-1]
 
-rScalingLine, = gamma_ax.plot([-50, 50], [4/3, 4/3], "k-.", linewidth = 0.5, label='$\gamma_r$')
-mScalingLine, = gamma_ax.plot([-50, 50], [1, 1], "k--", linewidth = 0.5, label='$\gamma_m$')
-#gamma_ax.set(xlim=[NAxis[0], NAxis[-1]])
-
 mr_eq_val = getRedshift(NAxis[indexMR_eq])
 mr_eq_ax = fig.add_axes([0.45,.45,.05,.075])
 mr_eq_text = mr_eq_ax.text(0,0,f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
@@ -647,6 +650,12 @@ Radn_dens_plot, = dens_ax.plot(NAxis, rad_dens, 'r')
 Mass_dens_plot, = dens_ax.plot(NAxis, mass_dens, 'g')
 Phi_dens_plot, = dens_ax.plot(NAxis, phi_dens, 'b')
 
+rScalingLine  = gamma_ax.plot([N[-1], N[0]], [4/3, 4/3], "r:", linewidth = .75, label='$\gamma_r=4/3$')
+mScalingLine  = gamma_ax.plot([N[-1], N[0]], [1, 1], "g--", linewidth = .75, label='$\gamma_m=1$')
+CCScalingLine = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, label='$\gamma_\Lambda=0$')
+
+bcgd_gam = (mass_dens + rad_dens*4/3)/2
+backgrd_scaling, = gamma_ax.plot(NAxis, bcgd_gam, "m-", linewidth = .75, label=r'$(\gamma_r\Omega_r+\gamma_m\Omega_m)/2$')
 
 #y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
 #        label = "$y_1^2$")
@@ -663,8 +672,7 @@ track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
 accel_plot, = accel_ax.plot(NAxis,
                 accelerationExpression(pathx,pathy,pathz),'darkorange')
-effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'springgreen',
-        label = r'$\gamma_\phi = 2x^2/(x^2+y^2)$')
+effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'b-', linewidth=1, alpha=0.4, label = r'$\gamma_\phi$')
 
 fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
 for point in fixedPoints:
@@ -707,25 +715,20 @@ track_ax.axis("off")
 
 
 accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
-             yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
-             xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
-             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+             yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'])
 accel_ax.tick_params(axis='x', which='both', labelbottom=False)
 accel_ax.yaxis.set_ticks_position('both')
-static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
+static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
 
 
 gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
-             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
-             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+             yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
 gamma_ax.tick_params(axis='x', which='both', labelbottom=False)
 gamma_ax.yaxis.set_ticks_position('both')
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
              ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
-             yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
-             xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2],
-             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+             yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
 
 d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
               xlim=[0,3], ylim=[0,6],
@@ -746,28 +749,24 @@ d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
 
 
 
-# static_line = accel_ax.plot([-8,3],[0,0], "k--", linewidth = 0.5)
+# static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
 # accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
-#              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
-#              xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
-#              xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
+#              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'])
 # accel_ax.yaxis.set_ticks_position('both')
 # accel_ax.tick_params(axis='x', which='both', labelbottom=True)
 
 
-# gamma_ax.set(ylabel="$\gamma_\phi$", yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1], xlabel="$N$",
-#             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
-#             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
+# gamma_ax.set(yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
+#             yticklabels = ['$0$','$1$', '$4/3$', '$2$'])
 # gamma_ax.yaxis.set_ticks_position('both')
-# gamma_ax.legend(fontsize=12, loc='best')
+# gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
 # gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
-
+# gamma_ax.set_xlabel('$N$', x=1.02)
+# gamma_ax.set_ylabel('$\gamma_\phi$', rotation = 0, y=1.02)
 
 # dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
-#             ylim=[-0.1,1.1],yticks=[0,1/4,1/2,3/4,1],
-#             yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
-#             xlim=[-4,3], xticks = [-4,-3,-2,-1, 0, 1, 2],
-#             xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$'])
+#             ylim=[-0.1,1.2],yticks=[0,1/4,1/2,3/4,1],
+#             yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
 
 # #Additional code for making paper plots
 # legend_lines1 = []
@@ -776,8 +775,8 @@ d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
 # legend_lines2.append([Radn_dens_plot, Mass_dens_plot, Phi_dens_plot])
 
 # dens_ax.text(NAxis[indexMR_eq]-0.5,.1,f'$z={mr_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
-# dens_ax.text(NAxis[indexMPeak]-1,1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
-# dens_ax.text(NAxis[indexMPhi_eq]-0.5,1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
+# dens_ax.text(NAxis[indexMPeak]-1,1.1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
+# dens_ax.text(NAxis[indexMPhi_eq]-0.5,1.1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
 
 # legend1 = dens_ax.legend(legend_lines1[0], ["Today","$\Omega_m=\Omega_r$","max$(\Omega_m)$",
 #                                             "$\Omega_m=\Omega_\phi$"], loc='upper left', fontsize=12)
@@ -806,5 +805,5 @@ d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
 
 
 #Run the code
-window.mainloop()
+window_gui.mainloop()
 #End
