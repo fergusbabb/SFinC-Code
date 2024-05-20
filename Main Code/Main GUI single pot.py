@@ -147,14 +147,15 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 #__________________________Initial values_____________________________
 pathnum = 1
 # So we get B, B, BC, BEC,  EC
-lam_0s = [0, np.sqrt(1), np.sqrt(3), np.sqrt(5)]
-lam_0 = lam_0s[1]
+lam_0s = [0, np.sqrt(1), np.sqrt(4), np.sqrt(100)]
+lam_0 = lam_0s[3]
 lam_min = 0
-lam_max = 4
+lam_max = 10
 
-Ni = 16
+Ni = 25
 
-N = np.linspace(0, Ni, abs(int(Ni*1000)))
+N = np.linspace(0, Ni, abs(int(Ni*10000)))
+
 
 c = 1 #3e5     # Given in km/s
 ##V = z * c   # ""
@@ -176,9 +177,20 @@ y0Squared = Omega_phi_0 - x0Squared
 
 Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 
-state_0 = [0.0000002,
-           0.0000001,
-           0.975]
+#For lambda^2 = 1,4 we use x = 2e-8, y=1e-9, z=0.99, Nplotmax = 7
+N_plot_max = 10
+state_0 = [0.163,
+          0.115,
+          0.979]
+
+# y0_at_E = 2/(lam_0*np.sqrt(3))
+# x0_at_E = np.sqrt(2)*y0_at_E
+# z0_at_E = np.sqrt(1-4/(lam_0**2))
+
+# state_0 = [x0_at_E-0.05,
+#            y0_at_E-0.05,
+#            z0_at_E-0.05]
+
 
 #_________________________Initialise plots________________________________
 #Tkinter works as:
@@ -291,7 +303,7 @@ def update_plot(event):
     # Get new fixed points and plot them
     fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
     for i, point in enumerate(fixedPoints):
-        plot, = track_ax.plot(point[0], point[1], point[2], 'or')
+        plot, = track_ax.plot(point[0], point[1], point[2], 'or', markeredgewidth=0.5, markeredgecolor='black')
         fixedPoint_plots.append(plot)
 
     
@@ -322,11 +334,6 @@ def update_plot(event):
     #Update tracks
     track.set_data(pathx, pathy)
     track.set_3d_properties(pathz)
-
-    #Update acceleration plot
-    accel_plot_new_data = accelerationExpression(
-                                pathx,pathy,pathz)
-    accel_plot.set_ydata(accel_plot_new_data)
 
     #Find when in N each event occured
     NAxis = N
@@ -359,6 +366,18 @@ def update_plot(event):
     Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
     Phi_dens_plot.set_xdata(NAxis)
     
+    #Update acceleration plot
+    accel_plot_new_data = accelerationExpression(
+                                pathx,pathy,pathz)
+    accel_plot.set_ydata(accel_plot_new_data)
+    accel_plot.set_xdata(NAxis)
+
+    gamma_ax.set_xlim([NAxis[0],N_plot_max])
+    dens_ax.set_xlim([NAxis[0],N_plot_max])
+    rScalingLine.set_xdata([NAxis[0],N_plot_max])
+    mScalingLine.set_xdata([NAxis[0],N_plot_max])
+    CCScalingLine.set_xdata([NAxis[0],N_plot_max])
+
     mr_eq_val = getRedshift(NAxis[indexMR_eq])
     mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
 
@@ -668,17 +687,17 @@ x_i, y_i, z_i = state_0[0], state_0[1], state_0[2]
 track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
 
-rScalingLine  = gamma_ax.plot([N[-1], N[0]], [4/3, 4/3], "r:", linewidth = .75, label='$\gamma_r=4/3$')
-mScalingLine  = gamma_ax.plot([N[-1], N[0]], [1, 1], "g--", linewidth = .75, label='$\gamma_m=1$')
+rScalingLine,  = gamma_ax.plot([N[-1], N[0]], [4/3, 4/3], "r:", linewidth = .75, label='$\gamma_r=4/3$')
+mScalingLine,  = gamma_ax.plot([N[-1], N[0]], [1, 1], "g--", linewidth = .75, label='$\gamma_m=1$')
 accel_plot, = gamma_ax.plot(NAxis,
                 accelerationExpression(pathx,pathy,pathz),'darkorange', label='Acceleration')
 effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'b-', linewidth=1, label = r'$\gamma_\phi$')
-CCScalingLine = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, label='$\gamma_\Lambda=0$')
+CCScalingLine, = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, label='$\gamma_\Lambda=0$')
 
 
 fixedPoints, fixedPoints_labels = fixedPoints_func(lam)
 for point in fixedPoints:
-    plot, = track_ax.plot(point[0], point[1], point[2], 'or')
+    plot, = track_ax.plot(point[0], point[1], point[2], 'or', markeredgewidth=0.5, markeredgecolor='black')
     fixedPoint_plots.append(plot)
 
 
@@ -759,7 +778,8 @@ track_ax.axis("off")
 
 
 gamma_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
-            yticklabels = ['$-1$', '$0$','$1$', '$4/3$', '$2$'])
+            yticklabels = ['$-1$', '$0$','$1$', '$4/3$', '$2$'],
+            xlim = [NAxis[0],N_plot_max])
 gamma_ax.yaxis.set_ticks_position('both')
 gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
 gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
@@ -771,11 +791,15 @@ gam2_ax.set_ylabel('Acceleration')
 gam2_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
             yticklabels = ['','','','',''])
 
-fig3.tight_layout()
+
+dens_ax.text(NAxis[indexMR_eq]-1.2,.1,f'$z={mr_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
+dens_ax.text(NAxis[indexMPeak]-1,1.1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
+dens_ax.text(NAxis[indexMPhi_eq]-1,1.1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
 
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             ylim=[-0.1,1.2],yticks=[0,1/4,1/2,3/4,1],
-            yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'])
+            yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
+            xlim = [NAxis[0],N_plot_max])
 
 #Additional code for making paper plots
 legend_lines1 = []
@@ -783,9 +807,6 @@ legend_lines1.append([todayLine, MR_eqLine, MPeakLine, MPhi_eqLine])
 legend_lines2 = []
 legend_lines2.append([Radn_dens_plot, Mass_dens_plot, Phi_dens_plot])
 
-dens_ax.text(NAxis[indexMR_eq]-0.75,.1,f'$z={mr_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
-dens_ax.text(NAxis[indexMPeak]-1,1.1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
-dens_ax.text(NAxis[indexMPhi_eq]-0.5,1.1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
 
 legend1 = dens_ax.legend(legend_lines1[0], ["Today","$\Omega_m=\Omega_r$","max$(\Omega_m)$",
                                             "$\Omega_m=\Omega_\phi$"], loc='upper left', fontsize=12)
@@ -805,11 +826,11 @@ d_lum_ax.legend(loc=4)
 
 
 
-# fig2.savefig("Figures/One Potential/ Track_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# fig3.savefig("Figures/One Potential/ Density_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# #fig4.savefig("Figures/One Potential/ Accel_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# fig5.savefig("Figures/One Potential/ Gamma_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
-# fig6.savefig("Figures/One Potential/ Hubble_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
+fig2.savefig("Figures/One Potential/UnlabeledTrack_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
+#fig3.savefig("Figures/One Potential/Density_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
+# #fig4.savefig("Figures/One Potential/Accel_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
+fig5.savefig("Figures/One Potential/Gamma_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
+# fig6.savefig("Figures/One Potential/Hubble_lambda2_{}.svg".format(round(lam_0**2)), format='svg')
 
 
 
