@@ -725,10 +725,9 @@ integral_plot, = d_lum_ax.plot(z, d_L,
                     label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
 
 
-## This integral runs from today towards the past, so it takes the input arrays in reverse. It stays reversed so that the output lines up with zAxis, which is increasing i.e. backwards in time
-xRunningIntegral = np.append(0, cumulative_trapezoid(pathx[indexToday::-1], NAxis[indexToday::-1]))
+xRunningIntegral = np.append(0, cumulative_trapezoid(pathx[:indexToday + 1], NAxis[:indexToday + 1]))
 
-hubbleFromY = HfromY(pathy[indexToday::-1], xRunningIntegral, lam)
+hubbleFromY = HfromY(pathy[:indexToday + 1], xRunningIntegral, lam)
 hubbleFromY *= H_0 / hubbleFromY[0]
 
 

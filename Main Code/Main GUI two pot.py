@@ -18,8 +18,8 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
-plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-                     "font.serif": ["Computer Modern Serif"]})
+##plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+##                     "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=14, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 12
 plt.rcParams['ytick.labelsize'] = 12
@@ -774,12 +774,12 @@ integral_plot, = d_lum_ax.plot(z, d_L,
 
 
 ## This integral runs from today towards the past, so it takes the input arrays in reverse. It stays reversed so that the output lines up with zAxis, which is increasing i.e. backwards in time
-xRunningIntegral = np.append(0, cumulative_trapezoid(pathx[indexToday::-1], NAxis[indexToday::-1]))
+xRunningIntegral = np.append(0, cumulative_trapezoid(pathx[:indexToday + 1], NAxis[:indexToday + 1]))
 
-hubbleFromY1 = HfromY(pathy1[indexToday::-1], xRunningIntegral, lam1)
+hubbleFromY1 = HfromY(pathy1[:indexToday + 1], xRunningIntegral, lam1)
 hubbleFromY1 *= H_0 / hubbleFromY1[0]
 
-hubbleFromY2 = HfromY(pathy1[indexToday::-1], xRunningIntegral, lam2)
+hubbleFromY2 = HfromY(pathy1[:indexToday + 1], xRunningIntegral, lam2)
 hubbleFromY2 *= H_0 / hubbleFromY2[0]
 
 
