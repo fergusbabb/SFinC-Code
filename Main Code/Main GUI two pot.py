@@ -171,6 +171,7 @@ xinit = np.linspace(-0.99, 0.99, pathnum)
 
 #Observed Values
 Omega_phi_0 = 0.738
+Omega_Lambda0 = 0.738
 gamma_phi_value = 0.013
 Omega_r0 = 4.984e-5
 
@@ -277,23 +278,18 @@ def gamma_phi(x, y):
 #_______________________________Integrand Forms______________________________
 
 def d_L_Dark_Energy(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_Lambda0, w_Lambda):
-    return 1/np.sqrt(Omega_m0*(1+z)**3 +
-                     Omega_r0*(1+z)**4 + 
-                     Omega_Lambda0*(1+z)**(3 * (1 + w_Lambda)))
+    return 1/np.sqrt(Omega_m0*(1+z)**-3 +
+                     Omega_r0*(1+z)**-4 + 
+                     Omega_Lambda0*(1+z)**(-3 * (1 + w_Lambda)))
 
-#def d_L_IntegrandConst(currentTotal, z, zaxis,
-#                        Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
-#    #Return 1/W(z) for constant LCDM model
-#    return 1/np.sqrt((1 - Omega_Lambda)*(1+z)**3 + 
-#                     (Omega_Lambda))
 
 def d_L_IntegrandScalar(currentTotal, z, zaxis,
                          Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
     #Return 1/W(z) with variable scalar field
     index = np.abs(zaxis-z).argmin()
-    return 1/np.sqrt(Omega_m0*(1+z)**3 +
-                     Omega_r0*(1+z)**4 + 
-                     Omega_phi_0*(1+z)**(3 * path_gamma_phi[index]))
+    return 1/np.sqrt(Omega_m0*(1+z)**-3 +
+                     Omega_r0*(1+z)**-4 + 
+                     Omega_phi_0*(1+z)**(-3 * path_gamma_phi[index]))
 
 
 #_______________________________Update track plots___________________________
@@ -595,47 +591,6 @@ quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
 cbar = plt.colorbar(quiver, cax=cbar_ax, orientation='vertical')
 cbar.set_label('Magnitude of derivatives')
 
-#_______________________________Hubble Fill Regions___________________________
-w_Lam_0 = -1
-w_pos_err = 0.15
-w_neg_err = -0.15
-
-def plot_d_luminosity(ax, z, d_L, d_L_bounds, label, color, fill_alpha=0.2):
-    ax.plot(z, d_L, label=label, color=color, lw=2)
-    if d_L_bounds is not None:
-        ax.fill_between(z, d_L_bounds[0], d_L_bounds[1], alpha=fill_alpha, color=color)
-        ax.plot(z, d_L_bounds[0], color=color, lw=0.5, alpha = 0.6)
-        ax.plot(z, d_L_bounds[1], color=color, lw=0.5, alpha = 0.6)
-
-def setup_luminosity_plots():
-    d_L_for_fill = []
-    #Define colors and Omega_Lambda0 values
-    configurations = [
-        (0.68, 'cyan'),
-        (0.73, 'magenta')
-    ]
-
-    #Gather all d_L values for bounds and normal plotting
-    for Omega_Lambda0, color in configurations:
-        temp_list = []
-        for w_Lambda in [w_Lam_0 + w_neg_err,
-                         w_Lam_0,
-                         w_Lam_0 + w_pos_err]:
-            d_L = (c) * (1 + z) * odeint(
-                d_L_Dark_Energy, 0, z, args=(
-                    zAxis, 1-Omega_Lambda0-Omega_r0, Omega_r0, Omega_Lambda0, w_Lambda
-                )
-            ).transpose()[0]
-            temp_list.append(d_L)
-        d_L_for_fill.append(temp_list)  #Store d_L values for each configuration
-    
-    #Plot and fill between using stored d_L values
-    for (Omega_Lambda0, color,), d_L_values in zip(configurations, d_L_for_fill):
-        # Plot the middle value normally and fill between the bounds
-        plot_d_luminosity(d_lum_ax, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
-                          f"$\Omega_{{\Lambda}}^{{(0)}}={Omega_Lambda0},\; w_{{\Lambda}}={w_Lam_0}$", color)
-
-
 #___________________________________Initial Plot_____________________________
 
 #Initial plot
@@ -744,6 +699,58 @@ for point in fixedPoints:
 track.set_visible(True)
 
 
+#_______________________________Hubble Fill Regions___________________________
+
+
+Omega_Lambda0 = 0.738
+gamma_phi_value = 0.013
+Omega_r0 = 4.984e-5
+
+standard_d_L = (1 + z) * odeint(
+                d_L_Dark_Energy, 0, z, args=(
+                    zAxis, 1-Omega_Lambda0-Omega_r0, Omega_r0, Omega_Lambda0, -1)
+                    ).transpose()[0]
+
+h_SN1A = 0.72
+h_SN_p_err = 0.01
+h_SN_n_err  = 0.01
+SN1A = [h_SN1A-h_SN_n_err, h_SN1A, h_SN1A+h_SN_p_err]
+
+h_CMB = 0.68
+h_CMB_p_err = 0.01
+h_CMB_n_err = 0.01
+CMB = [h_CMB-h_CMB_n_err, h_CMB, h_CMB+h_CMB_p_err]
+
+def plot_d_luminosity(ax, z, d_L, d_L_bounds, label, color, fill_alpha=0.2):
+    ax.plot(z, d_L, label=label, color=color, lw=2)
+    if d_L_bounds is not None:
+        ax.fill_between(z, d_L_bounds[0], d_L_bounds[1], alpha=fill_alpha, color=color)
+        ax.plot(z, d_L_bounds[0], color=color, lw=0.5, alpha = 0.6)
+        ax.plot(z, d_L_bounds[1], color=color, lw=0.5, alpha = 0.6)
+
+def setup_luminosity_plots():
+    d_L_for_fill = []
+    #Define colors and Omega_Lambda0 values
+    configurations = [
+        (CMB, 'cyan'),
+        (SN1A, 'magenta')
+    ]
+
+    #Gather all d_L values for bounds and normal plotting
+    for h, color in configurations:
+        temp_list = []
+        for i in [0,1,2]:
+            d_L = standard_d_L*h[i]
+            temp_list.append(d_L)
+        d_L_for_fill.append(temp_list)  #Store d_L values for each configuration
+    
+    #Plot and fill between using stored d_L values
+    for (h, color,), d_L_values in zip(configurations, d_L_for_fill):
+        # Plot the middle value normally and fill between the bounds
+        plot_d_luminosity(d_lum_ax, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
+                          f"$H_0 = {h[1]},\; w_{{\Lambda}}=-1$", color)
+
+
 d_L = (1 + z) * odeint(
     d_L_IntegrandScalar, 0, z, args=(
         zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
@@ -794,7 +801,7 @@ integral_plot, = d_lum_ax.plot(z, d_L,
 #              xlim=[-10,3], xticks = [-4,-3,-2,-1, 0, 1, 2, 3],
 #              xticklabels = ['$-4$', '$-3$', '$-2$', '$-1$','$0$','$1$', '$2$', '$3$'])
 
-# d_lum_ax.set(ylabel = "$H_0d_L$ ", xlabel= '$z$',
+# d_lum_ax.set(ylabel = "$d_L$ ", xlabel= '$z$',
 #               xlim=[0,3], ylim=[0,6],
 #               xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
 #               xticklabels = ['$0$','$1$','$2$', '$3$'],
@@ -862,7 +869,7 @@ dens_ax.yaxis.set_ticks_position('both')
 
 
 
-d_lum_ax.set(ylabel = "$H_0d_L$", xlabel= '$z$',
+d_lum_ax.set(ylabel = "$d_L$", xlabel= '$z$',
               xlim=[0,3], ylim=[0,6],
               xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
               xticklabels = ['$0$','$1$','$2$', '$3$'],
@@ -871,10 +878,10 @@ d_lum_ax.legend(loc=4)
 
 
 
-fig2.savefig("Figures/Two Potentials/UnlabeledTrack_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
-fig3.savefig("Figures/Two Potentials/Density_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
+#fig2.savefig("Figures/Two Potentials/UnlabeledTrack_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
+#fig3.savefig("Figures/Two Potentials/Density_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
 # fig4.savefig("Figures/Two Potentials/Accel_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
-fig5.savefig("Figures/Two Potentials/Gamma_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
+#fig5.savefig("Figures/Two Potentials/Gamma_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
 # fig6.savefig("Figures/Two Potentials/Hubble_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg') 
 
 
