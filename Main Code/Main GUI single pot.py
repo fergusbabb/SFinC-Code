@@ -10,7 +10,7 @@ import matplotlib.cm as cm
 
 #Tkinter for widgets and interactivity. Scipy for ode solving
 import tkinter as tk
-from scipy.integrate import (odeint, quad)
+from scipy.integrate import (odeint, quad, cumulative_trapezoid)
 
 
 #This import stops automatically sets up the window so its reasonable
@@ -285,6 +285,15 @@ def d_L_IntegrandScalar(currentTotal, z, zaxis,
     return 1/np.sqrt(Omega_m0*(1+z)**3 +
                      Omega_r0*(1+z)**4 + 
                      Omega_phi_0*(1+z)**(3 * path_gamma_phi[index]))
+
+
+#____________________________Calculate H from x and y________________________
+
+def HfromY(pathy, pathxIntegral, lam, V0=1):
+    kappa = 1#?
+    exponents = np.exp(- lam * kappa * pathxIntegral / 2)
+    H = kappa * np.sqrt(V0) * exponents / (pathy * np.sqrt(3))
+    return H
 
 
 #_______________________________Update track plots___________________________
@@ -712,13 +721,15 @@ d_L = (1 + z) * odeint(
 #Call hubble fill function before changing plot, so it is below
 setup_luminosity_plots()
 
-
-
 integral_plot, = d_lum_ax.plot(z, d_L,
                     label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
 
 
+## This integral runs from today towards the past, so it takes the input arrays in reverse. It stays reversed so that the output lines up with zAxis, which is increasing i.e. backwards in time
+xRunningIntegral = np.append(0, cumulative_trapezoid(pathx[indexToday::-1], NAxis[indexToday::-1]))
 
+hubbleFromY = HfromY(pathy[indexToday::-1], xRunningIntegral, lam)
+hubbleFromY *= H_0 / hubbleFromY[0]
 
 
 #_____________________Setting plot labels etc________________________________

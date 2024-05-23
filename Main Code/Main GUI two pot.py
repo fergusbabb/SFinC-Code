@@ -10,7 +10,7 @@ import matplotlib.cm as cm
 
 #Tkinter for widgets and interactivity. Scipy for ode solving
 import tkinter as tk
-from scipy.integrate import (odeint, quad)
+from scipy.integrate import (odeint, quad, cumulative_trapezoid)
 
 
 #This import stops automatically sets up the window so its reasonable
@@ -290,6 +290,15 @@ def d_L_IntegrandScalar(currentTotal, z, zaxis,
     return 1/np.sqrt(Omega_m0*(1+z)**-3 +
                      Omega_r0*(1+z)**-4 + 
                      Omega_phi_0*(1+z)**(-3 * path_gamma_phi[index]))
+
+
+#____________________________Calculate H from x and y________________________
+
+def HfromY(pathy, pathxIntegral, lam, V0=1):
+    kappa = 1#?
+    exponents = np.exp(- lam * kappa * pathxIntegral / 2)
+    H = kappa * np.sqrt(V0) * exponents / (pathy * np.sqrt(3))
+    return H
 
 
 #_______________________________Update track plots___________________________
@@ -632,6 +641,7 @@ zAxis = getRedshift(NAxis[:indexToday + 1])
 z = zAxis[::-1]
 
 
+
 mr_eq_val = getRedshift(NAxis[indexMR_eq])
 mr_eq_ax = fig.add_axes([0.45,.45,.05,.075])
 mr_eq_text = mr_eq_ax.text(0,0,f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
@@ -756,13 +766,21 @@ d_L = (1 + z) * odeint(
         zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
         )).transpose()[0]
 
-
 #Call hubble fill function before changing plot, so it is below
 setup_luminosity_plots()
 
 integral_plot, = d_lum_ax.plot(z, d_L,
                     label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
 
+
+## This integral runs from today towards the past, so it takes the input arrays in reverse. It stays reversed so that the output lines up with zAxis, which is increasing i.e. backwards in time
+xRunningIntegral = np.append(0, cumulative_trapezoid(pathx[indexToday::-1], NAxis[indexToday::-1]))
+
+hubbleFromY1 = HfromY(pathy1[indexToday::-1], xRunningIntegral, lam1)
+hubbleFromY1 *= H_0 / hubbleFromY1[0]
+
+hubbleFromY2 = HfromY(pathy1[indexToday::-1], xRunningIntegral, lam2)
+hubbleFromY2 *= H_0 / hubbleFromY2[0]
 
 
 #_____________________Setting plot labels etc________________________________
