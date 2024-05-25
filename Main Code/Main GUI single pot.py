@@ -96,6 +96,11 @@ window_hubble.geometry('750x500')
 fig6 = Figure(figsize=(7.5, 5)) #750x500 pixels
 fig6.set_facecolor('white')
 
+window_rho = tk.Tk()
+window_rho.title('Rho Plot Window')
+window_rho.geometry('750x500')
+fig7 = Figure(figsize=(7.5, 5)) #750x500 pixels
+fig7.set_facecolor('white')
 
 track_axis_dims2 = [0,.075,.9,.9]
 track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
@@ -116,8 +121,11 @@ gamma_ax = fig5.add_axes(gamma_axis_dims2)
 d_lum_ax_dims2 = [.15,.25,.8,.7]
 d_lum_ax = fig6.add_axes(d_lum_ax_dims2)
 
-windows = [window_tracking, window_dens, window_eos, window_hubble]
-figures = [fig2, fig3, fig5, fig6]
+rho_ax_dims = [.15,.25,.8,.7]
+rho_ax = fig7.add_axes(rho_ax_dims)
+
+windows = [window_tracking, window_dens, window_eos, window_hubble, window_rho]
+figures = [fig2, fig3, fig5, fig6, fig7]
 
 def setup_canvas_and_toolbar(figval, parent_window, toolbar_parent=None):
     if toolbar_parent is None:
@@ -383,6 +391,8 @@ def update_plot(event):
 
     gamma_ax.set_xlim([NAxis[0],N_plot_max])
     dens_ax.set_xlim([NAxis[0],N_plot_max])
+    rho_ax.set_xlim([NAxis[0],N_plot_max])
+    
     rScalingLine.set_xdata([NAxis[0],N_plot_max])
     mScalingLine.set_xdata([NAxis[0],N_plot_max])
     CCScalingLine.set_xdata([NAxis[0],N_plot_max])
@@ -408,13 +418,30 @@ def update_plot(event):
     #backgrd_scaling.set_ydata(bcgd_gam)
     
     #Update redshift plot
-    d_L = (c) * (1 + z) * odeint(
-    d_L_IntegrandScalar, 0, z, args=(
-        zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
-        )).transpose()[0]
-    
-    integral_plot.set_ydata(d_L)
-    integral_plot.set_xdata(z)
+##    d_L = (c) * (1 + z) * odeint(
+##    d_L_IntegrandScalar, 0, z, args=(
+##        zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
+##        )).transpose()[0]
+##    
+##    integral_plot.set_ydata(d_L)
+##    integral_plot.set_xdata(z)
+
+    xRunningIntegral = np.append(0, cumulative_trapezoid(pathx, NAxis))
+
+    hubbleFromY = HfromY(pathy, xRunningIntegral, lam)
+    hubbleFromY *= H_0 / hubbleFromY[indexToday]
+
+    rho_r = rad_dens * hubbleFromY**2
+    rho_m = mass_dens * hubbleFromY**2
+    rho_phi = phi_dens * hubbleFromY**2
+
+    rho_r_plot.set_ydata(np.log(rho_r))
+    rho_m_plot.set_ydata(np.log(rho_m))
+    rho_phi_plot.set_ydata(np.log(rho_phi))
+
+    rho_r_plot.set_xdata(NAxis)
+    rho_m_plot.set_xdata(NAxis)
+    rho_phi_plot.set_xdata(NAxis)
 
     #Show plots
     fig.canvas.draw()
@@ -422,7 +449,7 @@ def update_plot(event):
     fig3.canvas.draw()
     fig5.canvas.draw()
     fig6.canvas.draw()
-
+    fig7.canvas.draw()
 
 
 #____________________________Defining Widgets________________________________
@@ -725,12 +752,21 @@ integral_plot, = d_lum_ax.plot(z, d_L,
                     label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
 
 
-xRunningIntegral = np.append(0, cumulative_trapezoid(pathx[:indexToday + 1], NAxis[:indexToday + 1]))
-
-hubbleFromY = HfromY(pathy[:indexToday + 1], xRunningIntegral, lam)
-hubbleFromY *= H_0 / hubbleFromY[0]
+track.set_visible(True)
 
 
+xRunningIntegral = np.append(0, cumulative_trapezoid(pathx, NAxis))
+
+hubbleFromY = HfromY(pathy, xRunningIntegral, lam)
+hubbleFromY *= H_0 / hubbleFromY[indexToday]
+
+rho_r = rad_dens * hubbleFromY**2
+rho_m = mass_dens * hubbleFromY**2
+rho_phi = phi_dens * hubbleFromY**2
+
+rho_r_plot, = rho_ax.plot(NAxis, np.log(rho_r), "r", label = "$\rho_r$")
+rho_m_plot, = rho_ax.plot(NAxis, np.log(rho_m), "g", label = "$\rho_m$")
+rho_phi_plot, = rho_ax.plot(NAxis, np.log(rho_phi), "b", label = "$\rho_\phi$")
 #_____________________Setting plot labels etc________________________________
 
 '''GUI Settings'''
@@ -810,6 +846,9 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             ylim=[-0.1,1.2],yticks=[0,1/4,1/2,3/4,1],
             yticklabels = ['$0$','$1/4$','$1/2$', '$3/4$', '$1$'],
             xlim = [NAxis[0],N_plot_max])
+
+rho_ax.set(xlabel = "$N$", ylabel="log of Densities",
+           xlim = [NAxis[0],N_plot_max])
 
 #Additional code for making paper plots
 legend_lines1 = []
