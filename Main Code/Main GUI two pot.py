@@ -278,18 +278,18 @@ def gamma_phi(x, y):
 #_______________________________Integrand Forms______________________________
 
 def d_L_Dark_Energy(currentTotal, z, zaxis, Omega_m0, Omega_r0, Omega_Lambda0, w_Lambda):
-    return 1/np.sqrt(Omega_m0*(1+z)**-3 +
-                     Omega_r0*(1+z)**-4 + 
-                     Omega_Lambda0*(1+z)**(-3 * (1 + w_Lambda)))
+    return 1/np.sqrt(Omega_m0*(1+z)**3 +
+                     Omega_r0*(1+z)**4 + 
+                     Omega_Lambda0*(1+z)**(3 * (1 + w_Lambda)))
 
 
 def d_L_IntegrandScalar(currentTotal, z, zaxis,
                          Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi):
     #Return 1/W(z) with variable scalar field
     index = np.abs(zaxis-z).argmin()
-    return 1/np.sqrt(Omega_m0*(1+z)**-3 +
-                     Omega_r0*(1+z)**-4 + 
-                     Omega_phi_0*(1+z)**(-3 * path_gamma_phi[index]))
+    return 1/np.sqrt(Omega_m0*(1+z)**3 +
+                     Omega_r0*(1+z)**4 + 
+                     Omega_phi_0*(1+z)**(3 * path_gamma_phi[index]))
 
 
 #_______________________________Update track plots___________________________
@@ -740,7 +740,7 @@ def setup_luminosity_plots():
     for h, color in configurations:
         temp_list = []
         for i in [0,1,2]:
-            d_L = standard_d_L*h[i]
+            d_L = standard_d_L/(100*h[i])
             temp_list.append(d_L)
         d_L_for_fill.append(temp_list)  #Store d_L values for each configuration
     
