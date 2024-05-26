@@ -18,8 +18,8 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
-plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-                     "font.serif": ["Computer Modern Serif"]})
+##plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+##                     "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=14, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 12
 plt.rcParams['ytick.labelsize'] = 12
@@ -118,8 +118,8 @@ dens_ax = fig3.add_axes(dens_axis_dims2)
 gamma_axis_dims2 = [.1,.25,.8,.7]
 gamma_ax = fig5.add_axes(gamma_axis_dims2)
 
-d_lum_ax_dims2 = [.15,.25,.8,.7]
-d_lum_ax = fig6.add_axes(d_lum_ax_dims2)
+hubble_ax_dims2 = [.15,.25,.8,.7]
+hubble_ax = fig6.add_axes(hubble_ax_dims2)
 
 rho_ax_dims = [.15,.25,.8,.7]
 rho_ax = fig7.add_axes(rho_ax_dims)
@@ -176,6 +176,12 @@ c = 1 #3e5     # Given in km/s
 h = 0.738
 H_0 = 100*h # km/(s Mpc)
 xinit = np.linspace(-0.99, 0.99, pathnum)
+
+H0_SN = 73.04
+H0_SN_Err = 1.04
+
+H0_PL = 68.75
+H0_PL_Err = 0.52
 
 #Observed Values
 Omega_phi_0 = 0.738
@@ -468,6 +474,10 @@ def update_plot(event):
     rho_m_plot.set_xdata(NAxis)
     rho_phi_plot.set_xdata(NAxis)
 
+    # Update Hubble Plot
+    hubble_plot.set_ydata(hubbleFromY2)
+    hubble_plot.set_xdata(NAxis)
+
     #Show plots
     fig.canvas.draw()
     fig2.canvas.draw()
@@ -748,19 +758,27 @@ track.set_visible(True)
 xRunningIntegral = np.append(0, cumulative_trapezoid(pathx, NAxis))
 
 hubbleFromY1 = HfromY(pathy1, xRunningIntegral, lam1)
-hubbleFromY1 *= H_0 / hubbleFromY1[indexToday]
+hubbleFromY1 *= H0_PL / hubbleFromY1[indexToday]
 
 hubbleFromY2 = HfromY(pathy2, xRunningIntegral, lam2)
-hubbleFromY2 *= H_0 / hubbleFromY2[indexToday]
+hubbleFromY2 *= H0_PL / hubbleFromY2[indexToday]
 
 rho_r = rad_dens * hubbleFromY2**2
 rho_m = mass_dens * hubbleFromY2**2
 rho_phi = phi_dens * hubbleFromY2**2
 
-rho_r_plot, = rho_ax.plot(NAxis, np.log(rho_r), "r", label = "$\rho_r$")
-rho_m_plot, = rho_ax.plot(NAxis, np.log(rho_m), "g", label = "$\rho_m$")
-rho_phi_plot, = rho_ax.plot(NAxis, np.log(rho_phi), "b", label = "$\rho_\phi$")
+rho_r_plot, = rho_ax.plot(NAxis, rho_r, "r", label = "$\rho_r$")
+rho_m_plot, = rho_ax.plot(NAxis, rho_m, "g", label = "$\rho_m$")
+rho_phi_plot, = rho_ax.plot(NAxis, rho_phi, "b", label = "$\rho_\phi$")
 
+hubble_plot, = hubble_ax.plot(NAxis, hubbleFromY2)
+##hubble_plot, = hubble_ax.plot(NAxis, hubbleFromY1)
+
+hubble_SN_line = hubble_ax.plot([NAxis[0],N_plot_max], [H0_SN, H0_SN], alpha=0.6, color = "cyan")
+hubble_PL_line = hubble_ax.plot([NAxis[0],N_plot_max], [H0_PL, H0_PL], alpha=0.6, color = "magenta")
+
+hubble_SN_fill = hubble_ax.fill_between(NAxis, H0_SN + H0_SN_Err, H0_SN - H0_SN_Err, alpha=0.2, color="cyan")
+hubble_PL_fill = hubble_ax.fill_between(NAxis, H0_PL + H0_PL_Err, H0_PL - H0_PL_Err, alpha=0.2, color="magenta")
 
 
 #_______________________________Hubble Fill Regions___________________________
@@ -821,7 +839,7 @@ def setup_luminosity_plots():
 ##        )).transpose()[0]
 
 #Call hubble fill function before changing plot, so it is below
-setup_luminosity_plots()
+##setup_luminosity_plots()
 
 ##integral_plot, = d_lum_ax.plot(z, d_L,
 ##                    label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
@@ -916,13 +934,21 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             xlim = [NAxis[0],N_plot_max])
 
 rho_ax.set(xlabel = "$N$", ylabel="log of Densities",
-           xlim = [NAxis[0],N_plot_max])
+           xlim = [NAxis[0],N_plot_max],
+           yscale = "log")
+
+hubble_ax.set(xlabel = "$N$", ylabel="Hubble Parameter $H$",
+           xlim = [NAxis[0],N_plot_max],
+           yscale = "log")
 
 #Additional code for making paper plots
 legend_lines1 = []
 legend_lines1.append([todayLine, MR_eqLine, MPeakLine, MPhi_eqLine])
 legend_lines2 = []
 legend_lines2.append([Radn_dens_plot, Mass_dens_plot, Phi_dens_plot])
+
+legend_lines_rho = []
+legend_lines_rho.append([rho_r_plot, rho_m_plot, rho_phi_plot])
 
 
 legend1 = dens_ax.legend(legend_lines1[0], ["Today","$\Omega_m=\Omega_r$","max$(\Omega_m)$",
@@ -932,14 +958,17 @@ legend2 = dens_ax.legend(legend_lines2[0], ['$\Omega_r$', '$\Omega_m$', '$\Omega
 dens_ax.add_artist(legend1)
 dens_ax.yaxis.set_ticks_position('both')
 
+legend_rho = rho_ax.legend(legend_lines_rho[0], ['$\\rho_r$', '$\\rho_m$', '$\\rho_\phi$'],
+                         loc='center left', fontsize=12)
 
 
-d_lum_ax.set(ylabel = "$d_L$", xlabel= '$z$',
-              xlim=[0,3], ylim=[0,6],
-              xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
-              xticklabels = ['$0$','$1$','$2$', '$3$'],
-              yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
-d_lum_ax.legend(loc=4)
+
+##d_lum_ax.set(ylabel = "$d_L$", xlabel= '$z$',
+##              xlim=[0,3], ylim=[0,6],
+##              xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
+##              xticklabels = ['$0$','$1$','$2$', '$3$'],
+##              yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
+##d_lum_ax.legend(loc=4)
 
 
 

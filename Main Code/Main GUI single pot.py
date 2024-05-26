@@ -18,8 +18,8 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
-plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-                     "font.serif": ["Computer Modern Serif"]})
+##plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+##                     "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=14, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 12
 plt.rcParams['ytick.labelsize'] = 12
@@ -156,7 +156,7 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 pathnum = 1
 # So we get B, B, BC, BEC,  EC
 lam_0s = [0, np.sqrt(1), np.sqrt(4), np.sqrt(100)]
-lam_0 = lam_0s[3]
+lam_0 = lam_0s[1]
 lam_min = 0
 lam_max = 10
 
