@@ -29,24 +29,22 @@ plt.rcParams['ytick.labelsize'] = 12
 
 
 #_________________________Set up figures________________________________
-fig2 = plt.figure(figsize=(7.5, 5)) #750x500 pixels
+fig2 = plt.figure(figsize=(6.5, 4.5))
 fig2.set_facecolor('white')
 
-
-fig3 = plt.figure(figsize=(10, 7)) #750x500 pixels
+fig3 = plt.figure(figsize=(9, 6))
 fig3.set_facecolor('white')
 
-
-fig5 = plt.figure(figsize=(7.5, 6)) #750x500 pixels
+fig5 = plt.figure(figsize=(7.5, 5))
 fig5.set_facecolor('white')
 
-
-fig6 = plt.figure(figsize=(9, 6)) #900x600 pixels
+fig6 = plt.figure(figsize=(9, 6))
 fig6.set_facecolor('white')
 
-
-fig7 = plt.figure(figsize=(7.5, 5)) #750x500 pixels
+fig7 = plt.figure(figsize=(7, 4.5))
 fig7.set_facecolor('white')
+
+
 
 track_axis_dims2 = [0,.075,.9,.9]
 track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
@@ -55,16 +53,16 @@ track_ax.view_init(elev=24, azim=66)
 cbar_ax_dims2 = [.7,.25,.02,.6]
 cbar_ax = fig2.add_axes(cbar_ax_dims2)
 
-dens_axis_dims2 = [.1,.175,.825,.75]
+dens_axis_dims2 = [.1,.15,.825,.75]
 dens_ax = fig3.add_axes(dens_axis_dims2)
 
-gamma_axis_dims2 = [.1,.25,.8,.7]
+gamma_axis_dims2 = [.1,.15,.8,.75]
 gamma_ax = fig5.add_axes(gamma_axis_dims2)
 
-hubble_ax_dims2 = [.15,.25,.8,.7]
+hubble_ax_dims2 = [.15,.15,.8,.8]
 hubble_ax = fig6.add_axes(hubble_ax_dims2)
 
-rho_ax_dims = [.15,.25,.8,.7]
+rho_ax_dims = [.15,.15,.8,.8]
 rho_ax = fig7.add_axes(rho_ax_dims)
 
 figures = [fig2, fig3, fig5, fig6, fig7]
@@ -403,7 +401,7 @@ rho_phi = phi_dens * hubbleFromY**2
 
 z_decouple = 1100
 N_decouple = -np.log(1+z_decouple)
-rho_ax.plot([N_decouple,N_decouple],[1e0,1e20],'darkorange', linestyle=':', linewidth=1, label=r'$z_{\mathrm{dec}}\approx 1100$')
+rho_ax.plot([N_decouple,N_decouple],[1e0,1e20],'darkorange', linestyle='--', linewidth=1.2, label=r'$z_{\mathrm{dec}}\approx 1100$')
 rho_r_plot, = rho_ax.plot(NAxis, rho_r, "r", label = r"$\rho_r$")
 rho_m_plot, = rho_ax.plot(NAxis, rho_m, "g", label = r"$\rho_m$")
 rho_phi_plot, = rho_ax.plot(NAxis, rho_phi, "b", label = r"$\rho_\phi$")
