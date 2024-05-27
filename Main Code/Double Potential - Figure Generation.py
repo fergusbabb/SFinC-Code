@@ -26,38 +26,49 @@ plt.rcParams['xtick.labelsize'] = 12
 plt.rcParams['ytick.labelsize'] = 12
 
 
-#_________________________Set up main window________________________________
-#Main GUI figure
-window_gui = tk.Tk()
-window_gui.title('GUI for Matter and Radiation')
-window_gui.geometry('1600x950')
-fig = Figure(figsize=(16, 9.5)) #1600x950 pixels
-fig.set_facecolor('white')
 
-#Define Axes
-#Tracks plot figure
-track_axis_dims = [-.025,.525,.45,.5]
-track_ax = fig.add_axes(track_axis_dims, projection='3d')
+
+#_________________________Set up figures________________________________
+fig2 = plt.figure(figsize=(7.5, 5)) #750x500 pixels
+fig2.set_facecolor('white')
+
+
+fig3 = plt.figure(figsize=(10, 7)) #750x500 pixels
+fig3.set_facecolor('white')
+
+
+fig5 = plt.figure(figsize=(7.5, 6)) #750x500 pixels
+fig5.set_facecolor('white')
+
+
+fig6 = plt.figure(figsize=(9, 6)) #900x600 pixels
+fig6.set_facecolor('white')
+
+
+fig7 = plt.figure(figsize=(7.5, 5)) #750x500 pixels
+fig7.set_facecolor('white')
+
+track_axis_dims2 = [0,.075,.9,.9]
+track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
 track_ax.view_init(elev=24, azim=66)
 
-#Colour bar axes
-cbar_ax_dims = [.375,.6,.015,.35]
-cbar_ax = fig.add_axes(cbar_ax_dims)
+cbar_ax_dims2 = [.7,.25,.02,.6]
+cbar_ax = fig2.add_axes(cbar_ax_dims2)
 
-#Relative Density axes
-dens_axis_dims = [.625,.15,.325,.35]
-dens_ax = fig.add_axes(dens_axis_dims)
+dens_axis_dims2 = [.1,.175,.825,.75]
+dens_ax = fig3.add_axes(dens_axis_dims2)
 
-#EoS Axes
-gamma_axis_dims = [.625,.6,.325,.35]
-gamma_ax = fig.add_axes(gamma_axis_dims)
+gamma_axis_dims2 = [.1,.25,.8,.7]
+gamma_ax = fig5.add_axes(gamma_axis_dims2)
 
-#Hubble plot Axes
-#d_lum_ax_dims = [.0675,.125,.325,.3675] 
-#d_lum_ax = fig.add_axes(d_lum_ax_dims)
+hubble_ax_dims2 = [.15,.25,.8,.7]
+hubble_ax = fig6.add_axes(hubble_ax_dims2)
 
-hubble_ax_dims = [.0675,.125,.325,.3675]
-hubble_ax = fig.add_axes(hubble_ax_dims)
+rho_ax_dims = [.15,.25,.8,.7]
+rho_ax = fig7.add_axes(rho_ax_dims)
+
+figures = [fig2, fig3, fig5, fig6, fig7]
+
 
 #__________________________Initial values_____________________________
 #Bounding Circle
@@ -91,6 +102,7 @@ Ni = 25
 N = np.linspace(0, Ni, abs(int(Ni*10000)))
 
 c = 1 #3e5     # Given in km/s
+##V = z * c   # ""
 h = 0.738
 H_0 = 100*h # km/(s Mpc)
 xinit = np.linspace(-0.99, 0.99, pathnum)
@@ -114,8 +126,25 @@ y0Squared = Omega_phi_0 - x0Squared
 
 Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 
+#state_0 = [round(np.sqrt(x0Squared),3),
+#           round(np.sqrt(y0Squared),3),
+#           round(np.sqrt(y0Squared) * 1e-1,3),
+#           round(np.sqrt(Omega_r0),3)]
+
+#For lam1,lam2 = 1,-1 use Nplotmax = 4, x=2e-8, y1,y2 = 1e-10, z=0.995
+#For lam1=10, lam2 = 0.1, use Nplotmax = 4, x=2e-5, y1=1e-5 y2=1e-10 z=0.99
 N_plot_max = 5
 N_plot_min = -15
+
+# state_0 = [0.163,
+#           0.115,
+#           0.0000000001,
+#           0.979]
+
+##state_0 = [0.00002,
+##           0.00001,
+##           0.0000000001,
+##           0.99]
 
 state_0 = [0.16329,
            0.11547,
@@ -222,239 +251,12 @@ def HfromY(pathy, pathxIntegral, lam, V0=1):
     return H
 
 
-#_______________________________Update track plots___________________________
-def update_plot(event):
-    #Before update_plot is called lam sliders are updated
-    #Sliders will always have current lambda/ gamma values
-    lam1 = lambda1_slide.get()
-    lam2 = lambda2_slide.get()
-
-    state_0 = [float(x_entry_val.get()), 
-               float(y1_entry_val.get()),
-               float(y2_entry_val.get()), 
-               float(z_entry_val.get())]
-    
-    for plot in fixedPoint_plots:
-        plot.remove()
-    fixedPoint_plots.clear()  # Clear the list of plot objects
-
-    # Get new fixed points and plot them
-    fixedPoints, fixedPoints_labels = fixedPoints_func([lam1,lam2])
-    for i, point in enumerate(fixedPoints):
-        plot, = track_ax.plot(point[0], point[1], point[2], 'or', markeredgewidth=0.5, markeredgecolor='black')
-        fixedPoint_plots.append(plot)
-    
-    x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
-    state0_point.set_data(x_i, y_i)
-    state0_point.set_3d_properties(z_i)
-    
-
-    #Plot all paths with updated values
-    #Update the quiver vectors
-    quiver_vectors = np.array([ODEs([pt[0], pt[1], pt[2]], N, lam1)
-                                for pt in filtered_pts])
-    u, v, w = quiver_vectors[:, 0], quiver_vectors[:, 1], quiver_vectors[:, 2]
-    
-    #3D Quiver doesn't have a built in update directions, so replot
-    global quiver
-    quiver.remove()
-    quiver = track_ax.quiver(x_ins, y_ins, z_ins, u, v, w,
-                normalize=True, cmap=cmap, length = 0.075,
-                color=cmap(norm(magnitude)), norm=norm,
-                alpha = 0.75, linewidth=1)
-    
-    #Solve the system of ODEs using odeint
-    solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
-    pathx  = solution[:, 0]
-    pathy1 = solution[:, 1]
-    pathy2 = solution[:, 2]
-    pathz  = solution[:, 3]
-
-    pathy = np.sqrt(pathy1**2 + pathy2**2)
-
-    path_gamma_phi = gamma_phi(pathx, pathy)
-
-    #Update tracks
-    track.set_data(pathx, pathy)
-    track.set_3d_properties(pathz)
-    
-    #Find when in N each event occured
-    NAxis = N
-    
-    rad_dens = pathz**2
-    mass_dens = 1 - pathx**2 - pathy**2 - pathz**2
-    phi_dens = pathx**2 + pathy**2
-    total_dens = rad_dens + mass_dens + phi_dens
-
-    indexToday = np.argmin(np.abs(phi_dens-Omega_phi_0))  
-    indexMR_eq = np.argmin(np.abs(mass_dens-rad_dens)[0:indexToday])
-    indexMPhi_eq = np.argmin(np.abs(mass_dens-phi_dens)[indexMR_eq:-1]) + indexMR_eq
-    indexMPeak = np.argmax(mass_dens)
-    
-    NAxis -= NAxis[indexToday]
-    zAxis = getRedshift(NAxis[:indexToday + 1])
-    z = zAxis[::-1]
-
-    gamma_ax.set_xlim([NAxis[0],N_plot_max])
-    dens_ax.set_xlim([NAxis[0],N_plot_max])
-    #rho_ax.set_xlim([NAxis[0],N_plot_max])
-    
-    rScalingLine.set_xdata([NAxis[0],N_plot_max])
-    mScalingLine.set_xdata([NAxis[0],N_plot_max])
-    CCScalingLine.set_xdata([NAxis[0],N_plot_max])
-
-    MR_eqLine.set_xdata([NAxis[indexMR_eq], NAxis[indexMR_eq]])
-    MPhi_eqLine.set_xdata([NAxis[indexMPhi_eq], NAxis[indexMPhi_eq]])
-    MPeakLine.set_xdata([NAxis[indexMPeak], NAxis[indexMPeak]])
-
-    #Update relative density plots
-    Radn_dens_plot.set_ydata(pathz**2)
-    Radn_dens_plot.set_xdata(NAxis)
-    
-    Mass_dens_plot.set_ydata(1 - pathx**2 - pathy**2 - pathz**2)
-    Mass_dens_plot.set_xdata(NAxis)
-    
-    Phi_dens_plot.set_ydata(pathx**2 + pathy**2)
-    Phi_dens_plot.set_xdata(NAxis)
-
-
-    mr_eq_val = getRedshift(NAxis[indexMR_eq])
-    mr_eq_text.set_text(f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
-
-    m_max_val = getRedshift(NAxis[indexMPeak])
-    m_max_text.set_text(f'max$(\Omega_m):\; z={m_max_val:.3f}$')
-
-    msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
-    msf_eq_text.set_text(f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
-
-
-    #Update EoS plot
-    path_gamma_phi = gamma_phi(pathx, pathy) 
-    effective_eos.set_ydata(path_gamma_phi)
-    effective_eos.set_xdata(NAxis)
-
-    #Update acceleration plot
-    accel_plot_new_data = accelerationExpression(pathx, pathy, pathz)
-    accel_plot.set_ydata(accel_plot_new_data)
-    accel_plot.set_xdata(NAxis)
-    
-    #Update redshift plot
-##    d_L = (c) * (1 + z) * odeint(
-##    d_L_IntegrandScalar, 0, z, args=(
-##        zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
-##        )).transpose()[0]
-##    
-##    integral_plot.set_ydata(d_L)
-##    integral_plot.set_xdata(z)
-
-    xRunningIntegral = np.append(0, cumulative_trapezoid(pathx, NAxis))
-
-    hubbleFromY1 = HfromY(pathy1, xRunningIntegral, lam1)
-    hubbleFromY1 *= H_0 / hubbleFromY1[indexToday]
-
-    hubbleFromY2 = HfromY(pathy2, xRunningIntegral, lam2)
-    hubbleFromY2 *= H_0 / hubbleFromY2[indexToday]
-
-    rho_r = rad_dens * hubbleFromY2**2
-    rho_m = mass_dens * hubbleFromY2**2
-    rho_phi = phi_dens * hubbleFromY2**2
-
-
-    # Update Hubble Plot
-    hubble_plot.set_ydata(hubbleFromY2)
-    hubble_plot.set_xdata(NAxis)
-
-    #Show plots
-    fig.canvas.draw()
 
 
 
-#____________________________Defining Widgets________________________________
-#When cursor clicks on region plot update to clicked value
-
-#Canvas is where figure is placed to window
-canvas = FigureCanvasTkAgg(fig, window_gui)
-canvas.draw() #Show canvas (ie show figure)
-
-#Show the navigation toolbar
-NavigationToolbar2Tk(canvas, window_gui)
 
 
-#Lambda Slider Labels. Initialise, place, and hide weird borders
-lambda1_label_ax = fig.add_axes([.455,.9525,.05,.05])
-lambda1_label_ax.text(0,0,'$\lambda_1$ value')
-lambda1_label_ax.set_axis_off()
 
-lambda2_label_ax = fig.add_axes([.515,.9525,.05,.05])
-lambda2_label_ax.text(0,0,'$\lambda_2$ value')
-lambda2_label_ax.set_axis_off()
-
-#Lambda Slider. Initialise, add interaction, place, hide borders
-lambda1_slide = tk.Scale(window_gui, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
-lambda1_slide.set(lam1_0)
-lambda1_slide.bind("<ButtonRelease-1>", update_plot)
-lambda1_slide.place(relx=0.45, rely=0.05, relheight=0.35, relwidth=0.05)
-lambda1_slide.configure(bg = 'white', borderwidth=0)
-
-lambda2_slide = tk.Scale(window_gui, from_ = lam1_min, to = lam1_max, width = 20, length = 250, resolution=0.001)
-lambda2_slide.set(lam2_0)
-lambda2_slide.bind("<ButtonRelease-1>", update_plot)
-lambda2_slide.place(relx=0.51, rely=0.05, relheight=0.35, relwidth=0.05)
-lambda2_slide.configure(bg = 'white', borderwidth=0)
-
-def submit():
-    x0 = float(x_entry_val.get())
-    y01 = float(y1_entry_val.get())
-    y02 = float(y2_entry_val.get())
-    z0 = float(z_entry_val.get())
-
-    if x0**2 + y01**2 + y02**2 + z0**2 <= 1:
-        update_plot(0)
-    else:
-        print('Not valid values, check $x^2 + y1^2 + y02^2 + z^2 <= 1$')
-
-x_entry_val=tk.StringVar()
-y1_entry_val=tk.StringVar()
-y2_entry_val=tk.StringVar()
-z_entry_val=tk.StringVar()
-
-x_entry_label_ax = fig.add_axes([0.045,.525,.05,.075])
-x_entry_label_ax.text(0,0,'$x_0$:')
-x_entry_label_ax.set_axis_off()
-
-y1_entry_label_ax = fig.add_axes([0.1225,.525,.05,.075])
-y1_entry_label_ax.text(0,0,'$y_{01}$:')
-y1_entry_label_ax.set_axis_off()
-
-y2_entry_label_ax = fig.add_axes([0.2025,.525,.05,.075])
-y2_entry_label_ax.text(0,0,'$y_{02}$:')
-y2_entry_label_ax.set_axis_off()
-
-z_entry_label_ax = fig.add_axes([0.285,.525,.05,.075])
-z_entry_label_ax.text(0,0,'$z_0$:')
-z_entry_label_ax.set_axis_off()
-
-
-x_entry = tk.Entry(window_gui, textvariable = x_entry_val, relief='solid'
-            ).place(relx=0.06, rely=0.457, relheight=0.03, relwidth=0.05)
-y1_entry = tk.Entry(window_gui, textvariable = y1_entry_val, relief='solid'
-            ).place(relx=0.14, rely=0.457, relheight=0.03, relwidth=0.05)
-y2_entry = tk.Entry(window_gui, textvariable = y2_entry_val, relief='solid'
-            ).place(relx=0.22, rely=0.457, relheight=0.03, relwidth=0.05)
-z_entry = tk.Entry(window_gui, textvariable = z_entry_val, relief='solid'
-            ).place(relx=0.3, rely=0.457, relheight=0.03, relwidth=0.05)
-
-x_entry_val.set(state_0[0])    
-y1_entry_val.set(state_0[1])
-y2_entry_val.set(state_0[2])
-z_entry_val.set(state_0[3])
-
-sub_btn=tk.Button(window_gui, text = 'Submit', command = submit
-            ).place(relx=0.375, rely=0.45, relheight=0.05, relwidth=0.05)
-
-
-#Place Canvas
-canvas.get_tk_widget().place(relheight=1,relwidth=1)
 
 
 #________________________________Initialise the Quiver______________________________
@@ -488,6 +290,7 @@ def fibonacci_sphere(max_radius, num_shells, base_points):
 max_radius = 1
 num_shells = 10  #Number of concentric shells
 base_points = 1000  #Points on the outermost shell
+
 #Aid of ChatGPT ends.
 
 #Generate points nicely spaced based on fibbonaci. Makes fewer points 
@@ -533,8 +336,8 @@ fixedPoint_plots = []
 
 
 
-lam1 = lambda1_slide.get()
-lam2 = lambda2_slide.get()
+lam1 = lam1_0
+lam2 = lam2_0
 
 # Solve the system of ODEs using odeint
 solution = odeint(ODEs, state_0, N, args = (np.array([lam1, lam2]),))
@@ -569,20 +372,8 @@ z = zAxis[::-1]
 
 
 mr_eq_val = getRedshift(NAxis[indexMR_eq])
-mr_eq_ax = fig.add_axes([0.45,.45,.05,.075])
-mr_eq_text = mr_eq_ax.text(0,0,f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
-mr_eq_ax.set_axis_off()
-
 m_max_val = getRedshift(NAxis[indexMPeak])
-m_max_ax = fig.add_axes([0.45,.425,.05,.075])
-m_max_text = m_max_ax.text(0,0,f'max$(\Omega_m):\; z={m_max_val:.3f}$')
-m_max_ax.set_axis_off()
-
 msf_eq_val = getRedshift(NAxis[indexMPhi_eq])
-msf_eq_ax = fig.add_axes([0.45,.4,.05,.075])
-msf_eq_text = msf_eq_ax.text(0,0,f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
-msf_eq_ax.set_axis_off()
-
 
 
 todayLine, = dens_ax.plot([0,0], [-0.2,1.2], 'k', label='Today:\; $z = 0$')
@@ -607,11 +398,20 @@ accel_plot, = gamma_ax.plot(NAxis,
 effective_eos, = gamma_ax.plot(NAxis, gamma_phi(pathx, pathy), 'b-', linewidth=1, label = r'$\gamma_\phi$')
 CCScalingLine, = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, label='$\gamma_\Lambda=0$')
 
+#bcgd_gam = (mass_dens + rad_dens*4/3)/2
+#backgrd_scaling, = gamma_ax.plot(NAxis, bcgd_gam, "m-", linewidth = .75, label=r'$(\gamma_r\Omega_r+\gamma_m\Omega_m)/2$')
+
+# y1_dens_plot, =  dens_ax.plot(NAxis, pathy1**2, 'b--',
+#        label = "$y_1^2$")
+# y2_dens_plot, =  dens_ax.plot(NAxis, pathy2**2, 'b--',
+#        label = "$y_2^2$")
+
 
 
 x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
-state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
 
+
+# state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
 track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
 fixedPoints, fixedPoints_labels = fixedPoints_func([lam1,lam2])
@@ -638,94 +438,29 @@ rho_phi = phi_dens * hubbleFromY2**2
 
 z_decouple = 1100
 N_decouple = -np.log(1+z_decouple)
-
+rho_ax.plot([N_decouple,N_decouple],[1e0,1e20],'darkorange', linestyle=':', linewidth=1, label=r'$z_{\mathrm{dec}}\approx 1100$')
+rho_r_plot, = rho_ax.plot(NAxis, rho_r, "r", label = r"$\rho_r$")
+rho_m_plot, = rho_ax.plot(NAxis, rho_m, "g", label = r"$\rho_m$")
+rho_phi_plot, = rho_ax.plot(NAxis, rho_phi, "b", label = r"$\rho_\phi$")
 
 N_start_idx = np.argmax(N > N_plot_min)
 N_end_idx   = np.argmax(N > N_plot_max)
 
 
 hubble_ax.plot([0,0],[1e0,1e20],'k-', linewidth=1, label='Today')
-hubble_ax.plot([N_decouple,N_decouple],[1e0,1e20],'darkorange',
-                linestyle=':', linewidth=1, label=r'$z_{\mathrm{dec}}\approx 1100$')
-hubble_plot, = hubble_ax.plot(NAxis[N_start_idx:N_end_idx],
-                               hubbleFromY2[N_start_idx:N_end_idx], color='b',label=r'$H^{(\phi)}(N)$')
+hubble_ax.plot([N_decouple,N_decouple],[1e0,1e20],'darkorange', linestyle=':', linewidth=1, label=r'$z_{\mathrm{dec}}\approx 1100$')
+hubble_plot, = hubble_ax.plot(NAxis[N_start_idx:N_end_idx], hubbleFromY2[N_start_idx:N_end_idx], color='b',label=r'$H^{(\phi)}(N)$')
 #hubble_plot, = hubble_ax.plot(NAxis, hubbleFromY1)
 
-hubble_SN_line = hubble_ax.plot([N_plot_min,N_plot_max], [H0_SN, H0_SN],
-                                 alpha=0.75, color = "cyan", label=r'$H_0^{\mathrm{SN}}=73.04\pm 1.04$')
-hubble_PL_line = hubble_ax.plot([N_plot_min,N_plot_max], [H0_PL, H0_PL],
-                                 alpha=0.75, color = "magenta", label=r'$H_0^{\mathrm{PL}}=67.85\pm 0.52$')
+hubble_SN_line = hubble_ax.plot([N_plot_min,N_plot_max], [H0_SN, H0_SN], alpha=0.75, color = "cyan", label=r'$H_0^{\mathrm{SN}}=73.04\pm 1.04$')
+hubble_PL_line = hubble_ax.plot([N_plot_min,N_plot_max], [H0_PL, H0_PL], alpha=0.75, color = "magenta", label=r'$H_0^{\mathrm{PL}}=67.85\pm 0.52$')
 
 
-#_______________________________Hubble Fill Regions___________________________
 
 
-# Omega_Lambda0 = 0.738
-# gamma_phi_value = 0.013
-# Omega_r0 = 4.984e-5
-
-# standard_d_L = (1 + z) * odeint(
-#                 d_L_Dark_Energy, 0, z, args=(
-#                     zAxis, 1-Omega_Lambda0-Omega_r0, Omega_r0, Omega_Lambda0, -1)
-#                     ).transpose()[0]
-
-# h_SN1A = 0.72
-# h_SN_p_err = 0.01
-# h_SN_n_err  = 0.01
-# SN1A = [h_SN1A-h_SN_n_err, h_SN1A, h_SN1A+h_SN_p_err]
-
-# h_CMB = 0.68
-# h_CMB_p_err = 0.01
-# h_CMB_n_err = 0.01
-# CMB = [h_CMB-h_CMB_n_err, h_CMB, h_CMB+h_CMB_p_err]
-
-# def plot_d_luminosity(ax, z, d_L, d_L_bounds, label, color, fill_alpha=0.2):
-#     ax.plot(z, d_L, label=label, color=color, lw=2)
-#     if d_L_bounds is not None:
-#         ax.fill_between(z, d_L_bounds[0], d_L_bounds[1], alpha=fill_alpha, color=color)
-#         ax.plot(z, d_L_bounds[0], color=color, lw=0.5, alpha = 0.6)
-#         ax.plot(z, d_L_bounds[1], color=color, lw=0.5, alpha = 0.6)
-
-# def setup_luminosity_plots():
-#     d_L_for_fill = []
-#     #Define colors and Omega_Lambda0 values
-#     configurations = [
-#         (CMB, 'cyan'),
-#         (SN1A, 'magenta')
-#     ]
-
-#     #Gather all d_L values for bounds and normal plotting
-#     for h, color in configurations:
-#         temp_list = []
-#         for i in [0,1,2]:
-#             d_L = standard_d_L/(100*h[i])
-#             temp_list.append(d_L)
-#         d_L_for_fill.append(temp_list)  #Store d_L values for each configuration
-    
-#     #Plot and fill between using stored d_L values
-#     for (h, color,), d_L_values in zip(configurations, d_L_for_fill):
-#         # Plot the middle value normally and fill between the bounds
-#         plot_d_luminosity(d_lum_ax, z, d_L_values[1], [d_L_values[0], d_L_values[2]], 
-#                           f"$H_0 = {h[1]},\; w_{{\Lambda}}=-1$", color)
 
 
-##d_L = (1 + z) * odeint(
-##    d_L_IntegrandScalar, 0, z, args=(
-##        zAxis, Omega_m0, Omega_r0, Omega_phi_0, path_gamma_phi
-##        )).transpose()[0]
-
-#Call hubble fill function before changing plot, so it is below
-##setup_luminosity_plots()
-
-##integral_plot, = d_lum_ax.plot(z, d_L,
-##                    label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
-
-
-#_____________________Setting plot labels etc________________________________
-
-'''GUI Settings'''
-
-
+'''Figure Production Settings'''
 track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
              xlim = [-1,1], ylim = [0,1], zlim = [0,1],
              xticks = [-1, -0.5, 0, 0.5, 1],
@@ -733,6 +468,16 @@ track_ax.set(xlabel='$x$', ylabel='$y$', zlabel='$z$',
              zticks = [0, 0.5, 1])
 track_ax.set_box_aspect([2, 1, 1])
 track_ax.axis("off")
+
+
+
+# static_line = accel_ax.plot([N[-1], N[0]],[0,0], "k--", linewidth = 0.5)
+# accel_ax.set(ylabel="Acceleration", ylim=[-1.1,1.1],
+#              yticks=[-1,-1/2,0,1/2,1], yticklabels = ['$-1$','$-1/2$', '$0$', '$1/2$', '$1$'],
+#                xlim=[-8,3], xticks = [-8,-6,-4,-2,0,2], xlabel="$N$",
+#             xticklabels = ['$-8$', '$-6$', '$-4$', '$-2$','$0$','$2$'])
+# accel_ax.yaxis.set_ticks_position('both')
+# accel_ax.tick_params(axis='x', which='both', labelbottom=True)
 
 
 gamma_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
@@ -750,11 +495,27 @@ gam2_ax.set(yticks = [-1, 0, 1, 4/3, 2], ylim=[-1.1,2.25],
             yticklabels = ['','','','',''])
 
 
+dens_ax.text(NAxis[indexMR_eq]-1,.1,f'$z={mr_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
+dens_ax.text(NAxis[indexMPeak]-1.2,1.1,f'$z={m_max_val:.1f}$',backgroundcolor='1', fontsize=12)
+dens_ax.text(NAxis[indexMPhi_eq]-1.3,1.1,f'$z={msf_eq_val:.1f}$',backgroundcolor='1', fontsize=12)
+
 dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             ylim=[-0.1,1.2],yticks=[0,1/4,1/2,3/4,1],
             yticklabels = ['$0$','$1/4$','$1/2$','$3/4$','$1$'],
             xlim = [N_plot_min, N_plot_max], xticks=[-15,-10,-5,0,5])
 
+
+rho_ax.set_yscale('log', base=10, subs=[10**x
+                         for x in (0.25, 0.5, 0.75)], nonpositive='mask')
+rho_ax.set( xlabel = "$N$",
+            ylabel=r"$\log_{10}(\rho)$",
+            xlim = [N_plot_min, N_plot_max],
+            ylim=[1e0,1e20],
+            yticks=[1e0,1e5,1e10,1e15,1e20],
+            yticklabels=['$0$','$5$','$10$', '$15$',
+                             '$20$'],
+            xticks=[-15,-10,-5,0,5])
+rho_ax.legend(loc= 'upper right') 
 
 
 hubble_ax.set_yscale('log', base=10, subs=[10**x
@@ -766,17 +527,68 @@ hubble_ax.set(  xlabel = "$N$",
                 yticks=[1e0,1e5,1e10,1e15],
                 yticklabels=['$0$', '$5$', '$10$','$15$'],
                 xticks=[-15,-10,-5,0,5])
-hubble_ax.legend(loc='upper right')
+hubble_ax.legend(loc='upper left')
+
+axins = hubble_ax.inset_axes([0.5,0.5,0.45,0.45])
+axins.set_xlim(-1, 2)
+axins.set_ylim(50,80)
+hubble_ax.indicate_inset_zoom(axins, edgecolor="black")
+axins.set(xticks=[-1,0,1,2], yticks=[50,60,70,80])
+axins.tick_params(axis='both', which='major', labelsize=9)
 
 
-#d_lum_ax.set(ylabel = "$d_L$ ", xlabel= '$z$',
-#              xlim=[0,3], ylim=[0,6],
-#              xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
-#              xticklabels = ['$0$','$1$','$2$', '$3$'],
-#              yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
+N_start_idx_inset = np.argmax(N > -1)
+N_end_idx_inset   = np.argmax(N > 2)
+
+hubble_ax.plot([0,0],[50,80],'k-', linewidth=1)
+axins.plot(NAxis[N_start_idx_inset:N_end_idx_inset], 
+           hubbleFromY2[N_start_idx_inset:N_end_idx_inset],'b')
+axins.plot([N_plot_min,N_plot_max], [H0_SN, H0_SN], alpha=0.75, color = "cyan")
+axins.plot([N_plot_min,N_plot_max], [H0_PL, H0_PL], alpha=0.75, color = "magenta")
+axins.fill_between(NAxis[N_start_idx_inset:N_end_idx_inset], H0_SN + H0_SN_Err, H0_SN - H0_SN_Err, alpha=0.2, color="cyan")
+axins.fill_between(NAxis[N_start_idx_inset:N_end_idx_inset], H0_PL + H0_PL_Err, H0_PL - H0_PL_Err, alpha=0.2, color="magenta")
+
+
+
+#Additional code for making paper plots
+legend_lines1 = []
+legend_lines1.append([todayLine, MR_eqLine, MPeakLine, MPhi_eqLine])
+legend_lines2 = []
+legend_lines2.append([Radn_dens_plot, Mass_dens_plot, Phi_dens_plot])
+
+legend_lines_rho = []
+legend_lines_rho.append([rho_r_plot, rho_m_plot, rho_phi_plot])
+
+
+legend1 = dens_ax.legend(legend_lines1[0], ["Today","$\Omega_m=\Omega_r$","max$(\Omega_m)$",
+                                            "$\Omega_m=\Omega_\phi$"], loc='upper left', fontsize=12)
+legend2 = dens_ax.legend(legend_lines2[0], ['$\Omega_r$', '$\Omega_m$', '$\Omega_\phi$'],
+                         loc='center left', bbox_to_anchor=(0, .45), fontsize=12)
+dens_ax.add_artist(legend1)
+dens_ax.yaxis.set_ticks_position('both')
 
 
 
 
-#Run the code
-window_gui.mainloop()
+##d_lum_ax.set(ylabel = "$d_L$", xlabel= '$z$',
+##              xlim=[0,3], ylim=[0,6],
+##              xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
+##              xticklabels = ['$0$','$1$','$2$', '$3$'],
+##              yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
+##d_lum_ax.legend(loc=4)
+
+
+
+
+#fig2.savefig("Figures/Two Potentials/UnlabeledTrack_Near_B.svg", format='svg')
+#fig3.savefig("Figures/Two Potentials/Density_Near_B.svg", format='svg')
+#fig4.savefig("Figures/Two Potentials/Accel_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
+#fig5.savefig("Figures/Two Potentials/Gamma_Near_B.svg", format='svg')
+#fig6.savefig("Figures/Two Potentials/Rho_Near_B.svg", format='svg') 
+#fig6.savefig("Figures/Two Potentials/Hubble_Near_B.svg", format='svg') 
+
+plt.show()
+
+
+
+

@@ -18,8 +18,8 @@ import ctypes
 ctypes.windll.shcore.SetProcessDpiAwareness(1) 
 
 #Personal plotting preferences
-##plt.rcParams.update({"text.usetex": True, "font.family": "serif",
-##                     "font.serif": ["Computer Modern Serif"]})
+plt.rcParams.update({"text.usetex": True, "font.family": "serif",
+                     "font.serif": ["Computer Modern Serif"]})
 plt.rc('axes', labelsize=14, titlesize=15)
 plt.rcParams['xtick.labelsize'] = 12
 plt.rcParams['ytick.labelsize'] = 12
@@ -747,6 +747,8 @@ d_L = (1 + z) * odeint(
 
 #Call hubble fill function before changing plot, so it is below
 setup_luminosity_plots()
+
+
 
 integral_plot, = d_lum_ax.plot(z, d_L,
                     label = f"$\Omega_{{\phi}}^{{(0)}} = {Omega_phi_0}$", color = 'b', linewidth=2)
