@@ -73,17 +73,16 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 
 pathnum = 1
 
-lam_0s = [[0,0], [1,-1], [10, 0.1]]#, [20, 0.2]]
+lam_0s = [[0,0], [1,-1], [10, 0.1], [30,-30]] #, [20, 0.2]]
 
-lam1_0 = -0.4
+
 lam1_min = -30
 lam1_max = 30
 
-lam2_0 = 30
 lam2_min = -30
 lam2_max = 30
 
-lam1_0, lam2_0 = lam_0s[2]
+lam1_0, lam2_0 = lam_0s[3]
 
 
 Ni = 25
@@ -117,10 +116,16 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 N_plot_max = 5
 N_plot_min = -15
 
-state_0 = [0.16329,
-           0.11547,
-           2.6735e-15,
-           0.97979]
+# state_0 = [0.16329,
+#            0.11547,
+#            2.6735e-15,
+#            0.97979]
+
+state_0 = [0,
+           1e-11,
+           1e-11,
+           0.999355]
+
 
 #_____________________________Define ODE for 2 fluids_______________________
 
@@ -245,8 +250,6 @@ def update_plot(event):
         fixedPoint_plots.append(plot)
     
     x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
-    state0_point.set_data(x_i, y_i)
-    state0_point.set_3d_properties(z_i)
     
 
     #Plot all paths with updated values
@@ -295,6 +298,7 @@ def update_plot(event):
     zAxis = getRedshift(NAxis[:indexToday + 1])
     z = zAxis[::-1]
 
+    
     gamma_ax.set_xlim([NAxis[0],N_plot_max])
     dens_ax.set_xlim([NAxis[0],N_plot_max])
     #rho_ax.set_xlim([NAxis[0],N_plot_max])
@@ -363,7 +367,11 @@ def update_plot(event):
     # Update Hubble Plot
     hubble_plot.set_ydata(hubbleFromY2)
     hubble_plot.set_xdata(NAxis)
+    hubble_ax.set_xlim([NAxis[0],N_plot_max])
+    hubble_PL_line.set_xdata([NAxis[0],N_plot_max])
+    hubble_SN_line.set_xdata([NAxis[0],N_plot_max])
 
+    
     #Show plots
     fig.canvas.draw()
 
@@ -610,7 +618,6 @@ CCScalingLine, = gamma_ax.plot([N[-1], N[0]], [0, 0], "k-.", linewidth = .75, la
 
 
 x_i, y_i, z_i = state_0[0], np.sqrt(state_0[1]**2 + state_0[2]**2), state_0[3]
-state0_point, = track_ax.plot(x_i,y_i,z_i, 'cX')
 
 track = track_ax.plot(
                 pathx, pathy, pathz, 'b', linewidth=2)[0]
@@ -651,9 +658,9 @@ hubble_plot, = hubble_ax.plot(NAxis[N_start_idx:N_end_idx],
                                hubbleFromY2[N_start_idx:N_end_idx], color='b',label=r'$H^{(\phi)}(N)$')
 #hubble_plot, = hubble_ax.plot(NAxis, hubbleFromY1)
 
-hubble_SN_line = hubble_ax.plot([N_plot_min,N_plot_max], [H0_SN, H0_SN],
+hubble_SN_line, = hubble_ax.plot([N_plot_min,N_plot_max], [H0_SN, H0_SN],
                                  alpha=0.75, color = "cyan", label=r'$H_0^{\mathrm{SN}}=73.04\pm 1.04$')
-hubble_PL_line = hubble_ax.plot([N_plot_min,N_plot_max], [H0_PL, H0_PL],
+hubble_PL_line, = hubble_ax.plot([N_plot_min,N_plot_max], [H0_PL, H0_PL],
                                  alpha=0.75, color = "magenta", label=r'$H_0^{\mathrm{PL}}=67.85\pm 0.52$')
 
 

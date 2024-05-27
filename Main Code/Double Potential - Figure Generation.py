@@ -29,24 +29,22 @@ plt.rcParams['ytick.labelsize'] = 12
 
 
 #_________________________Set up figures________________________________
-fig2 = plt.figure(figsize=(7.5, 5)) #750x500 pixels
+fig2 = plt.figure(figsize=(6.5, 4.5))
 fig2.set_facecolor('white')
 
-
-fig3 = plt.figure(figsize=(10, 7)) #750x500 pixels
+fig3 = plt.figure(figsize=(9, 6))
 fig3.set_facecolor('white')
 
-
-fig5 = plt.figure(figsize=(7.5, 6)) #750x500 pixels
+fig5 = plt.figure(figsize=(7.5, 5))
 fig5.set_facecolor('white')
 
-
-fig6 = plt.figure(figsize=(9, 6)) #900x600 pixels
+fig6 = plt.figure(figsize=(9, 6))
 fig6.set_facecolor('white')
 
-
-fig7 = plt.figure(figsize=(7.5, 5)) #750x500 pixels
+fig7 = plt.figure(figsize=(7, 4.5))
 fig7.set_facecolor('white')
+
+
 
 track_axis_dims2 = [0,.075,.9,.9]
 track_ax = fig2.add_axes(track_axis_dims2, projection='3d')
@@ -55,16 +53,16 @@ track_ax.view_init(elev=24, azim=66)
 cbar_ax_dims2 = [.7,.25,.02,.6]
 cbar_ax = fig2.add_axes(cbar_ax_dims2)
 
-dens_axis_dims2 = [.1,.175,.825,.75]
+dens_axis_dims2 = [.1,.15,.825,.75]
 dens_ax = fig3.add_axes(dens_axis_dims2)
 
-gamma_axis_dims2 = [.1,.25,.8,.7]
+gamma_axis_dims2 = [.1,.15,.8,.75]
 gamma_ax = fig5.add_axes(gamma_axis_dims2)
 
-hubble_ax_dims2 = [.15,.25,.8,.7]
+hubble_ax_dims2 = [.15,.15,.8,.8]
 hubble_ax = fig6.add_axes(hubble_ax_dims2)
 
-rho_ax_dims = [.15,.25,.8,.7]
+rho_ax_dims = [.15,.15,.8,.8]
 rho_ax = fig7.add_axes(rho_ax_dims)
 
 figures = [fig2, fig3, fig5, fig6, fig7]
@@ -84,17 +82,17 @@ track_ax.plot([0,0,0], [1,0,0], [0,0,1], 'k', linewidth=1)
 
 pathnum = 1
 
-lam_0s = [[0,0], [1,-1], [10, 0.1]]#, [20, 0.2]]
+lam_0s = [[0,0], [1,-1], [10, 0.1], [30,-30]]#, [20, 0.2]]
 
 lam1_0 = -0.4
 lam1_min = -30
 lam1_max = 30
 
-lam2_0 = 30
+lam2_0 = 4
 lam2_min = -30
 lam2_max = 30
 
-lam1_0, lam2_0 = lam_0s[2]
+lam1_0, lam2_0 = lam_0s[3]
 
 
 Ni = 25
@@ -150,6 +148,11 @@ state_0 = [0.16329,
            0.11547,
            2.6735e-15,
            0.97979]
+
+state_0 = [0,
+           1e-12,
+           1e-12,
+           0.999796]
 
 #_____________________________Define ODE for 2 fluids_______________________
 
@@ -249,13 +252,6 @@ def HfromY(pathy, pathxIntegral, lam, V0=1):
     exponents = np.exp(- lam * kappa * pathxIntegral / 2)
     H = kappa * np.sqrt(V0) * exponents / (pathy * np.sqrt(3))
     return H
-
-
-
-
-
-
-
 
 
 
@@ -384,6 +380,7 @@ MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k-
 MPhi_eqLine, = dens_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]], [-0.2,1.2], 'k-.', linewidth = 0.75,
                           label = f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
 
+
 Radn_dens_plot, = dens_ax.plot(NAxis, rad_dens, 'r',
         label = "$\Omega_r$")
 Mass_dens_plot, = dens_ax.plot(NAxis, mass_dens, 'g',
@@ -438,10 +435,18 @@ rho_phi = phi_dens * hubbleFromY2**2
 
 z_decouple = 1100
 N_decouple = -np.log(1+z_decouple)
-rho_ax.plot([N_decouple,N_decouple],[1e0,1e20],'darkorange', linestyle=':', linewidth=1, label=r'$z_{\mathrm{dec}}\approx 1100$')
-rho_r_plot, = rho_ax.plot(NAxis, rho_r, "r", label = r"$\rho_r$")
-rho_m_plot, = rho_ax.plot(NAxis, rho_m, "g", label = r"$\rho_m$")
-rho_phi_plot, = rho_ax.plot(NAxis, rho_phi, "b", label = r"$\rho_\phi$")
+rho_ax.fill_betweenx([1e-0,1e20], N_plot_min, NAxis[indexMR_eq], alpha=0.1, color="pink")
+rho_ax.fill_betweenx([1e-0,1e20], NAxis[indexMR_eq], NAxis[indexMPhi_eq], alpha=0.1, color="lime")
+rho_ax.fill_betweenx([1e-0,1e20], NAxis[indexMPhi_eq], N_plot_max, alpha=0.1, color="cyan")
+
+rho_ax.plot([NAxis[indexMR_eq],NAxis[indexMR_eq]],[1e-0,1e20],'m:', linewidth=1.2, label=r'$\rho_r=\rho_m$')
+rho_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]],[1e-0,1e20],'c-.', linewidth=1.2, label=r'$\rho_m=\rho_\phi$')
+rho_ax.plot([N_decouple,N_decouple],[1e0,1e20],'darkorange', linestyle='--', linewidth=1.2, label=r'$z_{\mathrm{dec}}\approx 1100$')
+rho_r_plot, = rho_ax.plot(NAxis, rho_r, "r", label = r"$\rho_r\sim a^{-4}$")
+rho_m_plot, = rho_ax.plot(NAxis, rho_m, "g", label = r"$\rho_m\sim a^{-3}$")
+rho_phi_plot, = rho_ax.plot(NAxis, rho_phi, "b", label = r"$\rho_\phi \sim 1$")
+
+
 
 N_start_idx = np.argmax(N > N_plot_min)
 N_end_idx   = np.argmax(N > N_plot_max)
@@ -505,6 +510,16 @@ dens_ax.set(xlabel="$N$", ylabel="Density Parameters",
             xlim = [N_plot_min, N_plot_max], xticks=[-15,-10,-5,0,5])
 
 
+
+
+# todayLine, = dens_ax.plot([0,0], [-0.2,1.2], 'k', label='Today:\; $z = 0$')
+# MR_eqLine, = dens_ax.plot([NAxis[indexMR_eq],NAxis[indexMR_eq]], [-0.2,1.2], 'k:', linewidth = 0.75,
+#                           label = f'$\Omega_m=\Omega_r:\; z={mr_eq_val:.3f}$')
+# MPeakLine, = dens_ax.plot([NAxis[indexMPeak],NAxis[indexMPeak]], [-0.2,1.2], 'k--', linewidth = 0.75,
+#                           label = f'max$(\Omega_m):\; z={m_max_val:.3f}$')
+# MPhi_eqLine, = dens_ax.plot([NAxis[indexMPhi_eq],NAxis[indexMPhi_eq]], [-0.2,1.2], 'k-.', linewidth = 0.75,
+#                           label = f'$\Omega_m=\Omega_\phi:\; z={msf_eq_val:.3f}$')
+
 rho_ax.set_yscale('log', base=10, subs=[10**x
                          for x in (0.25, 0.5, 0.75)], nonpositive='mask')
 rho_ax.set( xlabel = "$N$",
@@ -515,7 +530,10 @@ rho_ax.set( xlabel = "$N$",
             yticklabels=['$0$','$5$','$10$', '$15$',
                              '$20$'],
             xticks=[-15,-10,-5,0,5])
-rho_ax.legend(loc= 'upper right') 
+rho_ax.legend(loc= 'upper right', ncol=2) 
+
+
+
 
 
 hubble_ax.set_yscale('log', base=10, subs=[10**x
@@ -579,12 +597,11 @@ dens_ax.yaxis.set_ticks_position('both')
 
 
 
-
 #fig2.savefig("Figures/Two Potentials/UnlabeledTrack_Near_B.svg", format='svg')
-#fig3.savefig("Figures/Two Potentials/Density_Near_B.svg", format='svg')
+#fig3.savefig("Figures/Two Potentials/Density_LCDM_Approximation.svg", format='svg')
 #fig4.savefig("Figures/Two Potentials/Accel_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
 #fig5.savefig("Figures/Two Potentials/Gamma_Near_B.svg", format='svg')
-#fig6.savefig("Figures/Two Potentials/Rho_Near_B.svg", format='svg') 
+#fig6.savefig("Figures/Two Potentials/Rho_LCDM_Approximation.svg", format='svg') 
 #fig6.savefig("Figures/Two Potentials/Hubble_Near_B.svg", format='svg') 
 
 plt.show()
