@@ -44,8 +44,9 @@ track_ax.view_init(elev=24, azim=66)
 cbar_ax_dims = [.375,.6,.015,.35]
 cbar_ax = fig.add_axes(cbar_ax_dims)
 
+
 #Relative Density axes
-dens_axis_dims = [.625,.15,.325,.35]
+dens_axis_dims = [.625,.125,.325,.3675]
 dens_ax = fig.add_axes(dens_axis_dims)
 
 #EoS Axes
@@ -53,10 +54,7 @@ gamma_axis_dims = [.625,.6,.325,.35]
 gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
-#d_lum_ax_dims = [.0675,.125,.325,.3675] 
-#d_lum_ax = fig.add_axes(d_lum_ax_dims)
-
-hubble_ax_dims = [.0675,.125,.325,.3675]
+hubble_ax_dims = [.1,.125,.325,.3675]
 hubble_ax = fig.add_axes(hubble_ax_dims)
 
 #__________________________Initial values_____________________________
@@ -781,8 +779,6 @@ hubble_ax.legend(loc='upper right')
 #              xticks=[0,1,2,3], yticks=[0,1,2,3,4,5,6],
 #              xticklabels = ['$0$','$1$','$2$', '$3$'],
 #              yticklabels = ['$0$','$1$','$2$', '$3$', '$4$','$5$','$6$'])
-
-
 
 
 #Run the code

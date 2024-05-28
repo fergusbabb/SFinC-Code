@@ -43,7 +43,7 @@ cbar_ax_dims = [.375,.6,.015,.35]
 cbar_ax = fig.add_axes(cbar_ax_dims)
 
 #Relative Density axes
-dens_axis_dims = [.625,.15,.325,.35]
+dens_axis_dims = [.625,.125,.325,.3675]
 dens_ax = fig.add_axes(dens_axis_dims)
 
 #EoS Axes
@@ -52,7 +52,7 @@ gamma_ax = fig.add_axes(gamma_axis_dims)
 
 #Hubble plot Axes
 
-hubble_ax_dims = [.0675,.125,.325,.3675]
+hubble_ax_dims = [.1,.125,.325,.3675]
 hubble_ax = fig.add_axes(hubble_ax_dims)
 
 
@@ -108,8 +108,11 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 state_0 = [2e-11,
            1e-11,
            0.999]
+# state_0 = [2e-8,
+#            1e-9,
+#            0.99]
 
-N_plot_max = 5
+N_plot_max = 7
 N_plot_min = -15
 
 #_________________________Initialise plots________________________________
