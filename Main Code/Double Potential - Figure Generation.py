@@ -601,7 +601,7 @@ dens_ax.yaxis.set_ticks_position('both')
 #fig3.savefig("Figures/Two Potentials/Density_LCDM_Approximation.svg", format='svg')
 #fig4.savefig("Figures/Two Potentials/Accel_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
 #fig5.savefig("Figures/Two Potentials/Gamma_Near_B.svg", format='svg')
-#fig7.savefig("Figures/Two Potentials/Rho_LCDM_Approximation.svg", format='svg') 
+fig7.savefig("Figures/Two Potentials/Rho_Near_B.svg", format='svg') 
 #fig6.savefig("Figures/Two Potentials/Hubble_Near_B.svg", format='svg') 
 
 plt.show()
