@@ -28,42 +28,28 @@ plt.rcParams['ytick.labelsize'] = 12
 #Standard tkinter window set up
 window = tk.Tk()
 window.title('GUI for Arbitrary Fluid')
-window.geometry('850x500')
+window.geometry('1200x950')
 
-window_4_report = tk.Tk()
-window_4_report.title('Window to generate plots for report')
-window_4_report.geometry('750x500')
-fig2 = Figure(figsize=(7.5, 5)) #750x500 pixels
-fig2.set_facecolor('white')
 
-gamma_ax_dims = [.1,.2,.8,.7]
-gamma_ax = fig2.add_axes(gamma_ax_dims)
-
-window_4_report_2 = tk.Tk()
-window_4_report_2.title('Window to generate plots for report 2')
-window_4_report_2.geometry('750x500')
-fig3 = Figure(figsize=(7.5, 5)) #750x500 pixels
-fig3.set_facecolor('white')
 
 #Tracks plot figure
-fig = Figure(figsize=(8.5, 500)) #1000x950 pixels
+fig = Figure(figsize=(12, 9.5)) #1000x950 pixels
 fig.set_facecolor('white')
-#track_axis_dims = [.05,.6,.75,.3]
-#track_ax = fig.add_axes(track_axis_dims, aspect='equal')
-track_axis_dims2 = [.1,.15,.75,.8]
-track_ax = fig3.add_axes(track_axis_dims2, aspect='equal')
+track_axis_dims = [.075,.6,.35,.3]
+track_ax = fig.add_axes(track_axis_dims, aspect='equal')
 
 #Colour bar axes
-#cbar_ax_dims = [.8,.6,.015,.3]
-#cbar_ax = fig.add_axes(cbar_ax_dims)
-cbar_ax_dims2 = [.875,.25,.015,.6]
-cbar_ax = fig3.add_axes(cbar_ax_dims2)
+cbar_ax_dims = [.45,.6,.015,.3]
+cbar_ax = fig.add_axes(cbar_ax_dims)
+
+gamma_ax_dims = [.6,.6,.35,.3]
+gamma_ax = fig.add_axes(gamma_ax_dims)
 
 #Hubble plot Axes
-lam_gam_dims = [.1,.225,.675,.7] 
+lam_gam_dims = [.15,.2,.55,.3] 
 lam_gam_ax = fig.add_axes(lam_gam_dims)
-#lam_gam_dims2 = [.15,.25,.7,.6] 
-#lam_gam_ax = fig2.add_axes(lam_gam_dims2)
+
+
 
 #Bounding Circle
 theta = np.linspace(0, np.pi, 150)
@@ -73,16 +59,9 @@ track_ax.plot([-1,1], [0,0], 'k', linewidth=1)
 
 canvas = FigureCanvasTkAgg(fig, window) 
 canvas.draw() 
-canvas2 = FigureCanvasTkAgg(fig2, window_4_report) 
-canvas2.draw() 
-canvas3 = FigureCanvasTkAgg(fig3, window_4_report_2) 
-canvas3.draw() 
 
 #Place Canvas
 canvas.get_tk_widget().place(relheight=1,relwidth=1)
-canvas2.get_tk_widget().place(relheight=1,relwidth=1)
-canvas3.get_tk_widget().place(relheight=1,relwidth=1)
-
 
 #Initial values
 gam_0 = 1
@@ -209,15 +188,13 @@ def update_plot(event):
                     cmap=cmap)
 
 
-    track_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda^2 = {lambda_slide.get()**2:.2f}$')
-    gamma_ax.set_title(f'$\gamma={gamma_slide.get():.2f},\; \lambda^2 = {lambda_slide.get()**2:.2f}$')
+    fig.suptitle(f'$\gamma={gamma_slide.get():.2f},\; \lambda^2 = {lambda_slide.get()**2:.2f}$')
 
     gam_ScaleLine.set_ydata([gam,gam])
     
     #Show plots
     fig.canvas.draw()
-    fig2.canvas.draw()
-    fig3.canvas.draw()
+
 
 def fibonacci_semicircle(max_radius, num_points):
     points = []
@@ -294,7 +271,7 @@ cid = fig.canvas.mpl_connect('button_press_event', regions_plot)
 
 #Lambda Slider. Initialise, add interaction, place, hide borders
 
-lambda_label_ax = fig.add_axes([.8,.925,.05,.05])
+lambda_label_ax = fig.add_axes([.765,.505,.05,.05])
 lambda_label_ax.text(0,0,'$\lambda$ value')
 lambda_label_ax.set_axis_off()
 
@@ -302,11 +279,11 @@ lambda_slide = tk.Scale(window, from_ = 0.01, to = np.sqrt(12),
                        width = 20, length = 250, resolution=0.001)
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
-lambda_slide.place(relx=0.8, rely=0.0975, relheight=0.7, relwidth=0.075)
+lambda_slide.place(relx=0.75, rely=0.5, relheight=0.3, relwidth=0.075)
 lambda_slide.configure(bg = 'white', borderwidth=0)
 
 #Gamma slider. Initialise, add interaction, place, hide borders
-gamma_label_ax = fig.add_axes([.9,.925,.05,.05])
+gamma_label_ax = fig.add_axes([.865,.505,.05,.05])
 gamma_label_ax.text(0,0,'$\gamma$ value')
 gamma_label_ax.set_axis_off()
 
@@ -314,7 +291,7 @@ gamma_slide = tk.Scale(window, from_ = 0.01, to = 2,
                        width = 20, length = 250, resolution=0.001)
 gamma_slide.set(gam_0)
 gamma_slide.bind("<ButtonRelease-1>", update_plot)
-gamma_slide.place(relx=0.9, rely=0.0975, relheight=0.7, relwidth=0.075)
+gamma_slide.place(relx=0.85, rely=0.5, relheight=0.3, relwidth=0.075)
 gamma_slide.configure(bg = 'white', borderwidth=0)
 
 #___________________________________Initial Plot____________________________________
@@ -399,12 +376,11 @@ gam_ScaleLine, = gamma_ax.plot([N[-1], N[0]], [gam, gam], "m-", linewidth = .75,
 #_____________________Setting plot labels etc________________________________
 
 track_ax.set_xlabel('$x$', x=1)
-track_ax.set_ylabel('$y$', rotation = 0, y=1)
+track_ax.set_ylabel('$y$', rotation = 0, y=1.01)
 track_ax.set(xticks=[-1,-.5,0,.5,1], yticks=[0,.5,1],
              xlim = [-1.2,1.2], ylim=[-0.2,1.15],
              xticklabels = ['$-1$','$-1/2$','$0$','$1/2$','$1$'],
-             yticklabels = ['$0$','$1/2$','$1$'],
-             title = f'$\gamma={gamma_slide.get():.0f},\; \lambda^2 = {lambda_slide.get()**2:.0f}$')
+             yticklabels = ['$0$','$1/2$','$1$'])
 track_ax.legend()
 
 #Interactive plot, plot lines as in P40
@@ -426,11 +402,12 @@ lam_gam_ax.plot([0,6],[0,2],'k')
 lam_gam_ax.plot([2,2],[0,2],'k', linestyle = ':')
 #lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
 
-gamma_ax.set_title(f'$\gamma={gamma_slide.get():.0f},\; \lambda^2 = {lambda_slide.get()**2:.0f}$')
+fig.suptitle(f'$\gamma={gamma_slide.get():.0f},\; \lambda^2 = {lambda_slide.get()**2:.0f}$',fontsize=14)
+
 gamma_ax.set(yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[0,12])
-gamma_ax.set_xlabel('$N$', x=1.02)
-gamma_ax.set_ylabel('$\gamma_\phi$', rotation = 0, y=1.02)
+gamma_ax.set_xlabel('$N$')
+gamma_ax.set_ylabel('$\gamma_\phi$', rotation = 0)
 gamma_ax.yaxis.set_ticks_position('both')
 gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
 gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
@@ -438,8 +415,6 @@ gamma_ax.tick_params(axis='x', which='both', labelbottom=True)
 #fig2.savefig("Figures/Arbitrary Fluid/EoS_lambda2_{}_gamma_{}.svg".format(round(lam_0**2),round(gam_0)), format='svg')
 #fig3.savefig("Figures/Arbitrary Fluid/Track_lambda2_{}_gamma_{}.svg".format(round(lam_0**2),round(gam_0)), format='svg')
 
-
-NavigationToolbar2Tk(canvas3, window_4_report_2)
 window.mainloop()
 #End
 
