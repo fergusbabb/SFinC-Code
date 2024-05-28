@@ -28,12 +28,12 @@ plt.rcParams['ytick.labelsize'] = 12
 #Standard tkinter window set up
 window = tk.Tk()
 window.title('GUI for Arbitrary Fluid')
-window.geometry('1200x950')
+window.geometry('1200x800')
 
 
 
 #Tracks plot figure
-fig = Figure(figsize=(12, 9.5)) #1000x950 pixels
+fig = Figure(figsize=(12, 8)) #1200x900 pixels
 fig.set_facecolor('white')
 track_axis_dims = [.075,.6,.35,.3]
 track_ax = fig.add_axes(track_axis_dims, aspect='equal')
@@ -46,7 +46,7 @@ gamma_ax_dims = [.6,.6,.35,.3]
 gamma_ax = fig.add_axes(gamma_ax_dims)
 
 #Hubble plot Axes
-lam_gam_dims = [.15,.2,.55,.3] 
+lam_gam_dims = [.225,.15,.45,.35] 
 lam_gam_ax = fig.add_axes(lam_gam_dims)
 
 
@@ -188,7 +188,7 @@ def update_plot(event):
                     cmap=cmap)
 
 
-    fig.suptitle(f'$\gamma={gamma_slide.get():.2f},\; \lambda^2 = {lambda_slide.get()**2:.2f}$')
+    fig.suptitle(f'$\lambda^2 = {lambda_slide.get()**2:.0f},\; \gamma={gamma_slide.get():.0f}$',fontsize=14)
 
     gam_ScaleLine.set_ydata([gam,gam])
     
@@ -279,7 +279,7 @@ lambda_slide = tk.Scale(window, from_ = 0.01, to = np.sqrt(12),
                        width = 20, length = 250, resolution=0.001)
 lambda_slide.set(lam_0)
 lambda_slide.bind("<ButtonRelease-1>", update_plot)
-lambda_slide.place(relx=0.75, rely=0.5, relheight=0.3, relwidth=0.075)
+lambda_slide.place(relx=0.75, rely=0.5, relheight=0.35, relwidth=0.075)
 lambda_slide.configure(bg = 'white', borderwidth=0)
 
 #Gamma slider. Initialise, add interaction, place, hide borders
@@ -291,7 +291,7 @@ gamma_slide = tk.Scale(window, from_ = 0.01, to = 2,
                        width = 20, length = 250, resolution=0.001)
 gamma_slide.set(gam_0)
 gamma_slide.bind("<ButtonRelease-1>", update_plot)
-gamma_slide.place(relx=0.85, rely=0.5, relheight=0.3, relwidth=0.075)
+gamma_slide.place(relx=0.85, rely=0.5, relheight=0.35, relwidth=0.075)
 gamma_slide.configure(bg = 'white', borderwidth=0)
 
 #___________________________________Initial Plot____________________________________
@@ -402,14 +402,13 @@ lam_gam_ax.plot([0,6],[0,2],'k')
 lam_gam_ax.plot([2,2],[0,2],'k', linestyle = ':')
 #lam_gam_ax.plot([0, 12], [2/3, 2/3],'k', linestyle = ':')
 
-fig.suptitle(f'$\gamma={gamma_slide.get():.0f},\; \lambda^2 = {lambda_slide.get()**2:.0f}$',fontsize=14)
+fig.suptitle(f'$\lambda^2 = {lambda_slide.get()**2:.0f},\; \gamma={gamma_slide.get():.0f}$',fontsize=14)
 
 gamma_ax.set(yticks = [0, 1, 4/3, 2], ylim=[-0.1,2.1],
             yticklabels = ['$0$','$1$', '$4/3$', '$2$'], xlim=[0,12])
 gamma_ax.set_xlabel('$N$')
 gamma_ax.set_ylabel('$\gamma_\phi$', rotation = 0)
 gamma_ax.yaxis.set_ticks_position('both')
-gamma_ax.legend(fontsize=12, loc='upper right', ncol=2)
 gamma_ax.tick_params(axis='x', which='both', labelbottom=True) 
 
 #fig2.savefig("Figures/Arbitrary Fluid/EoS_lambda2_{}_gamma_{}.svg".format(round(lam_0**2),round(gam_0)), format='svg')
