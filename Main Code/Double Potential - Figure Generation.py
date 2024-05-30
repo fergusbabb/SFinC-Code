@@ -92,7 +92,7 @@ lam2_0 = 4
 lam2_min = -30
 lam2_max = 30
 
-lam1_0, lam2_0 = lam_0s[3]
+lam1_0, lam2_0 = lam_0s[2]
 
 
 Ni = 25
@@ -134,25 +134,24 @@ Omega_m0 = 1 - x0Squared - y0Squared - Omega_r0
 N_plot_max = 5
 N_plot_min = -15
 
-# state_0 = [0.163,
-#           0.115,
-#           0.0000000001,
-#           0.979]
+state_0 = [0.163,
+          0.115,
+          0.0000000001,
+          0.979]
 
 ##state_0 = [0.00002,
 ##           0.00001,
 ##           0.0000000001,
 ##           0.99]
 
-state_0 = [0.16329,
-           0.11547,
-           2.6735e-15,
-           0.97979]
+#Near B
 
-state_0 = [0,
-           1e-12,
-           1e-12,
-           0.999796]
+
+#LCDM
+# state_0 = [0,
+#            1e-12,
+#            1e-12,
+#            0.999796]
 
 #_____________________________Define ODE for 2 fluids_______________________
 
@@ -601,7 +600,7 @@ dens_ax.yaxis.set_ticks_position('both')
 #fig3.savefig("Figures/Two Potentials/Density_LCDM_Approximation.svg", format='svg')
 #fig4.savefig("Figures/Two Potentials/Accel_lambda1_{}_lambda2_{}.svg".format(round(lam1_0),round(lam2_0)), format='svg')
 #fig5.savefig("Figures/Two Potentials/Gamma_Near_B.svg", format='svg')
-fig7.savefig("Figures/Two Potentials/Rho_Near_B.svg", format='svg') 
+#fig7.savefig("Figures/Two Potentials/Rho_Near_B.svg", format='svg') 
 #fig6.savefig("Figures/Two Potentials/Hubble_Near_B.svg", format='svg') 
 
 plt.show()
